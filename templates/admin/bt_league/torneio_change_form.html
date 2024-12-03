@@ -1,0 +1,17 @@
+{% extends "admin/change_form.html" %}
+
+{% block object-tools-items %}
+    <li>
+        <a href="{% url 'bt_league:create_games' original.pk %}">Gerar Jogos</a>
+    </li>
+    {{ block.super }}
+{% endblock %}
+
+{% block submit_buttons_bottom %}
+    {{ block.super }}
+    <!-- {% if original.pk %}
+        <div class="submit-row">
+            <a href="{% url 'bt_league:create_games' original.pk %}" class="btn btn-primary">Gerar Jogos</a>
+        </div>
+    {% endif %} -->
+{% endblock %}

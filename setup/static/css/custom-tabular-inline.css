@@ -1,0 +1,21 @@
+.inline-group .tabular tr td.original p{
+    display: none !important;
+}
+
+.inline-group .tabular tr.has_original td {
+    padding-top: 8px !important;
+}
+
+.inline-group .tabular tr.has_original td.field-placar_dupla1 {
+    text-align: center;
+}
+
+.inline-group .tabular tr.has_original th.column-ranking,
+.inline-group .tabular tr.has_original td.field-ranking {
+    width: 10px !important;
+}
+
+#torneio_form .submit-row input[type=submit]:nth-child(2),
+#torneio_form .submit-row input[type=submit]:nth-child(3) {
+    display: none !important;
+}
