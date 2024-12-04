@@ -57,8 +57,8 @@ class JogoInline(admin.TabularInline):
 class RankingInline(admin.TabularInline):
     model = Torneio.jogadores.through
     extra = 0
-    fields = ('ranking', 'nome', 'vitorias', 'pontos')
-    readonly_fields = ('ranking', 'nome', 'vitorias', 'pontos')
+    fields = ('ranking', 'nome', 'pontos')
+    readonly_fields = ('ranking', 'nome', 'pontos')
     can_delete = False
     verbose_name = 'Ranking'
     verbose_name_plural = 'Ranking'
@@ -72,7 +72,8 @@ class RankingInline(admin.TabularInline):
             torneio_obj = Torneio.objects.get(pk=torneio)
             qs_sorted = sorted(
                 qs,
-                key=lambda q: q.jogador.ranking(torneio_obj),
+                key=lambda q: q.jogador.player_points(torneio_obj),
+                reverse=True
             )
             pk_list = [q.pk for q in qs_sorted]
             preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(pk_list)])
@@ -85,12 +86,10 @@ class RankingInline(admin.TabularInline):
     def nome(self, obj):
         return obj.jogador.nome
 
-    def vitorias(self, obj):
-        return obj.jogador.player_victories(obj.torneio)
-    vitorias.short_description = 'Vitórias'
-
     def pontos(self, obj):
-        return obj.jogador.player_points(obj.torneio)
+        vitorias, pontos = obj.jogador.player_points(obj.torneio)
+        return f'{vitorias} / {pontos}'
+    pontos.short_description = 'V / P'
 
     def ranking(self, obj):
         return obj.jogador.ranking(obj.torneio)

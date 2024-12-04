@@ -50,8 +50,7 @@
             <tr>
                 <th>#</th>
                 <th>Nome</th>
-                <th>V</th>
-                <th>P</th>
+                <th>V / P</th>
             </tr>
         </thead>
 
@@ -60,8 +59,7 @@
             <tr>
                 <td>{{ item.posicao }}º</td>
                 <td>{{ item.jogador.nome }}</td>
-                <td>{{ item.vitorias }}</td>
-                <td>{{ item.pontos }}</td>
+                <td>{{ item.vitorias }} / {{ item.pontos }}</td>
             </tr>
             {% endfor %}
         </tbody>

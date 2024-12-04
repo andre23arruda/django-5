@@ -22,7 +22,7 @@ class Jogador(models.Model):
         jogadores = torneio.jogadores.all()
 
         # Cria lista de tuplas (jogador, pontos)
-        ranking = [(jogador, jogador.player_victories(torneio)) for jogador in jogadores]
+        ranking = [(jogador, jogador.player_points(torneio)) for jogador in jogadores]
 
         # Ordena por pontos em ordem decrescente
         ranking_ordenado = sorted(ranking, key=lambda x: x[1], reverse=True)
@@ -45,33 +45,20 @@ class Jogador(models.Model):
             jogos = jogos.filter(torneio=torneio)
 
         pontos = 0
-        for jogo in jogos:
-            if (jogo.dupla1_jogador1 == self or jogo.dupla1_jogador2 == self):
-                jogo_pontos = jogo.placar_dupla1 or 0
-            else:
-                jogo_pontos = jogo.placar_dupla2 or 0
-            pontos += jogo_pontos
-        return pontos
-
-    def player_victories(self, torneio=None):
-        '''Calcula número de vitorias do jogador em um torneio específico ou em todos os torneios'''
-        jogos = Jogo.objects.filter(
-            models.Q(dupla1_jogador1=self) | models.Q(dupla1_jogador2=self) |
-            models.Q(dupla2_jogador1=self) | models.Q(dupla2_jogador2=self)
-        )
-
-        if torneio:
-            jogos = jogos.filter(torneio=torneio)
-
         vitorias = 0
         for jogo in jogos:
             if jogo.placar_dupla1 is None or jogo.placar_dupla2 is None:
                 continue
-            elif (jogo.dupla1_jogador1 == self or jogo.dupla1_jogador2 == self) and jogo.placar_dupla1 > jogo.placar_dupla2:
-                vitorias += 1
-            elif (jogo.dupla2_jogador1 == self or jogo.dupla2_jogador2 == self) and jogo.placar_dupla1 < jogo.placar_dupla2:
-                vitorias += 1
-        return vitorias
+            elif (jogo.dupla1_jogador1 == self or jogo.dupla1_jogador2 == self):
+                jogo_pontos = jogo.placar_dupla1 or 0
+                if jogo.placar_dupla1 > jogo.placar_dupla2:
+                    vitorias += 1
+            else:
+                jogo_pontos = jogo.placar_dupla2 or 0
+                if jogo.placar_dupla1 < jogo.placar_dupla2:
+                    vitorias += 1
+            pontos += jogo_pontos
+        return vitorias, pontos
 
 
 class Torneio(models.Model):
