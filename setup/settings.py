@@ -1,9 +1,10 @@
 import json, os, sys
 from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / '.env', verbose=True)
+
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = json.loads(os.getenv('DEBUG', 'false'))
 ALLOWED_HOSTS = json.loads((os.getenv('ALLOWED_HOSTS', '["*"]')))
