@@ -93,6 +93,9 @@ class Torneio(models.Model):
 
     def create_games(self):
         '''Gera jogos usando todas as duplas possíveis'''
+        if len(self.jogadores.all()) % 4 != 0:
+            return Exception('Número de jogadores deve ser multiplo de 4')
+
         duplas = self.create_teams()
         random.shuffle(duplas)
         jogos_gerados = []

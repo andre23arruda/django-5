@@ -58,7 +58,7 @@ class RankingInline(admin.TabularInline):
     model = Torneio.jogadores.through
     extra = 0
     fields = ('ranking', 'nome', 'vitorias', 'pontos')
-    readonly_fields = ('nome', 'vitorias', 'pontos', 'ranking')
+    readonly_fields = ('ranking', 'nome', 'vitorias', 'pontos')
     can_delete = False
     verbose_name = 'Ranking'
     verbose_name_plural = 'Ranking'

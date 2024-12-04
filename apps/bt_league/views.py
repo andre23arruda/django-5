@@ -11,8 +11,11 @@ def create_games(request, torneio_id: int):
     if torneio.jogo_set.exists():
         messages.add_message(request, messages.INFO, 'Jogos já gerados para este torneio.')
     else:
-        torneio.create_games()
-        messages.add_message(request, messages.INFO, 'Jogos gerados com sucesso!')
+        result = torneio.create_games()
+        if isinstance(result, Exception):
+            messages.add_message(request, messages.ERROR, result)
+        else:
+            messages.add_message(request, messages.INFO, 'Jogos gerados com sucesso!')
     return redirect('admin:bt_league_torneio_change', torneio_id)
 
 
