@@ -2,6 +2,14 @@
 
 {% block object-tools-items %}
     <li>
+        <a href="{% url 'bt_league:qrcode_tournament' original.pk %}" target="_blank">QR Code</a>
+    </li>
+
+    <li>
+        <a href="{% url 'bt_league:see_tournament' original.pk %}" target="_blank">Ver Torneio</a>
+    </li>
+
+    <li>
         <a href="{% url 'bt_league:create_games' original.pk %}">Gerar Jogos</a>
     </li>
     {{ block.super }}

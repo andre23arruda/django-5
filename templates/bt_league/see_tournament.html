@@ -1,9 +1,15 @@
-{% extends 'base.html' %}
+{% extends '../base.html' %}
+
+{% load static %}
+
+{% block favicon %}
+    <link rel="shortcut icon" href="{% static 'images/bt.ico' %}" />
+{% endblock %}
 
 {% block title %}{{ torneio.nome }} ({{ torneio.data }}){% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container mt-5">
     {% if torneio.ativo %}
         <h1 class="text-center">{{ torneio.nome }} ({{ torneio.data }})</h1>
     {% else %}

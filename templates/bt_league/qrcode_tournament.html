@@ -1,0 +1,30 @@
+{% extends '../base.html' %}
+
+{% load static %}
+
+{% block favicon %}
+    <link rel="shortcut icon" href="{% static 'images/bt.ico' %}" />
+{% endblock %}
+
+{% block title %}{{ torneio.nome }} - ({{ torneio.data }}){% endblock %}
+
+{% block content %}
+    <main style="
+        position: absolute;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        background-color: #cecece;
+        font-size: 4rem;"
+    >
+        <h3 class="mb-4">{{ torneio.nome }} - {{ torneio.data }}</h3>
+
+        <h5 class="mb-4">Aponte seu celular para o QR Code e veja a classificação atual</h5>
+
+        <img src="data:image/png;base64, {{ img_b64 }}" alt="QR Code do participante" />
+    </main>
+{% endblock %}
