@@ -16,7 +16,19 @@ english.DATETIME_FORMAT = 'H:i d/m/Y'
 
 @admin.register(Jogador)
 class JogadorAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'email')
+    list_display = ('nome', 'telefone', 'email')
+    readonly_fields = ('criado_por',)
+
+    def get_queryset(self, request):
+        if request.user.is_superuser:
+            return super().get_queryset(request)
+        return super().get_queryset(request).filter(criado_por=request.user)
+
+    def save_model(self, request, obj, form, change):
+        created = not change
+        if created:
+            obj.criado_por = request.user
+        super().save_model(request, obj, form, change)
 
 
 class JogoInline(admin.TabularInline):
@@ -106,6 +118,13 @@ class TorneioAdmin(admin.ModelAdmin):
     list_filter = ('ativo',)
     inlines = [JogoInline, RankingInline]
     # actions = [create_games]
+
+    def get_form(self, request, obj=None, **kwargs):
+        if request.user.is_superuser:
+            return super().get_form(request, obj, **kwargs)
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['jogadores'].queryset = Jogador.objects.filter(criado_por=request.user).order_by('nome')
+        return form
 
     def get_queryset(self, request):
         if request.user.is_superuser:
