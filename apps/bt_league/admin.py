@@ -106,6 +106,7 @@ def create_games(modeladmin, request, queryset):
 class TorneioAdmin(admin.ModelAdmin):
     class Media:
         css = {'all': ('css/custom-tabular-inline.css',)}
+        js = ['js/create-games-modal.js']
 
     fieldsets = [
         # ('', {'fields': ('nome', 'data', 'criado_por'), 'classes': ('',)}),

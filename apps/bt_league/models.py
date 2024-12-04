@@ -77,7 +77,7 @@ class Jogador(models.Model):
 class Torneio(models.Model):
     nome = models.CharField(max_length=100)
     data = models.DateField()
-    jogadores = models.ManyToManyField(Jogador)
+    jogadores = models.ManyToManyField(Jogador, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
     ativo = models.BooleanField(default=True)
