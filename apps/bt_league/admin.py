@@ -68,11 +68,11 @@ class RankingInline(admin.TabularInline):
         torneio = request.resolver_match.kwargs.get('object_id')
 
         if torneio:
+            qs = qs.filter(torneio=torneio)
             torneio_obj = Torneio.objects.get(pk=torneio)
             qs_sorted = sorted(
                 qs,
-                key=lambda q: q.jogador.player_points(torneio_obj),
-                reverse=True
+                key=lambda q: q.jogador.ranking(torneio_obj),
             )
             pk_list = [q.pk for q in qs_sorted]
             preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(pk_list)])

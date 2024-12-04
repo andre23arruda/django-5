@@ -22,7 +22,7 @@ class Jogador(models.Model):
         jogadores = torneio.jogadores.all()
 
         # Cria lista de tuplas (jogador, pontos)
-        ranking = [(jogador, jogador.player_points(torneio)) for jogador in jogadores]
+        ranking = [(jogador, jogador.player_victories(torneio)) for jogador in jogadores]
 
         # Ordena por pontos em ordem decrescente
         ranking_ordenado = sorted(ranking, key=lambda x: x[1], reverse=True)
@@ -93,8 +93,10 @@ class Torneio(models.Model):
 
     def create_games(self):
         '''Gera jogos usando todas as duplas possíveis'''
-        if len(self.jogadores.all()) % 4 != 0:
-            return Exception('Número de jogadores deve ser multiplo de 4')
+        n_jogadores = self.jogadores.count()
+        excess_playes = n_jogadores % 4
+        if excess_playes:
+            return Exception(f'Não é possível gerar jogos com { n_jogadores } jogadores. Número de jogadores deve ser multiplo de 4.')
 
         duplas = self.create_teams()
         random.shuffle(duplas)

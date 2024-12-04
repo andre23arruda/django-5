@@ -3,11 +3,13 @@ document.addEventListener('DOMContentLoaded', function() {
     var cancelButton = document.getElementById('games-cancel');
     var gamesDialog = document.getElementById('games-dialog');
 
-    updateButton.addEventListener('click', function () {
-        gamesDialog.showModal();
-    });
+    if (updateButton) {
+        updateButton.addEventListener('click', function () {
+            gamesDialog.showModal();
+        });
 
-    cancelButton.addEventListener('click', function () {
-        gamesDialog.close();
-    });
+        cancelButton.addEventListener('click', function () {
+            gamesDialog.close();
+        });
+    }
 })
