@@ -18,6 +18,7 @@ english.DATETIME_FORMAT = 'H:i d/m/Y'
 class JogadorAdmin(admin.ModelAdmin):
     list_display = ('nome', 'telefone', 'email')
     readonly_fields = ('criado_por',)
+    search_fields = ('nome',)
 
     def get_queryset(self, request):
         if request.user.is_superuser:
@@ -96,11 +97,6 @@ class RankingInline(admin.TabularInline):
     ranking.short_description = '#'
 
 
-@admin.action(description='Gerar jogos')
-def create_games(modeladmin, request, queryset):
-    for torneio in queryset:
-        torneio.create_games()
-
 @admin.register(Torneio)
 class TorneioAdmin(admin.ModelAdmin):
     class Media:
@@ -108,16 +104,15 @@ class TorneioAdmin(admin.ModelAdmin):
         js = ['js/create-games-modal.js']
 
     fieldsets = [
-        # ('', {'fields': ('nome', 'data', 'criado_por'), 'classes': ('',)}),
-        ('', {'fields': (('nome', 'ativo'), 'data'), 'classes': ('',)}),
+        ('INFORMAÇÕES', {'fields': (('nome', 'ativo'), 'data'), 'classes': ('collapse',)}),
         ('JOGADORES', {'fields': ('jogadores',), 'classes': ('collapse',)}),
     ]
     change_form_template = 'admin/bt_league/torneio_change_form.html'
     list_display = ('nome', 'data', 'total_jogadores', 'total_jogos', 'ativo')
-    filter_horizontal = ('jogadores',)
+    autocomplete_fields = ['jogadores']
+    # filter_horizontal = ('jogadores',)
     list_filter = ('ativo',)
     inlines = [JogoInline, RankingInline]
-    # actions = [create_games]
 
     def get_form(self, request, obj=None, **kwargs):
         if request.user.is_superuser:
