@@ -128,11 +128,11 @@ class TorneioAdmin(admin.ModelAdmin):
 
     def total_jogadores(self, obj):
         return obj.jogadores.count()
-    total_jogadores.short_description = 'Nº Jogadores'
+    total_jogadores.short_description = 'Jogadores'
 
     def total_jogos(self, obj):
         return obj.jogo_set.count()
-    total_jogos.short_description = 'Nº Jogos'
+    total_jogos.short_description = 'Jogos'
 
     def response_add(self, request, obj, post_url_continue=None):
         messages.add_message(request, messages.INFO, 'Informações salvas com sucesso.')

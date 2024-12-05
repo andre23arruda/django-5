@@ -12,6 +12,9 @@
 <div class="container mt-5">
     {% if torneio.ativo %}
         <h1 class="text-center">{{ torneio.nome }} ({{ torneio.data }})</h1>
+        <div class="text-end">
+            <button class="btn btn-primary btn-sm" onclick="location.reload();">Recarregar</button>
+        </div>
     {% else %}
         <h1 class="text-center"><s>{{ torneio.nome }} ({{ torneio.data }})</s></h1>
         <h2 class="text-center"><s>FINALIZADO</s></h2>
