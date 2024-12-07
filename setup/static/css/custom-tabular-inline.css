@@ -20,14 +20,17 @@
     display: none !important;
 }
 
-.form-row.field-jogadores input.select2-search__field  {
+.form-row.field-jogadores input.select2-search__field,
+.form-row.field-duplas input.select2-search__field {
     min-width: 100px !important;
 }
 
-.form-row.field-jogadores .select2.select2-container.select2-container--admin-autocomplete {
+.form-row.field-jogadores .select2.select2-container.select2-container--admin-autocomplete,
+.form-row.field-duplas .select2.select2-container.select2-container--admin-autocomplete {
     width: auto !important;
 }
 
-.form-row.field-jogadores label[for="id_jogadores"] {
+.form-row.field-jogadores label[for="id_jogadores"],
+.form-row.field-duplas label[for="id_duplas"] {
     display: none !important;
 }

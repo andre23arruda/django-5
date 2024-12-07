@@ -1,17 +1,23 @@
 {% extends "admin/change_form.html" %}
 
 {% block object-tools-items %}
-    <li>
-        <a href="{% url 'bt_league:qrcode_tournament' original.pk %}" target="_blank">QR Code</a>
-    </li>
-
-    <li>
-        <a href="{% url 'bt_league:see_tournament' original.pk %}" target="_blank">Ver Torneio</a>
-    </li>
-
     {% if not original.has_games %}
         <li>
             <a href="#" id="create-games">Gerar Jogos</a>
+        </li>
+    {% else %}
+        <li>
+            <a href="{% url 'bt_cup:qrcode_tournament' original.pk %}" target="_blank">QR Code</a>
+        </li>
+
+        <li>
+            <a href="{% url 'bt_cup:see_tournament' original.pk %}" target="_blank">Ver Torneio</a>
+        </li>
+    {% endif %}
+
+    {% if not original.is_finished and original.has_games %}
+        <li>
+            <a href="{% url 'bt_cup:next_stage' original.pk %}">Próxima fase</a>
         </li>
     {% endif %}
 
@@ -23,18 +29,9 @@
 
         <div style="display: flex; justify-content: space-between; margin-top: 20px;">
             <button id="games-cancel" class="button">Cancelar</button>
-            <button id="confirm" class="button primary" onclick="location.href=`{% url 'bt_league:create_games' original.pk %}`">Sim, criar</button>
+            <button id="confirm" class="button primary" onclick="location.href=`{% url 'bt_cup:create_games' original.pk %}`">Sim, criar</button>
         </div>
     </dialog>
 
     {{ block.super }}
-{% endblock %}
-
-{% block submit_buttons_bottom %}
-    {{ block.super }}
-    <!-- {% if original.pk %}
-        <div class="submit-row">
-            <a href="{% url 'bt_league:create_games' original.pk %}" class="btn btn-primary">Gerar Jogos</a>
-        </div>
-    {% endif %} -->
 {% endblock %}

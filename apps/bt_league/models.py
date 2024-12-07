@@ -111,6 +111,8 @@ class Torneio(models.Model):
 
         return jogos_gerados
 
+    def has_games(self):
+        return Jogo.objects.filter(torneio=self).exists()
 
 class Jogo(models.Model):
     torneio = models.ForeignKey(Torneio, on_delete=models.CASCADE)
@@ -131,3 +133,8 @@ class Jogo(models.Model):
 
     def dupla_2(self):
         return f'{self.dupla2_jogador1.nome}/{self.dupla2_jogador2.nome}'
+
+    def save(self, *args, **kwargs):
+        if self.placar_dupla1 is not None and self.placar_dupla2 is not None:
+            self.concluido = True
+        super().save(*args, **kwargs)

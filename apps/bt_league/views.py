@@ -63,4 +63,4 @@ def qrcode_tournament(request, torneio_id: int):
         'img_b64': uri,
         'torneio': torneio,
     }
-    return render(request, 'bt_league/qrcode_tournament.html', context)
+    return render(request, 'qrcode_tournament.html', context)

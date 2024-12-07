@@ -1,4 +1,4 @@
-{% extends '../base.html' %}
+{% extends './base.html' %}
 
 {% load static %}
 
@@ -21,10 +21,12 @@
         background-color: #cecece;
         font-size: 4rem;"
     >
+    <div class="container text-center">
         <h3 class="mb-4">{{ torneio.nome }} - {{ torneio.data }}</h3>
 
         <h5 class="mb-4">Aponte seu celular para o QR Code e veja a classificação atual</h5>
 
-        <img src="data:image/png;base64, {{ img_b64 }}" alt="QR Code do participante" />
+        <img src="data:image/png;base64, {{ img_b64 }}" alt="QR Code do participante" width="200" />
+    </div>
     </main>
 {% endblock %}

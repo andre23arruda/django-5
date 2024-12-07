@@ -6,6 +6,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name='index'),
     path('torneio/', include('bt_league.urls')),
+    path('copa/', include('bt_cup.urls')),
 ]
 
 admin.site.index_title = 'Meu Admin'

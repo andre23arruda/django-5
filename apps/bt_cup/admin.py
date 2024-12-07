@@ -2,22 +2,22 @@ from django.contrib import admin, messages
 from django.db.models import Case, When
 from django.shortcuts import redirect
 from django.utils.html import format_html
-from .models import Jogador, Torneio, Jogo
-
-from django.conf.locale.pt_BR import formats as portuguese
-from django.conf.locale.en import formats as english
-
-portuguese.DATE_FORMAT = 'd/m/Y'
-portuguese.DATETIME_FORMAT = 'H:i d/m/Y'
-english.DATE_FORMAT = 'd/m/Y'
-english.DATETIME_FORMAT = 'H:i d/m/Y'
+from .models import Dupla, Torneio, Jogo
 
 
-@admin.register(Jogador)
-class JogadorAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'telefone', 'email')
+@admin.register(Dupla)
+class DuplaAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'telefone', 'ativo')
+    list_editable = ('ativo',)
     readonly_fields = ('criado_por',)
-    search_fields = ('nome',)
+    search_fields = ('jogador1', 'jogador2', 'ativo')
+
+    def get_search_results(self, request, queryset, search_term):
+        '''Sobrescreve os resultados da pesquisa no campo autocomplete.'''
+        queryset, use_distinct = super().get_search_results(request, queryset, search_term)
+        if '/admin/autocomplete/' in request.path:
+            queryset = queryset.filter(ativo=True)
+        return queryset, use_distinct
 
     def get_queryset(self, request):
         if request.user.is_superuser:
@@ -34,26 +34,28 @@ class JogadorAdmin(admin.ModelAdmin):
 class JogoInline(admin.TabularInline):
     model = Jogo
     extra = 0
-    fields = ('dupla_1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla_2', 'concluido')
-    readonly_fields = ('dupla_1', 'dupla_2', 'x', 'concluido')
+    fields = ('fase', 'dupla_1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla_2', 'concluido')
+    readonly_fields = ('fase', 'dupla_1', 'dupla_2', 'x', 'concluido')
     can_delete = False
 
-    def has_add_permission(self, request, obj=None):
-        return False
-
     def dupla_1(self, obj):
-        if obj.placar_dupla1 is not None and obj.placar_dupla2 is not None:
-            if obj.placar_dupla1 > obj.placar_dupla2:
-                return format_html('<u><strong>{}</strong></u>', obj.dupla_1())
-        return obj.dupla_1()
+        if obj.dupla1 is not None:
+            if obj.dupla1 == obj.winner:
+                trophy = '🏆' if obj.fase == 'FINAL' else ''
+                return format_html('<u><strong>{}</strong>{}</u>', obj.dupla1, trophy)
+        return obj.dupla1 or '-'
     dupla_1.short_description = 'Dupla 1'
 
     def dupla_2(self, obj):
-        if obj.placar_dupla1 is not None and obj.placar_dupla2 is not None:
-            if obj.placar_dupla2 > obj.placar_dupla1:
-                return format_html('<u><strong>{}</strong></u>', obj.dupla_2())
-        return obj.dupla_2()
+        if obj.dupla2 is not None:
+            if obj.dupla2 == obj.winner:
+                trophy = '🏆' if obj.fase == 'FINAL' else ''
+                return format_html('<u><strong>{}</strong></u>{}', obj.dupla2, trophy)
+        return obj.dupla2 or '-'
     dupla_2.short_description = 'Dupla 2'
+
+    def has_add_permission(self, request, obj=None):
+        return False
 
     def x(self, obj):
         return 'x'
@@ -61,13 +63,13 @@ class JogoInline(admin.TabularInline):
 
 
 class RankingInline(admin.TabularInline):
-    model = Torneio.jogadores.through
+    model = Torneio.duplas.through
     extra = 0
-    fields = ('ranking', 'nome', 'pontos')
-    readonly_fields = ('ranking', 'nome', 'pontos')
+    fields = ('nome', 'info', 'grupo')
+    readonly_fields = ('grupo', 'nome', 'info')
     can_delete = False
-    verbose_name = 'Ranking'
-    verbose_name_plural = 'Ranking'
+    verbose_name = 'Ranking por grupo'
+    verbose_name_plural = 'Ranking por grupo'
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -78,7 +80,7 @@ class RankingInline(admin.TabularInline):
             torneio_obj = Torneio.objects.get(pk=torneio)
             qs_sorted = sorted(
                 qs,
-                key=lambda q: q.jogador.player_points(torneio_obj),
+                key=lambda q: q.dupla.get_group_data(torneio_obj),
                 reverse=True
             )
             pk_list = [q.pk for q in qs_sorted]
@@ -90,16 +92,18 @@ class RankingInline(admin.TabularInline):
         return False
 
     def nome(self, obj):
-        return obj.jogador.nome
+        return obj.dupla.__str__()
 
-    def pontos(self, obj):
-        vitorias, pontos = obj.jogador.player_points(obj.torneio)
-        return f'{vitorias} / {pontos}'
-    pontos.short_description = 'V / P'
+    def grupo(self, obj):
+        return obj.dupla.get_group(obj.torneio) or '-'
 
-    def ranking(self, obj):
-        return obj.jogador.ranking(obj.torneio)
-    ranking.short_description = '#'
+    def info(self, obj):
+        _, pos, v, p = obj.dupla.get_group_data(obj.torneio)
+        result = f'{ -pos } / { v } / { p }'
+        if pos == -1 or pos == -2:
+            return format_html('<u><strong>{}</strong></u>', result)
+        return result
+    info.short_description = '#  /  V  /  P'
 
 
 @admin.register(Torneio)
@@ -110,12 +114,12 @@ class TorneioAdmin(admin.ModelAdmin):
 
     fieldsets = [
         ('INFORMAÇÕES', {'fields': (('nome', 'ativo'), 'data'), 'classes': ('collapse',)}),
-        ('JOGADORES', {'fields': ('jogadores',), 'classes': ('collapse',)}),
+        ('DUPLAS', {'fields': ('duplas',), 'classes': ('collapse',)}),
     ]
-    change_form_template = 'admin/bt_league/torneio_change_form.html'
-    list_display = ('nome', 'data', 'total_jogadores', 'total_jogos', 'ativo')
-    autocomplete_fields = ['jogadores']
-    # filter_horizontal = ('jogadores',)
+    change_form_template = 'admin/bt_cup/torneio_change_form.html'
+    list_display = ('nome', 'data', 'total_duplas', 'total_jogos', 'ativo')
+    autocomplete_fields = ['duplas']
+    # filter_horizontal = ['duplas']
     list_filter = ('ativo',)
     inlines = [JogoInline, RankingInline]
 
@@ -123,17 +127,19 @@ class TorneioAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return super().get_form(request, obj, **kwargs)
         form = super().get_form(request, obj, **kwargs)
-        form.base_fields['jogadores'].queryset = Jogador.objects.filter(criado_por=request.user).order_by('nome')
+        form.base_fields['duplas'].queryset = Dupla.objects.filter(criado_por=request.user).order_by('criado_em')
         return form
+
+
 
     def get_queryset(self, request):
         if request.user.is_superuser:
             return super().get_queryset(request)
         return super().get_queryset(request).filter(criado_por=request.user)
 
-    def total_jogadores(self, obj):
-        return obj.jogadores.count()
-    total_jogadores.short_description = 'Jogadores'
+    def total_duplas(self, obj):
+        return obj.duplas.count()
+    total_duplas.short_description = 'Duplas'
 
     def total_jogos(self, obj):
         return obj.jogo_set.count()
@@ -141,11 +147,11 @@ class TorneioAdmin(admin.ModelAdmin):
 
     def response_add(self, request, obj, post_url_continue=None):
         messages.add_message(request, messages.INFO, 'Informações salvas com sucesso.')
-        return redirect(f'admin:bt_league_torneio_change', obj.id)
+        return redirect(f'admin:bt_cup_torneio_change', obj.id)
 
     def response_change(self, request, obj):
         messages.add_message(request, messages.INFO, 'Informações salvas com sucesso.')
-        return redirect(f'admin:bt_league_torneio_change', obj.id)
+        return redirect(f'admin:bt_cup_torneio_change', obj.id)
 
     def save_model(self, request, obj, form, change):
         created = not change

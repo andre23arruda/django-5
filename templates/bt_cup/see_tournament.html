@@ -1,0 +1,185 @@
+{% extends '../base.html' %}
+
+{% load static %}
+
+{% block favicon %}
+    <link rel="shortcut icon" href="{% static 'images/bt.ico' %}" />
+{% endblock %}
+
+{% block title %}{{ torneio.nome }} ({{ torneio.data }}){% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">{{ torneio.nome }} ({{ torneio.data }})</h1>
+
+    <div class="text-end">
+        <button class="btn btn-primary btn-sm" onclick="location.reload();">Recarregar</button>
+    </div>
+
+    <div class="row">
+        <!-- Grupos -->
+        <div class="col">
+            <h3 class="text-center">Grupos e Classificação</h3>
+            {% for grupo, jogos in grupos.items %}
+                <div class="row mb-4">
+                    <!-- Jogos do Grupo -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header text-center">
+                                {{ grupo }} - Jogos
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-bordered text-center">
+                                    <thead>
+                                        <tr>
+                                            <th>Dupla 1</th>
+                                            <th>Placar</th>
+                                            <th>Dupla 2</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for jogo in jogos.jogos %}
+                                            <tr>
+                                                <td>{{ jogo.dupla1 }}</td>
+                                                <td>
+                                                    {{ jogo.placar_dupla1|default_if_none:'-' }} X {{ jogo.placar_dupla2|default_if_none:'-' }}
+                                                </td>
+                                                <td>{{ jogo.dupla2 }}</td>
+                                                <td>
+                                                    {% if jogo.concluido %}
+                                                        <span class="badge bg-success">Concluído</span>
+                                                    {% else %}
+                                                        <span class="badge bg-warning text-dark">Pendente</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Classificação do Grupo -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header text-center">
+                                {{ grupo }} - Classificação
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-bordered text-center">
+                                    <thead>
+                                        <tr>
+                                            <th>Posição</th>
+                                            <th>Dupla</th>
+                                            <th>Vitórias</th>
+                                            <th>Pontos</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for dupla, stats in jogos.classificacao %}
+                                            <tr>
+                                                <td>{{ forloop.counter }}</td>
+                                                <td>{{ dupla }}</td>
+                                                <td>{{ stats.vitorias }}</td>
+                                                <td>{{ stats.pontos }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Próxima Fase e Fases Finais -->
+    <div class="row">
+        <!-- Próxima Fase -->
+        <div class="">
+            <h3 class="text-center">Playoffs</h3>
+            {% for fase, jogos in proximas_fases.items %}
+                <div class="card mb-3">
+                    <div class="card-header text-center">
+                        {{ fase }}
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered text-center">
+                            <thead>
+                                <tr>
+                                    <th>Dupla 1</th>
+                                    <th>Placar</th>
+                                    <th>Dupla 2</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for jogo in jogos %}
+                                    <tr>
+                                        <td>{{ jogo.dupla1 }}</td>
+                                        <td>
+                                            {{ jogo.placar_dupla1|default_if_none:'-' }} X {{ jogo.placar_dupla2|default_if_none:'-' }}
+                                        </td>
+                                        <td>{{ jogo.dupla2 }}</td>
+                                        <td>
+                                            {% if jogo.concluido %}
+                                                <span class="badge bg-success">Concluído</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">Pendente</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Fases Finais -->
+        <div class="col">
+            {% for fase, jogos in fases_finais.items %}
+                <div class="card mb-3">
+                    <div class="card-header text-center">
+                        {{ fase }}
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered text-center">
+                            <thead>
+                                <tr>
+                                    <th>Dupla 1</th>
+                                    <th>Placar</th>
+                                    <th>Dupla 2</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for jogo in jogos %}
+                                    <tr>
+                                        <td>{{ jogo.dupla1 }}</td>
+                                        <td>
+                                            {{ jogo.placar_dupla1|default_if_none:'-' }} X {{ jogo.placar_dupla2|default_if_none:'-' }}
+                                        </td>
+                                        <td>{{ jogo.dupla2 }}</td>
+                                        <td>
+                                            {% if jogo.concluido %}
+                                                <span class="badge bg-success">Concluído</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">Pendente</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

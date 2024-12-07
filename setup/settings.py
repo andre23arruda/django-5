@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bookstore',
     'bt_league',
+    'bt_cup',
 ]
 
 MIDDLEWARE = [
