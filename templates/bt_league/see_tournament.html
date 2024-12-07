@@ -21,51 +21,51 @@
     {% endif %}
 
     <h3>Jogos</h3>
-    <table class="table table-striped text-center mb-4">
-        <thead>
-            <tr>
-                <th class="text-right">Dupla 1</th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th>Dupla 2</th>
-            </tr>
-        </thead>
+    <div class="card-body table-responsive">
+        <table class="table table-striped text-center mb-4">
+            <thead>
+                <tr>
+                    <th class="text-right">Dupla 1</th>
+                    <th>Placar</th>
+                    <th>Dupla 2</th>
+                </tr>
+            </thead>
 
-        <tbody>
-            {% for jogo in jogos %}
-            <tr class="{% if jogo.concluido %}table-success{% endif %}">
-                <td>{{ jogo.dupla1_jogador1.nome }} / {{ jogo.dupla1_jogador2.nome }}</td>
-                <td>{{ jogo.placar_dupla1|default_if_none:'-' }}</td>
-                <td>x</td>
-                <td>{{ jogo.placar_dupla2|default_if_none:'-' }}</td>
-                <td>{{ jogo.dupla2_jogador1.nome }} / {{ jogo.dupla2_jogador2.nome }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            <tbody>
+                {% for jogo in jogos %}
+                <tr class="{% if jogo.concluido %}table-success{% endif %}">
+                    <td>{{ jogo.dupla1_jogador1.nome }} / {{ jogo.dupla1_jogador2.nome }}</td>
+                    <td>{{ jogo.placar_dupla1|default_if_none:'-' }} x {{ jogo.placar_dupla2|default_if_none:'-' }}</td>
+                    <td>{{ jogo.dupla2_jogador1.nome }} / {{ jogo.dupla2_jogador2.nome }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
     <hr/>
 
     <h3 class="mt-5 mb-2">Ranking</h3>
-    <table class="table table-striped text-center mb-4">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Nome</th>
-                <th>V / P</th>
-            </tr>
-        </thead>
+    <div class="card-body table-responsive">
+        <table class="table table-striped text-center mb-4">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nome</th>
+                    <th>V / P</th>
+                </tr>
+            </thead>
 
-        <tbody>
-            {% for item in ranking %}
-            <tr>
-                <td>{{ item.posicao }}º</td>
-                <td>{{ item.jogador.nome }}</td>
-                <td>{{ item.vitorias }} / {{ item.pontos }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            <tbody>
+                {% for item in ranking %}
+                <tr>
+                    <td>{{ item.posicao }}º</td>
+                    <td>{{ item.jogador.nome }}</td>
+                    <td>{{ item.vitorias }} / {{ item.pontos }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}
