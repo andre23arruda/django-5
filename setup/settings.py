@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'bookstore',
     'bt_league',
     'bt_cup',
+    'escala_de_plantao',
 ]
 
 MIDDLEWARE = [

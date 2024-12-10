@@ -1,0 +1,16 @@
+{% extends "admin/change_form.html" %}
+
+{% block object-tools-items %}
+    <li>
+        <a href="{% url 'escala_de_plantao:create_plantoes' original.pk %}">Próximo mês</a>
+    </li>
+
+    <li>
+        <a href="{% url 'escala_de_plantao:see_all_escalas' original.pk %}" target="_blank">Ver escala</a>
+    </li>
+
+    <!-- <li>
+        <a href="{% url 'escala_de_plantao:see_escala' original.pk %}" target="_blank">Ver escala</a>
+    </li> -->
+    {{ block.super }}
+{% endblock %}
