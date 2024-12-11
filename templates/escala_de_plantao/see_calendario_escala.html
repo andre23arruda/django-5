@@ -1,0 +1,73 @@
+{% extends '../base.html' %}
+
+{% load static %}
+
+{% block favicon %}
+    <link rel="shortcut icon" href="{% static 'images/bt.ico' %}" />
+{% endblock %}
+
+{% block title %}{{ escala.nome }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">{{ escala.nome }}</h1>
+
+    <div class="row">
+        <div class="col">
+            <div class="row mb-4">
+                {% for mes_ano, dados in calendarios.items %}
+                <div class="mb-4">
+                    <div class="card">
+                        <div class="card-header text-center">
+                            {{ mes_ano }}
+                        </div>
+
+                        <div class="card-body table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Segunda</th>
+                                        <th>Terça</th>
+                                        <th>Quarta</th>
+                                        <th>Quinta</th>
+                                        <th>Sexta</th>
+                                        <th>Sábado</th>
+                                        <th>Domingo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for semana in dados %}
+                                        <tr>
+                                            {% for dia in semana %}
+                                                <td>
+                                                    {% if dia.is_current_month %}
+                                                        <div class="d-flex justify-content-between">
+                                                            <strong>{{ dia.dia }}</strong>
+                                                        </div>
+                                                    {% endif %}
+
+                                                    {% if dia.plantoes %}
+                                                        <div class="plantoes-dia">
+                                                            {% for plantao in dia.plantoes %}
+                                                                <div class="plantao">
+                                                                    {{ plantao.plantonista.nome }}
+                                                                    ({{ plantao.get_turno_display }})
+                                                                </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    {% endif %}
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
