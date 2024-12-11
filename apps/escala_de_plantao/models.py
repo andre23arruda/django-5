@@ -123,7 +123,7 @@ class Escala(models.Model):
             # Incrementa para começar no próximo plantonista
             index_plantonista = (index_plantonista + 1) % len(plantonistas)
 
-            first_day = plantao_anterior.data
+            first_day = plantao_anterior.data + timedelta(days=1)
             last_day = (first_day + timedelta(days=32)).replace(day=6)
         else:
             # Se não houver plantão anterior, começa do primeiro plantonista
