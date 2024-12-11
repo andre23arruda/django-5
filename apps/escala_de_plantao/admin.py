@@ -69,6 +69,11 @@ class EscalaAdmin(admin.ModelAdmin):
         return obj.plantonistas.count()
     count_plantonistas.short_description = 'Plantonistas'
 
+    def get_queryset(self, request):
+        if request.user.is_superuser:
+            return super().get_queryset(request)
+        return super().get_queryset(request).filter(criado_por=request.user)
+
     def save_model(self, request, obj, form, change):
         created = not change
         if created:

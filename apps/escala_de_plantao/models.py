@@ -79,6 +79,7 @@ class Escala(models.Model):
     criado_em = models.DateTimeField(auto_now_add=True)
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
     ativo = models.BooleanField(default=True)
+    dois_turnos_fds = models.BooleanField(default=False, help_text='Habilita os dois turnos no fim de semana')
 
     def __str__(self):
         return self.nome
@@ -136,7 +137,7 @@ class Escala(models.Model):
             holliday = is_holliday(current_day)  # Função de verificação de feriado
 
             # Lógica para turnos
-            if weekend or holliday:
+            if (self.dois_turnos_fds and weekend) or holliday:
                 # Encontra plantonista para a manhã
                 plantonista_manha, i = self.plantonista_online(index_plantonista, current_day)
                 if plantonista_manha:
