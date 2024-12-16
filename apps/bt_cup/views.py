@@ -38,7 +38,11 @@ def next_stage(request, torneio_id: int):
     n_duplas = torneio.duplas.count()
     jogos = torneio.jogo_set.all()
     jogos_preenchidos = jogos.filter(fase__in=['OITAVAS', 'QUARTAS', 'SEMIFINAIS', 'FINAL'], dupla1__isnull=False, dupla2__isnull=False)
-    if jogos_preenchidos:
+    jogos_grupos_nao_finalizados = jogos.filter(fase__startswith='GRUPO', concluido=False)
+
+    if jogos_grupos_nao_finalizados.exists():
+        messages.add_message(request, messages.ERROR, 'Jogos de grupos ainda não foram preenchidos.')
+    elif jogos_preenchidos:
         result = torneio.next_stage()
         if isinstance(result, Exception):
             messages.add_message(request, messages.ERROR, result)

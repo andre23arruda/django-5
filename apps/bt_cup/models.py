@@ -236,7 +236,7 @@ class Torneio(models.Model):
             if len(jogos_atuais) == 0: # Nenhum jogo concluído, ignorar a fase
                 continue
             elif jogos_atuais.count() != Jogo.objects.filter(torneio=self, fase=fase).count(): # jogos pendentes
-                return Exception(f'guardando conclusão de todos os jogos da fase {fase}.')
+                return Exception(f'Aguardando conclusão de todos os jogos da fase {fase}.')
 
             # Checar se existe uma próxima fase
             if i + 1 >= len(fases):
