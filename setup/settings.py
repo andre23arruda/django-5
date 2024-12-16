@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'aluguel_quadra',
     'bookstore',
     'bt_league',
     'bt_cup',
@@ -72,9 +73,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_TZ = True
+TIME_ZONE = 'America/Sao_Paulo'
 
 # apps folder
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
