@@ -1,9 +1,11 @@
 import random
 from django.db import models
 from itertools import combinations
+from shortuuid.django_fields import ShortUUIDField
 
 
 class Jogador(models.Model):
+    id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     nome = models.CharField(max_length=100)
     email = models.EmailField(blank=True, null=True)
     telefone = models.CharField(max_length=20, blank=True, null=True)
@@ -62,6 +64,7 @@ class Jogador(models.Model):
 
 
 class Torneio(models.Model):
+    id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     nome = models.CharField(max_length=100)
     data = models.DateField()
     jogadores = models.ManyToManyField(Jogador, blank=True)

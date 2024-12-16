@@ -15,8 +15,8 @@ english.DATETIME_FORMAT = 'H:i d/m/Y'
 
 @admin.register(Jogador)
 class JogadorAdmin(admin.ModelAdmin):
+    exclude = ('criado_por', 'id',)
     list_display = ('nome', 'telefone', 'email')
-    readonly_fields = ('criado_por',)
     search_fields = ('nome',)
 
     def get_queryset(self, request):

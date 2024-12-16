@@ -12,7 +12,7 @@ locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
 
 @login_required(redirect_field_name='next', login_url='/admin/login/')
-def create_plantoes(request, escala_id: int):
+def create_plantoes(request, escala_id: str):
     '''Cria plantões de uma escala'''
     escala = get_object_or_404(Escala, pk=escala_id)
     result = escala.create_plantoes()
@@ -23,7 +23,7 @@ def create_plantoes(request, escala_id: int):
     return redirect('admin:escala_de_plantao_escala_change', escala_id)
 
 
-def see_escala(request, escala_id: int):
+def see_escala(request, escala_id: str):
     '''Visualiza escala de plantões'''
     escala = get_object_or_404(Escala, pk=escala_id)
     plantoes = escala.plantao_set.all()
@@ -35,7 +35,7 @@ def see_escala(request, escala_id: int):
     return render(request, 'escala_de_plantao/see_escala.html', context)
 
 
-def see_all_escalas(request, escala_id: int):
+def see_all_escalas(request, escala_id: str):
     '''Visualiza escala de plantões em tabela'''
     escala = get_object_or_404(Escala, pk=escala_id)
     plantoes = escala.plantao_set.all()
@@ -101,7 +101,7 @@ def gerar_calendario_plantoes(escala):
     return calendarios_por_mes
 
 
-def calendar_plantoes(request, escala_id: int):
+def calendar_plantoes(request, escala_id: str):
     escala = get_object_or_404(Escala, pk=escala_id)
     calendarios = gerar_calendario_plantoes(escala)
 

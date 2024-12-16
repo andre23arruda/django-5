@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Torneio
 
 @login_required(redirect_field_name='next', login_url='/admin/login/')
-def create_games(request, torneio_id: int):
+def create_games(request, torneio_id: str):
     '''Cria jogos para o torneio'''
     torneio = get_object_or_404(Torneio, pk=torneio_id)
     if torneio.jogo_set.exists():
@@ -19,7 +19,7 @@ def create_games(request, torneio_id: int):
     return redirect('admin:bt_league_torneio_change', torneio_id)
 
 
-def see_tournament(request, torneio_id: int):
+def see_tournament(request, torneio_id: str):
     '''Visualiza torneio'''
     torneio = get_object_or_404(Torneio, pk=torneio_id)
 
@@ -49,7 +49,7 @@ def see_tournament(request, torneio_id: int):
 
 
 @login_required(redirect_field_name='next', login_url='/admin/login/')
-def qrcode_tournament(request, torneio_id: int):
+def qrcode_tournament(request, torneio_id: str):
     '''Cria QR Code do torneio'''
     torneio = get_object_or_404(Torneio, pk=torneio_id)
     site_url = os.getenv('HOST_ADDRESS')

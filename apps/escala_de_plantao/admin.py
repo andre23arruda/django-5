@@ -12,6 +12,7 @@ english.DATETIME_FORMAT = 'H:i d/m/Y'
 
 @admin.register(FeriadoPontoFacultativo)
 class FeriadoPontoFacultativoAdmin(admin.ModelAdmin):
+    exclude = ('id',)
     list_display = ('nome',)
     ordering = ('ano', 'mes', 'dia')
 
@@ -23,7 +24,7 @@ class FeriadoPontoFacultativoAdmin(admin.ModelAdmin):
 class PlantonistaAdmin(admin.ModelAdmin):
     list_display = ('nome', 'telefone', 'ordem_na_lista', 'online')
     ordering = ('ordem_na_lista',)
-    exclude = ('criado_por',)
+    exclude = ('criado_por', 'id')
     search_fields = ('nome',)
 
     def online(self, obj):
@@ -61,9 +62,10 @@ class EscalaAdmin(admin.ModelAdmin):
 
     change_form_template = 'admin/escala_de_plantao/escala_change_form.html'
     list_display = ('nome', 'count_plantonistas', 'ativo')
-    readonly_fields = ['criado_por']
+    exclude = ['criado_por', 'id']
     autocomplete_fields = ('plantonistas',)
     inlines = [PlantaoInline]
+    ordering = ('nome',)
 
     def count_plantonistas(self, obj):
         return obj.plantonistas.count()

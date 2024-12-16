@@ -1,6 +1,8 @@
 import random
 from django.db import models
 from itertools import combinations
+from shortuuid.django_fields import ShortUUIDField
+
 
 FASE_CHOICES = [
     ('GRUPO 1', 'GRUPO 1'),
@@ -16,6 +18,7 @@ FASE_CHOICES = [
 
 
 class Dupla(models.Model):
+    id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     jogador1 = models.CharField(max_length=100)
     jogador2 = models.CharField(max_length=100)
     telefone = models.CharField(max_length=20, blank=True, null=True)
@@ -85,6 +88,7 @@ class Dupla(models.Model):
 
 
 class Torneio(models.Model):
+    id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     nome = models.CharField(max_length=100)
     data = models.DateField()
     duplas = models.ManyToManyField(Dupla, blank=True)

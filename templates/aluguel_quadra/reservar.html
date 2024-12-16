@@ -1,0 +1,99 @@
+{% extends '../base.html' %}
+
+{% load static %}
+
+{% block favicon %}
+    <link rel="shortcut icon" href="{% static 'images/bt.ico' %}" />
+{% endblock %}
+
+{% block title %}Reservar quadra{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">Deseja reservar uma quadra hoje?</h2>
+
+    <ul>
+        <li>Avise antes se não puder comparecer</li>
+        <li>Tolerância de 10 minutos</li>
+        <li>Pague depois de jogar</li>
+        <li>Venha com sua turma se divertir!</li>
+    </ul>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" action="{% url 'aluguel_quadra:reservar' %}">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>Erro no Agendamento:</strong>
+            {% for key, error in form.errors.items %}
+                {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.cliente_nome.id_for_label }}" class="form-label">{{ form.cliente_nome.label }}</label>
+                {{ form.cliente_nome }}
+                {% if form.cliente_nome.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.cliente_nome.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.cliente_telefone.id_for_label }}" class="form-label">{{ form.cliente_telefone.label }}</label>
+                {{ form.cliente_telefone }}
+                {% if form.cliente_telefone.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.cliente_telefone.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.horario.id_for_label }}" class="form-label">{{ form.horario.label }}</label>
+                {{ form.horario }}
+                {% if form.horario.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.horario.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.quadra.id_for_label }}" class="form-label">{{ form.quadra.label }}</label>
+                {{ form.quadra }}
+                {% if form.quadra.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.quadra.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-xs-12">
+            <button type="submit" class="btn btn-primary">Agendar Quadra</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

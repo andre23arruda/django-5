@@ -1,0 +1,28 @@
+{% extends '../base.html' %}
+
+{% load static %}
+
+{% block favicon %}
+    <link rel="shortcut icon" href="{% static 'images/bt.ico' %}" />
+{% endblock %}
+
+{% block title %}Agendamento Confirmado{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Confirmação de Reserva</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Detalhes da Reserva</h5>
+            <p><strong>Quadra:</strong> {{ aluguel.quadra.nome }}</p>
+            <p><strong>Data:</strong> {{ aluguel.data|date:"d/m/Y" }}</p>
+            <p><strong>Início:</strong> {{ aluguel.inicio|time:"H:i" }}</p>
+            <p><strong>Término:</strong> {{ aluguel.fim|time:"H:i" }}</p>
+            <p><strong>Reservado por:</strong> {{ aluguel.cliente_nome }}</p>
+            <p><strong>Telefone:</strong> {{ aluguel.cliente_telefone }}</p>
+            <p><strong>Valor Total:</strong> R$ {{ aluguel.valor_total|floatformat:2 }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

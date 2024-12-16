@@ -7,9 +7,9 @@ from .models import Dupla, Torneio, Jogo
 
 @admin.register(Dupla)
 class DuplaAdmin(admin.ModelAdmin):
+    exclude = ('id', 'criado_por')
     list_display = ('__str__', 'telefone', 'ativo')
     list_editable = ('ativo',)
-    readonly_fields = ('criado_por',)
     search_fields = ('jogador1', 'jogador2', 'ativo')
 
     def get_search_results(self, request, queryset, search_term):
@@ -129,8 +129,6 @@ class TorneioAdmin(admin.ModelAdmin):
         form = super().get_form(request, obj, **kwargs)
         form.base_fields['duplas'].queryset = Dupla.objects.filter(criado_por=request.user).order_by('criado_em')
         return form
-
-
 
     def get_queryset(self, request):
         if request.user.is_superuser:

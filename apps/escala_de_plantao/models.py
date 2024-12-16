@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 from django.db import models
 from django.utils import timezone
+from shortuuid.django_fields import ShortUUIDField
 
 
 TURNO_CHOICES = [
@@ -31,6 +32,7 @@ def is_holliday(date):
 
 
 class FeriadoPontoFacultativo(models.Model):
+    id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     nome = models.CharField(max_length=100)
     dia = models.IntegerField()
     mes = models.IntegerField()
@@ -48,6 +50,7 @@ class FeriadoPontoFacultativo(models.Model):
 
 
 class Plantonista(models.Model):
+    id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     nome = models.CharField(max_length=100)
     ordem_na_lista = models.IntegerField()
     email = models.EmailField(blank=True, null=True)
@@ -74,6 +77,7 @@ class Plantonista(models.Model):
 
 
 class Escala(models.Model):
+    id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     nome = models.CharField(max_length=100)
     plantonistas = models.ManyToManyField(Plantonista, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
