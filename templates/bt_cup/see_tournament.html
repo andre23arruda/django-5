@@ -10,11 +10,15 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="text-center mb-4">{{ torneio.nome }} ({{ torneio.data }})</h1>
-
-    <div class="text-end">
-        <button class="btn btn-primary btn-sm" onclick="location.reload();">Recarregar</button>
-    </div>
+    {% if torneio.ativo %}
+        <h1 class="text-center">{{ torneio.nome }} ({{ torneio.data }})</h1>
+        <div class="text-end">
+            <button class="btn btn-primary btn-sm" onclick="location.reload();">Recarregar</button>
+        </div>
+    {% else %}
+        <h1 class="text-center"><s>{{ torneio.nome }} ({{ torneio.data }})</s></h1>
+        <h2 class="text-center"><s>FINALIZADO</s></h2>
+    {% endif %}
 
     <div class="row">
         <!-- Grupos -->
@@ -43,7 +47,7 @@
                                             <tr>
                                                 <td>{{ jogo.dupla1 }}</td>
                                                 <td>
-                                                    {{ jogo.placar_dupla1|default_if_none:'-' }} X {{ jogo.placar_dupla2|default_if_none:'-' }}
+                                                    {{ jogo.placar_dupla1|default_if_none:'' }} X {{ jogo.placar_dupla2|default_if_none:'' }}
                                                 </td>
                                                 <td>{{ jogo.dupla2 }}</td>
                                                 <td>
@@ -119,11 +123,11 @@
                             <tbody>
                                 {% for jogo in jogos %}
                                     <tr>
-                                        <td>{{ jogo.dupla1 }}</td>
+                                        <td>{{ jogo.dupla1|default_if_none:'Há definir' }}</td>
                                         <td>
-                                            {{ jogo.placar_dupla1|default_if_none:'-' }} X {{ jogo.placar_dupla2|default_if_none:'-' }}
+                                            {{ jogo.placar_dupla1|default_if_none:'' }} X {{ jogo.placar_dupla2|default_if_none:'' }}
                                         </td>
-                                        <td>{{ jogo.dupla2 }}</td>
+                                        <td>{{ jogo.dupla2|default_if_none:'Há definir'}}</td>
                                         <td>
                                             {% if jogo.concluido %}
                                                 <span class="badge bg-success">Concluído</span>
@@ -160,11 +164,11 @@
                             <tbody>
                                 {% for jogo in jogos %}
                                     <tr>
-                                        <td>{{ jogo.dupla1 }}</td>
+                                        <td>{{ jogo.dupla1|default_if_none:'Há definir' }}</td>
                                         <td>
-                                            {{ jogo.placar_dupla1|default_if_none:'-' }} X {{ jogo.placar_dupla2|default_if_none:'-' }}
+                                            {{ jogo.placar_dupla1|default_if_none:'' }} X {{ jogo.placar_dupla2|default_if_none:'' }}
                                         </td>
-                                        <td>{{ jogo.dupla2 }}</td>
+                                        <td>{{ jogo.dupla2|default_if_none:'Há definir' }}</td>
                                         <td>
                                             {% if jogo.concluido %}
                                                 <span class="badge bg-success">Concluído</span>
