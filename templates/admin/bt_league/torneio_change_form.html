@@ -9,11 +9,9 @@
         <a href="{% url 'bt_league:see_tournament' original.pk %}" target="_blank">Ver Torneio</a>
     </li>
 
-    {% if not original.has_games %}
-        <li>
-            <a href="#" id="create-games">Gerar Jogos</a>
-        </li>
-    {% endif %}
+    <li>
+        <a href="#" id="create-games">Gerar Jogos</a>
+    </li>
 
     <dialog id="games-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
         <section>

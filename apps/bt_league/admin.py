@@ -34,8 +34,8 @@ class JogadorAdmin(admin.ModelAdmin):
 class JogoInline(admin.TabularInline):
     model = Jogo
     extra = 0
-    fields = ('dupla_1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla_2', 'concluido')
-    readonly_fields = ('dupla_1', 'dupla_2', 'x', 'concluido')
+    fields = ('dupla_1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla_2', 'quadra', 'concluido')
+    readonly_fields = ('dupla_1', 'dupla_2', 'x', 'concluido', 'quadra')
     can_delete = False
 
     def has_add_permission(self, request, obj=None):
@@ -109,7 +109,7 @@ class TorneioAdmin(admin.ModelAdmin):
         js = ['js/create-games-modal.js']
 
     fieldsets = [
-        ('INFORMAÇÕES', {'fields': (('nome', 'ativo'), 'data'), 'classes': ('collapse',)}),
+        ('INFORMAÇÕES', {'fields': (('nome', 'ativo'), 'data', 'quadras'), 'classes': ('collapse',)}),
         ('JOGADORES', {'fields': ('jogadores',), 'classes': ('collapse',)}),
     ]
     change_form_template = 'admin/bt_league/torneio_change_form.html'

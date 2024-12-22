@@ -71,6 +71,7 @@ class Torneio(models.Model):
     criado_em = models.DateTimeField(auto_now_add=True)
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
     ativo = models.BooleanField(default=True)
+    quadras = models.IntegerField(default=1)
 
     def __str__(self):
         return self.nome
@@ -88,30 +89,50 @@ class Torneio(models.Model):
         if excess_playes:
             return Exception(f'Não é possível gerar jogos com { n_jogadores } jogadores. Número de jogadores deve ser multiplo de 4.')
 
+        quadras_jogadores = (n_jogadores / self.quadras) % 4
+        if quadras_jogadores:
+            return Exception(f'Não é possível gerar jogos para { self.quadras } quadras com { n_jogadores } jogadores.')
+
+        if self.jogo_set.exists():
+            self.jogo_set.all().delete()
+
         duplas = self.create_teams()
-        random.shuffle(duplas)
         jogos_gerados = []
+        jogadores_por_quadra = []
+
+        if self.quadras == 1:
+            random.shuffle(duplas)
 
         while duplas:
-            # Pega primeira dupla livre como primeira dupla do jogo
-            dupla1 = duplas.pop()
+            for quadra in range(1, self.quadras + 1):
+                if quadra == 1:
+                    dupla1 = duplas.pop(0)
+                else:
+                    duplas_filtradas = [dupla for dupla in duplas if (dupla[0].id not in jogadores_por_quadra and dupla[1].id not in jogadores_por_quadra)]
+                    dupla1 = duplas_filtradas.pop(0)
+                    duplas.remove(dupla1)
+                jogadores_por_quadra.extend([dupla1[0].id, dupla1[1].id])
 
-            # Procura outra dupla que não tenha jogadores repetidos
-            for i, dupla2 in enumerate(duplas):
-                if (len(set(dupla1 + dupla2)) == 4):
-                    # Criar jogo
-                    jogo = Jogo.objects.create(
-                        torneio=self,
-                        dupla1_jogador1=dupla1[0],
-                        dupla1_jogador2=dupla1[1],
-                        dupla2_jogador1=dupla2[0],
-                        dupla2_jogador2=dupla2[1]
-                    )
+                # Procura uma dupla2 que não tenha jogadores repetidos e não esteja jogando
+                for i, dupla2 in enumerate(duplas):
+                    if (len(set(dupla1 + dupla2)) == 4 and (dupla2[0].id not in jogadores_por_quadra and dupla2[1].id not in jogadores_por_quadra)):
+                        jogo = Jogo.objects.create(
+                            torneio=self,
+                            quadra=quadra,
+                            dupla1_jogador1=dupla1[0],
+                            dupla1_jogador2=dupla1[1],
+                            dupla2_jogador1=dupla2[0],
+                            dupla2_jogador2=dupla2[1]
+                        )
 
-                    jogos_gerados.append(jogo)
-                    duplas.pop(i)
-                    break
+                        # Atualiza o conjunto de jogadores na quadra
+                        jogadores_por_quadra.extend([dupla2[0].id, dupla2[1].id])
+                        print(jogadores_por_quadra)
+                        jogos_gerados.append(jogo)
+                        duplas.pop(i)
+                        break
 
+            jogadores_por_quadra =[]
         return jogos_gerados
 
     def has_games(self):
@@ -119,11 +140,11 @@ class Torneio(models.Model):
 
 class Jogo(models.Model):
     torneio = models.ForeignKey(Torneio, on_delete=models.CASCADE)
+    quadra = models.IntegerField(default=1)
     dupla1_jogador1 = models.ForeignKey(Jogador, related_name='dupla1_jogador1', on_delete=models.CASCADE)
     dupla1_jogador2 = models.ForeignKey(Jogador, related_name='dupla1_jogador2', on_delete=models.CASCADE)
     dupla2_jogador1 = models.ForeignKey(Jogador, related_name='dupla2_jogador1', on_delete=models.CASCADE)
     dupla2_jogador2 = models.ForeignKey(Jogador, related_name='dupla2_jogador2', on_delete=models.CASCADE)
-
     placar_dupla1 = models.IntegerField(null=True, blank=True, verbose_name='')
     placar_dupla2 = models.IntegerField(null=True, blank=True, verbose_name='')
     concluido = models.BooleanField(default=False)
