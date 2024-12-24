@@ -100,9 +100,6 @@ class Torneio(models.Model):
         jogos_gerados = []
         jogadores_por_quadra = []
 
-        if self.quadras == 1:
-            random.shuffle(duplas)
-
         while duplas:
             for quadra in range(1, self.quadras + 1):
                 if quadra == 1:
@@ -116,7 +113,8 @@ class Torneio(models.Model):
                 # Procura uma dupla2 que não tenha jogadores repetidos e não esteja jogando
                 for i, dupla2 in enumerate(duplas):
                     if (len(set(dupla1 + dupla2)) == 4 and (dupla2[0].id not in jogadores_por_quadra and dupla2[1].id not in jogadores_por_quadra)):
-                        jogo = Jogo.objects.create(
+
+                        jogo = Jogo(
                             torneio=self,
                             quadra=quadra,
                             dupla1_jogador1=dupla1[0],
@@ -127,12 +125,16 @@ class Torneio(models.Model):
 
                         # Atualiza o conjunto de jogadores na quadra
                         jogadores_por_quadra.extend([dupla2[0].id, dupla2[1].id])
-                        print(jogadores_por_quadra)
                         jogos_gerados.append(jogo)
                         duplas.pop(i)
                         break
 
             jogadores_por_quadra =[]
+
+        if self.quadras == 1:
+            random.shuffle(jogos_gerados)
+        for jogo in jogos_gerados:
+            jogo.save()
         return jogos_gerados
 
     def has_games(self):
