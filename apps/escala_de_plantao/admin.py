@@ -13,8 +13,9 @@ english.DATETIME_FORMAT = 'H:i d/m/Y'
 @admin.register(FeriadoPontoFacultativo)
 class FeriadoPontoFacultativoAdmin(admin.ModelAdmin):
     exclude = ('id',)
-    list_display = ('nome',)
+    list_display = ('nome', 'data')
     ordering = ('ano', 'mes', 'dia')
+    list_filter = ('ano', 'mes')
 
     def data(self, obj):
         return obj.data()
