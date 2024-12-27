@@ -35,7 +35,7 @@ class FeriadoPontoFacultativo(models.Model):
     id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     nome = models.CharField(max_length=100)
     dia = models.IntegerField()
-    mes = models.IntegerField()
+    mes = models.IntegerField(verbose_name='Mês')
     ano = models.IntegerField(default=timezone.now().year)
 
     class Meta:
@@ -83,7 +83,11 @@ class Escala(models.Model):
     criado_em = models.DateTimeField(auto_now_add=True)
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
     ativo = models.BooleanField(default=True)
-    dois_turnos_fds = models.BooleanField(default=False, help_text='Habilita os dois turnos no fim de semana')
+    dois_turnos_fds = models.BooleanField(
+        default=False,
+        verbose_name='Dois turnos no fim de semana',
+        help_text='Habilita os dois turnos no fim de semana'
+    )
 
     def __str__(self):
         return self.nome

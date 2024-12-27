@@ -11,6 +11,17 @@ from .models import Escala
 locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
 
+def calendario_plantoes(request, escala_id: str):
+    escala = get_object_or_404(Escala, pk=escala_id)
+    calendarios = gerar_calendario_plantoes(escala)
+
+    context = {
+        'calendarios': calendarios,
+        'escala': escala,
+    }
+    return render(request, 'escala_de_plantao/see_calendario_escala.html', context)
+
+
 @login_required(redirect_field_name='next', login_url='/admin/login/')
 def create_plantoes(request, escala_id: str):
     '''Cria plantões de uma escala'''
@@ -99,14 +110,3 @@ def gerar_calendario_plantoes(escala):
         calendarios_por_mes[mes_ano] = [calendario[i:i+7] for i in range(0, len(calendario), 7)]
 
     return calendarios_por_mes
-
-
-def calendar_plantoes(request, escala_id: str):
-    escala = get_object_or_404(Escala, pk=escala_id)
-    calendarios = gerar_calendario_plantoes(escala)
-
-    context = {
-        'calendarios': calendarios,
-        'escala': escala,
-    }
-    return render(request, 'escala_de_plantao/see_calendario_escala.html', context)
