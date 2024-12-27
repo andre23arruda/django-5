@@ -8,7 +8,7 @@ urlpatterns = [
     path('copa/', include('bt_cup.urls')),
     path('torneio/', include('bt_league.urls')),
     path('quadras/', include('aluguel_quadra.urls')),
-    path('plantao/', include('escala_de_plantao.urls')),
+    path('escala-plantao/', include('escala_de_plantao.urls')),
 ]
 
 admin.site.index_title = 'Painel de Gestão'
