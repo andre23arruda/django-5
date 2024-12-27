@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from django import forms
+from django.utils import timezone
 from .models import Aluguel, Quadra
 
 
@@ -45,35 +46,28 @@ class AgendamentoForm(forms.ModelForm):
         label='Seu Telefone',
         widget=forms.TextInput(attrs={'type': 'tel', 'class': 'form-control', 'required': True, 'placeholder': '(XX) 9XXXX-XXXX'})
     )
+    timezone = forms.CharField(widget=forms.HiddenInput())
 
     class Meta:
         model = Aluguel
-        fields = ['quadra', 'cliente_nome', 'cliente_telefone']
+        fields = ['quadra', 'cliente_nome', 'cliente_telefone', 'timezone']
 
     def clean(self):
         cleaned_data = super().clean()
         quadra = cleaned_data.get('quadra')
         horario = cleaned_data.get('horario')
+        user_timezone = cleaned_data.get('timezone')
+        timezone.activate(user_timezone)
         hora_inicio, hora_fim = horario.split('-')
         today = date.today()
 
-        data_inicio = datetime.combine(
-            today,
-            datetime.strptime(hora_inicio, '%H:%M').time()
-        )
-        data_fim = datetime.combine(
-            today,
-            datetime.strptime(hora_fim, '%H:%M').time()
-        )
+        data_inicio = timezone.make_aware(datetime.combine(today, datetime.strptime(hora_inicio, '%H:%M').time()))
+        data_fim = timezone.make_aware(datetime.combine(today, datetime.strptime(hora_fim, '%H:%M').time()))
 
         # Verifica se a data de início é anterior à data atual
-        now = datetime.now()
+        now = timezone.localtime(timezone.now())
         if data_inicio < now:
-            raise forms.ValidationError('A data de início não pode ser no passado.')
-
-        # Verifica se a data de término é posterior à data de início
-        if data_fim <= data_inicio:
-            raise forms.ValidationError('A data de término deve ser posterior à data de início.')
+            raise forms.ValidationError('Horário de início não pode ser no passado.')
 
         # Verifica conflitos de agendamento
         conflitos = Aluguel.objects.filter(

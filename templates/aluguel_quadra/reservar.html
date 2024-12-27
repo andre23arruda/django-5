@@ -29,6 +29,7 @@
 
     <form method="post" action="{% url 'aluguel_quadra:reservar' %}">
         {% csrf_token %}
+        <input type="hidden" id="timezone" name="timezone" />
 
         {% if form.errors %}
         <div class="alert alert-danger">
@@ -92,8 +93,13 @@
         </div>
 
         <div class="col-xs-12">
-            <button type="submit" class="btn btn-primary">Agendar Quadra</button>
+            <button type="submit" class="btn btn-primary">Reservar Quadra</button>
         </div>
     </form>
+
+    <script>
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+        document.getElementById('timezone').value = timeZone
+    </script>
 </div>
 {% endblock %}
