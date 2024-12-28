@@ -11,6 +11,7 @@ ALLOWED_HOSTS = json.loads((os.getenv('ALLOWED_HOSTS', '["*"]')))
 
 # Application definition
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -54,7 +55,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'setup.wsgi.application'
 
-
 # Database
 DATABASES = {
     'default': {
@@ -89,3 +89,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# locale
+LOCALE_PATHS = [ BASE_DIR / 'locale' ]
+
+# Jazzmin
+from .theme import JAZZMIN_UI_TWEAKS, JAZZMIN_SETTINGS
