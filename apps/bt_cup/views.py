@@ -28,7 +28,10 @@ def create_games(request, torneio_id: str):
             messages.add_message(request, messages.ERROR, result)
         else:
             messages.add_message(request, messages.INFO, 'Jogos gerados com sucesso!')
-    return redirect('admin:bt_cup_torneio_change', torneio_id)
+
+    response = redirect('admin:bt_cup_torneio_change', torneio_id)
+    response['location'] += '#jogos-tab'
+    return response
 
 
 @login_required(redirect_field_name='next', login_url='/admin/login/')
@@ -73,7 +76,10 @@ def next_stage(request, torneio_id: str):
                 oitavas.dupla1 = dupla1
                 oitavas.dupla2 = dupla2
         messages.add_message(request, messages.INFO, 'Confrontos gerados com sucesso!')
-    return redirect('admin:bt_cup_torneio_change', torneio_id)
+
+    response = redirect('admin:bt_cup_torneio_change', torneio_id)
+    response['location'] += '#jogos-tab'
+    return response
 
 
 def see_tournament(request, torneio_id: str):
