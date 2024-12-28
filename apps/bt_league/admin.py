@@ -109,13 +109,11 @@ class TorneioAdmin(admin.ModelAdmin):
         js = ['js/create-games-modal.js']
 
     fieldsets = [
-        ('INFORMAÇÕES', {'fields': (('nome', 'ativo'), 'data', 'quadras'), 'classes': ('collapse',)}),
-        ('JOGADORES', {'fields': ('jogadores',), 'classes': ('collapse',)}),
+        ('Torneio', {'fields': ('nome', 'data', 'quadras', 'jogadores', 'ativo')}),
     ]
     change_form_template = 'admin/bt_league/torneio_change_form.html'
     list_display = ('nome', 'data', 'total_jogadores', 'total_jogos', 'ativo')
     autocomplete_fields = ['jogadores']
-    # filter_horizontal = ('jogadores',)
     list_filter = ('ativo',)
     inlines = [JogoInline, RankingInline]
 
@@ -141,11 +139,15 @@ class TorneioAdmin(admin.ModelAdmin):
 
     def response_add(self, request, obj, post_url_continue=None):
         messages.add_message(request, messages.INFO, 'Informações salvas com sucesso.')
-        return redirect(f'admin:bt_league_torneio_change', obj.id)
+        response = redirect('admin:bt_league_torneio_change', obj.id)
+        response['location'] += '#jogos-tab'
+        return response
 
     def response_change(self, request, obj):
         messages.add_message(request, messages.INFO, 'Informações salvas com sucesso.')
-        return redirect(f'admin:bt_league_torneio_change', obj.id)
+        response = redirect('admin:bt_league_torneio_change', obj.id)
+        response['location'] += '#jogos-tab'
+        return response
 
     def save_model(self, request, obj, form, change):
         created = not change

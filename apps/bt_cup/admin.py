@@ -68,8 +68,8 @@ class RankingInline(admin.TabularInline):
     fields = ('nome', 'info', 'grupo')
     readonly_fields = ('grupo', 'nome', 'info')
     can_delete = False
-    verbose_name = 'Ranking por grupo'
-    verbose_name_plural = 'Ranking por grupo'
+    verbose_name = 'Ranking'
+    verbose_name_plural = 'Ranking'
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -95,7 +95,7 @@ class RankingInline(admin.TabularInline):
         return obj.dupla.__str__()
 
     def grupo(self, obj):
-        return obj.dupla.get_group(obj.torneio) or '-'
+        return obj.dupla.get_group(obj.torneio).replace('GRUPO ', '') or '-'
 
     def info(self, obj):
         _, pos, v, p = obj.dupla.get_group_data(obj.torneio)
@@ -113,8 +113,7 @@ class TorneioAdmin(admin.ModelAdmin):
         js = ['js/create-games-modal.js']
 
     fieldsets = [
-        ('INFORMAÇÕES', {'fields': (('nome', 'ativo'), 'data'), 'classes': ('collapse',)}),
-        ('DUPLAS', {'fields': ('duplas',), 'classes': ('collapse',)}),
+        ('Torneio', {'fields': ('nome', 'data', 'duplas', 'ativo')}),
     ]
     change_form_template = 'admin/bt_cup/torneio_change_form.html'
     list_display = ('nome', 'data', 'total_duplas', 'total_jogos', 'ativo')
@@ -145,11 +144,15 @@ class TorneioAdmin(admin.ModelAdmin):
 
     def response_add(self, request, obj, post_url_continue=None):
         messages.add_message(request, messages.INFO, 'Informações salvas com sucesso.')
-        return redirect(f'admin:bt_cup_torneio_change', obj.id)
+        response = redirect('admin:bt_cup_torneio_change', obj.id)
+        response['location'] += '#jogos-tab'
+        return response
 
     def response_change(self, request, obj):
         messages.add_message(request, messages.INFO, 'Informações salvas com sucesso.')
-        return redirect(f'admin:bt_cup_torneio_change', obj.id)
+        response = redirect('admin:bt_cup_torneio_change', obj.id)
+        response['location'] += '#jogos-tab'
+        return response
 
     def save_model(self, request, obj, form, change):
         created = not change

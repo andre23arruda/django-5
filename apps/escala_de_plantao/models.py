@@ -36,11 +36,11 @@ class FeriadoPontoFacultativo(models.Model):
     nome = models.CharField(max_length=100)
     dia = models.IntegerField()
     mes = models.IntegerField(verbose_name='Mês')
-    ano = models.IntegerField(default=timezone.now().year)
+    ano = models.IntegerField(default=timezone.now().year, verbose_name='Ano')
 
     class Meta:
-        verbose_name = 'Feriado / Ponto facultativo'
-        verbose_name_plural = 'Feriados / Pontos facultativos'
+        verbose_name = 'Feriado'
+        verbose_name_plural = 'Feriados'
 
     def __str__(self):
         return self.nome + ' (' + str(self.dia) + '/' + str(self.mes) + '/' + str(self.ano) + ')'
@@ -82,12 +82,12 @@ class Escala(models.Model):
     plantonistas = models.ManyToManyField(Plantonista, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
-    ativo = models.BooleanField(default=True)
     dois_turnos_fds = models.BooleanField(
         default=False,
         verbose_name='Dois turnos no fim de semana',
         help_text='Habilita os dois turnos no fim de semana'
     )
+    ativo = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nome

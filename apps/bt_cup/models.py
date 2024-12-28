@@ -94,7 +94,7 @@ class Torneio(models.Model):
     duplas = models.ManyToManyField(Dupla, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     criado_por = models.ForeignKey('auth.User', related_name='torneios_criados', on_delete=models.SET_NULL, null=True)
-    ativo = models.BooleanField(default=True)
+    ativo = models.BooleanField(default=True, verbose_name='Ativo')
 
     def __str__(self):
         return self.nome
