@@ -1,37 +1,42 @@
 {% extends "admin/change_form.html" %}
 
-{% block object-tools-items %}
-    {% if not original.has_games %}
-        <li>
-            <a href="#" id="create-games">Gerar Jogos</a>
-        </li>
-    {% else %}
-        <li>
-            <a href="{% url 'bt_cup:qrcode_tournament' original.pk %}" target="_blank">QR Code</a>
-        </li>
-
-        <li>
-            <a href="{% url 'bt_cup:see_tournament' original.pk %}" target="_blank">Ver Torneio</a>
-        </li>
-    {% endif %}
-
-    {% if not original.is_finished and original.has_games %}
-        <li>
-            <a href="{% url 'bt_cup:next_stage' original.pk %}">Próxima fase</a>
-        </li>
-    {% endif %}
-
-    <dialog id="games-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
-        <section>
-            <h2>Atenção!</h2>
-            <h3>Tem certeza que deseja criar os jogos? A ação não pode ser desfeita!</h3>
-        </section>
-
-        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-            <button id="games-cancel" class="button">Cancelar</button>
-            <button id="confirm" class="button primary" onclick="location.href=`{% url 'bt_cup:create_games' original.pk %}`">Sim, criar</button>
-        </div>
-    </dialog>
-
+{% block submit_buttons_bottom %}
     {{ block.super }}
+    {% if original.pk %}
+        {% if not original.has_games %}
+            <a href="#" id="create-games" class="btn btn-block btn-primary btn-sm mt-2">Gerar Jogos</a>
+
+            <dialog id="games-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
+                <section>
+                    <h4>Atenção!</h4>
+                    <h5>Tem certeza que deseja criar os jogos? A ação não pode ser desfeita!</h5>
+                </section>
+
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                    <a
+                        id="games-cancel"
+                        href="#"
+                        class="btn btn-primary btn-sm"
+                    >
+                        Cancelar
+                    </a>
+
+                    <a
+                        id="confirm"
+                        class="btn btn-primary btn-sm"
+                        href="{% url 'bt_cup:create_games' original.pk %}"
+                    >
+                        Sim, criar
+                    </a>
+                </div>
+            </dialog>
+        {% else %}
+            <a href="{% url 'bt_cup:qrcode_tournament' original.pk %}" class="btn btn-block btn-primary btn-sm mt-2" target="_blank">QR Code</a>
+            <a href="{% url 'bt_cup:see_tournament' original.pk %}" class="btn btn-block btn-primary btn-sm mt-2" target="_blank">Ver Torneio</a>
+        {% endif %}
+
+        {% if not original.is_finished and original.has_games %}
+            <a href="{% url 'bt_cup:next_stage' original.pk %}" class="btn btn-block btn-primary btn-sm mt-2">Próxima fase</a>
+        {% endif %}
+    {% endif %}
 {% endblock %}

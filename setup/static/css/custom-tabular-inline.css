@@ -1,4 +1,4 @@
-.inline-group .tabular tr td.original p{
+/* .inline-group .tabular tr td.original p{
     display: none !important;
 }
 
@@ -32,5 +32,44 @@
 
 .form-row.field-jogadores label[for="id_jogadores"],
 .form-row.field-duplas label[for="id_duplas"] {
+    display: none !important;
+} */
+
+th.column-dupla_1,
+th.column-dupla_2,
+td.field-dupla_1,
+td.field-dupla_2,
+td.field-placar_dupla1,
+td.field-placar_dupla2 {
+    text-align: center !important;
+    padding-right: 2px !important;
+    padding-left: 2px !important;
+}
+
+td.field-placar_dupla1 input.vIntegerField,
+td.field-placar_dupla2 input.vIntegerField {
+    max-width: 70px !important;
+}
+
+td.field-x {
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+}
+
+td.field-x p {
+    margin-bottom: 0px !important;
+}
+
+@media (max-width: 500px) {
+    td.field-placar_dupla1 input.vIntegerField,
+    td.field-placar_dupla2 input.vIntegerField {
+        max-width: 40px !important;
+    }
+}
+
+#jazzy-actions input[name="_addanother"],
+#jazzy-actions input[name="_continue"] {
     display: none !important;
 }

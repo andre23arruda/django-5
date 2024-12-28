@@ -1,20 +1,10 @@
 {% extends "admin/change_form.html" %}
 
-{% block object-tools-items %}
-    <li>
-        <a href="{% url 'escala_de_plantao:create_plantoes' original.pk %}">Próximo mês</a>
-    </li>
-
-    <li>
-        <a href="{% url 'escala_de_plantao:calendario_plantoes' original.pk %}" target="_blank">Calendário</a>
-    </li>
-
-    <li>
-        <a href="{% url 'escala_de_plantao:see_all_escalas' original.pk %}" target="_blank">Ver escala</a>
-    </li>
-
-    <!-- <li>
-        <a href="{% url 'escala_de_plantao:see_escala' original.pk %}" target="_blank">Ver escala</a>
-    </li> -->
+{% block submit_buttons_bottom %}
     {{ block.super }}
+    {% if original.pk %}
+        <a class="btn btn-block btn-primary btn-sm mt-2" href="{% url 'escala_de_plantao:create_plantoes' original.pk %}">Próximo mês</a>
+        <a class="btn btn-block btn-primary btn-sm mt-2" href="{% url 'escala_de_plantao:calendario_plantoes' original.pk %}" target="_blank">Calendário</a>
+        <a class="btn btn-block btn-primary btn-sm mt-2" href="{% url 'escala_de_plantao:see_all_escalas' original.pk %}" target="_blank">Ver escala</a>
+    {% endif %}
 {% endblock %}
