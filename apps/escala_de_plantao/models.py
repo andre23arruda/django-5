@@ -94,7 +94,7 @@ class Escala(models.Model):
 
     def plantonista_online(self, indice_inicial: int, date=None):
         '''Encontra o próximo plantonista disponível a partir do índice inicial.'''
-        plantonistas = list(self.plantonistas.all())
+        plantonistas = list(self.plantonistas.all().order_by('ordem_na_lista'))
         total_plantonistas = len(plantonistas)
         for i in range(total_plantonistas):
             # Calcula o índice do plantonista, considerando a rotatividade
@@ -177,10 +177,11 @@ class Escala(models.Model):
 
 
 class Plantao(models.Model):
-    escala = models.ForeignKey(Escala, on_delete=models.CASCADE)
+    escala = models.ForeignKey(Escala, on_delete=models.CASCADE, verbose_name='Escala')
     plantonista = models.ForeignKey(Plantonista, on_delete=models.CASCADE)
     turno = models.IntegerField(choices=TURNO_CHOICES, default=2)
-    data = models.DateField()
+    data = models.DateField(verbose_name='Data')
+    criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
 
     class Meta:
         verbose_name = 'Plantão'
