@@ -1,8 +1,9 @@
 from django.contrib import admin
-from .models import FeriadoPontoFacultativo, Escala, Plantao, Plantonista
-
 from django.conf.locale.pt_BR import formats as portuguese
 from django.conf.locale.en import formats as english
+from django.utils import timezone
+
+from .models import FeriadoPontoFacultativo, Escala, Plantao, Plantonista
 
 portuguese.DATE_FORMAT = 'd/m/Y'
 portuguese.DATETIME_FORMAT = 'H:i d/m/Y'
@@ -59,8 +60,15 @@ class PlantaoInline(admin.TabularInline):
     fields = ('data', 'turno', 'plantonista')
     can_delete = False
 
+    # def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    #     escala_id = request.resolver_match.kwargs.get('object_id')
+    #     if escala_id:
+    #         plantonistas_qs = Escala.objects.get(id=escala_id).plantonistas.all().order_by('ordem_na_lista')
+    #         if db_field.name == 'plantonista':
+    #             kwargs['queryset'] = plantonistas_qs
+    #     return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def get_queryset(self, request):
-        from django.utils import timezone
         qs = super().get_queryset(request)
         today = timezone.now().date()
         return qs.filter(data__gte=today)
@@ -74,6 +82,9 @@ class EscalaAdmin(admin.ModelAdmin):
     class Media:
         css = {'all': ('css/escala-plantao.css',)}
 
+    fieldsets = [
+        ('Informações', {'fields': ('nome', 'plantonistas', 'dois_turnos_fds', 'ativo')}),
+    ]
     change_form_template = 'admin/escala_de_plantao/escala_change_form.html'
     list_display = ('nome', 'count_plantonistas', 'ativo')
     exclude = ['criado_por', 'id']
