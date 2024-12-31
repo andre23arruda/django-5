@@ -29,6 +29,7 @@ JAZZMIN_SETTINGS = {
         'bt_cup.Torneio': 'fas fa-trophy',
         'escala_de_plantao.Escala': 'fas fa-sitemap',
         'escala_de_plantao.Plantonista': 'fas fa-users',
+        'escala_de_plantao.Plantao': 'fas fa-briefcase',
         'escala_de_plantao.FeriadoPontoFacultativo': 'fas fa-calendar-alt',
     },
     'default_icon_parents': 'fas fa-chevron-circle-right',

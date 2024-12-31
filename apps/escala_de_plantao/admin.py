@@ -10,6 +10,19 @@ english.DATE_FORMAT = 'd/m/Y'
 english.DATETIME_FORMAT = 'H:i d/m/Y'
 
 
+@admin.register(Plantao)
+class PlantaoAdmin(admin.ModelAdmin):
+    list_display = ('plantonista', 'data', 'turno')
+    list_filter = ('data', 'escala')
+    ordering = ('-data',)
+    list_per_page = 31
+
+    def get_queryset(self, request):
+        if request.user.is_superuser:
+            return super().get_queryset(request)
+        return super().get_queryset(request).filter(criado_por=request.user)
+
+
 @admin.register(FeriadoPontoFacultativo)
 class FeriadoPontoFacultativoAdmin(admin.ModelAdmin):
     exclude = ('id',)
