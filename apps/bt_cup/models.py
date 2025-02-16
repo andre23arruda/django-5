@@ -394,14 +394,17 @@ class Jogo(models.Model):
         return f'{self.dupla1} X {self.dupla2}'
 
     def save(self, *args, **kwargs):
-        if self.dupla1 is not None and self.dupla2 is not None:
-            self.concluido = (
-                self.placar_dupla1 is not None and
-                self.placar_dupla1 != '' and
-                self.placar_dupla2 is not None and
-                self.placar_dupla2 != ''
-            )
-            super().save(*args, **kwargs)
+        if self.dupla1 is None and self.dupla2 is None:
+            self.placar_dupla1 = None
+            self.placar_dupla2 = None
+
+        self.concluido = (
+            self.placar_dupla1 is not None and
+            self.placar_dupla1 != '' and
+            self.placar_dupla2 is not None and
+            self.placar_dupla2 != ''
+        )
+        super().save(*args, **kwargs)
 
     @property
     def winner(self):

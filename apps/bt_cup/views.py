@@ -38,7 +38,6 @@ def create_games(request, torneio_id: str):
 def next_stage(request, torneio_id: str):
     '''Processa grupos e vai para a próxima fase'''
     torneio = get_object_or_404(Torneio, pk=torneio_id)
-    n_duplas = torneio.duplas.count()
     jogos = torneio.jogo_set.all()
     jogos_preenchidos = jogos.filter(
         fase__in=['OITAVAS', 'QUARTAS', 'SEMIFINAIS', 'FINAL'],
