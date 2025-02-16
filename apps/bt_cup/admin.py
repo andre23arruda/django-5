@@ -113,10 +113,10 @@ class TorneioAdmin(admin.ModelAdmin):
         js = ['js/create-games-modal.js']
 
     fieldsets = [
-        ('Torneio', {'fields': ('nome', 'data', 'duplas', 'ativo')}),
+        ('Torneio', {'fields': ('nome', 'data', 'duplas', 'quantidade_grupos', 'ativo')}),
     ]
     change_form_template = 'admin/bt_cup/torneio_change_form.html'
-    list_display = ('nome', 'data', 'total_duplas', 'total_jogos', 'ativo')
+    list_display = ('nome', 'data', 'total_duplas', 'grupos', 'total_jogos', 'ativo')
     autocomplete_fields = ['duplas']
     # filter_horizontal = ['duplas']
     list_filter = ('ativo',)
@@ -137,6 +137,10 @@ class TorneioAdmin(admin.ModelAdmin):
     def total_duplas(self, obj):
         return obj.duplas.count()
     total_duplas.short_description = 'Duplas'
+
+    def grupos(self, obj):
+        return obj.quantidade_grupos
+    grupos.short_description = 'Grupos'
 
     def total_jogos(self, obj):
         return obj.jogo_set.count()

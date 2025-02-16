@@ -40,8 +40,15 @@ def next_stage(request, torneio_id: str):
     torneio = get_object_or_404(Torneio, pk=torneio_id)
     n_duplas = torneio.duplas.count()
     jogos = torneio.jogo_set.all()
-    jogos_preenchidos = jogos.filter(fase__in=['OITAVAS', 'QUARTAS', 'SEMIFINAIS', 'FINAL'], dupla1__isnull=False, dupla2__isnull=False)
-    jogos_grupos_nao_finalizados = jogos.filter(fase__startswith='GRUPO', concluido=False)
+    jogos_preenchidos = jogos.filter(
+        fase__in=['OITAVAS', 'QUARTAS', 'SEMIFINAIS', 'FINAL'],
+        dupla1__isnull=False,
+        dupla2__isnull=False
+    )
+    jogos_grupos_nao_finalizados = jogos.filter(
+        fase__startswith='GRUPO',
+        concluido=False
+    )
 
     if jogos_grupos_nao_finalizados.exists():
         messages.add_message(request, messages.ERROR, 'Jogos de grupos ainda não foram finalizados.')
@@ -56,22 +63,22 @@ def next_stage(request, torneio_id: str):
         classificados = distribute_classifieds(classificados)
         for i in range(0, len(classificados), 2):
             dupla1, dupla2 = classificados[i:i+2]
-            if n_duplas == 4:
+            if torneio.quantidade_grupos == 1:
                 final = jogos.get(fase='FINAL')
                 final.dupla1 = dupla1
                 final.dupla2 = dupla2
                 final.save()
-            elif n_duplas == 8:
+            elif torneio.quantidade_grupos == 2:
                 semifinal = jogos.filter(fase='SEMIFINAIS')[i//2]
                 semifinal.dupla1 = dupla1
                 semifinal.dupla2 = dupla2
                 semifinal.save()
-            elif n_duplas == 16:
+            elif torneio.quantidade_grupos == 4:
                 quartas = jogos.filter(fase='QUARTAS')[i//2]
                 quartas.dupla1 = dupla1
                 quartas.dupla2 = dupla2
                 quartas.save()
-            elif n_duplas == 32:
+            elif torneio.quantidade_grupos == 8:
                 oitavas = jogos.filter(fase='OITAVAS')[i//2]
                 oitavas.dupla1 = dupla1
                 oitavas.dupla2 = dupla2

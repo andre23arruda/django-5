@@ -1,5 +1,6 @@
 import random
 from django.db import models
+from django.utils.html import format_html
 from itertools import combinations
 from shortuuid.django_fields import ShortUUIDField
 
@@ -14,6 +15,14 @@ FASE_CHOICES = [
     ('SEMIFINAIS', 'SEMI-FINAIS'),
     ('FINAL', 'FINAL'),
     ('CAMPEAO', 'CAMPEÃO'),
+]
+
+
+QUANTIDADE_GRUPOS_CHOICES = [
+    (1, '1'),
+    (2, '2'),
+    (4, '4'),
+    (8, '8')
 ]
 
 
@@ -92,6 +101,19 @@ class Torneio(models.Model):
     nome = models.CharField(max_length=100)
     data = models.DateField()
     duplas = models.ManyToManyField(Dupla, blank=True)
+    quantidade_grupos = models.IntegerField(
+        choices=QUANTIDADE_GRUPOS_CHOICES,
+        default=2,
+        help_text=format_html('''
+            Selecione o número de grupos para distribuir as duplas
+            <ul>
+                <li>1 grupo: Fase de grupo e FINAL</li>
+                <li>2 grupos: Fase de grupo, SEMIFINAIS e FINAL</li>
+                <li>4 grupos: Fase de grupo, QUARTAS, SEMIFINAIS e FINAL</li>
+                <li>8 grupos: Fase de grupo, OITAVAS, QUARTAS, SEMIFINAIS e FINAL</li>
+            </ul>
+        ''')
+    )
     criado_em = models.DateTimeField(auto_now_add=True)
     criado_por = models.ForeignKey('auth.User', related_name='torneios_criados', on_delete=models.SET_NULL, null=True)
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
@@ -99,15 +121,37 @@ class Torneio(models.Model):
     def __str__(self):
         return self.nome
 
+    def create_groups(self, duplas):
+        '''Distribui duplas em grupos de forma aleatória'''
+        if len(duplas) < self.quantidade_grupos:
+            return Exception(f'Número de duplas {len(duplas)} menor que número de grupos {self.quantidade_grupos}')
+
+        # amanho base de cada grupo e duplas extras
+        tamanho_base = len(duplas) // self.quantidade_grupos
+        duplas_extras = len(duplas) % self.quantidade_grupos
+
+        # Distribui duplas nos grupos
+        grupos = []
+        posicao_atual = 0
+        for i in range(self.quantidade_grupos):
+            # Se ainda houver duplas extras, adiciona um a mais neste grupo
+            tamanho_grupo = tamanho_base + (1 if i < duplas_extras else 0)
+
+            # Pega os duplas para este grupo
+            grupo = duplas[posicao_atual:posicao_atual + tamanho_grupo]
+            grupos.append(grupo)
+            posicao_atual += tamanho_grupo
+
+        return grupos
+
     def create_games(self):
         '''Cria jogos de um torneio automaticamente, com todos jogando contra todos no grupo'''
         duplas = list(self.duplas.all())
 
-        if len(duplas) not in  [4, 8, 16, 32]:
-            return Exception('O número de duplas deve ser 4, 8, 16 ou 32')
-
         random.shuffle(duplas)
-        grupos = [duplas[i:i+4] for i in range(0, len(duplas), 4)]
+        grupos = self.create_groups(duplas)
+        if isinstance(grupos, Exception):
+            return grupos
 
         jogos_criados = {
             'grupos': {},
@@ -137,7 +181,8 @@ class Torneio(models.Model):
             jogos_criados['grupos'][f'grupo {i}'] = grupo_jogos
 
         # Preparar próximas fases
-        if len(duplas) == 32:
+        n_grupos = self.quantidade_grupos
+        if n_grupos == 8:
             for i in range(8): # Oitavas de final
                 oitava = Jogo.objects.create(
                     torneio=self,
@@ -147,7 +192,7 @@ class Torneio(models.Model):
                 )
                 jogos_criados['oitavas'].append(oitava)
 
-        if len(duplas) >= 16:
+        if n_grupos >= 4:
             for i in range(4): # Quartas de final
                 quarta = Jogo.objects.create(
                     torneio=self,
@@ -157,7 +202,7 @@ class Torneio(models.Model):
                 )
                 jogos_criados['quartas'].append(quarta)
 
-        if len(duplas) >= 8:
+        if n_grupos >= 2:
             for i in range(2): # Semifinais
                 semi = Jogo.objects.create(
                     torneio=self,
@@ -192,7 +237,7 @@ class Torneio(models.Model):
         jogos = Jogo.objects.filter(torneio=self)
 
         # 1. Identificar os jogos de grupos
-        for i in range(1, 5):  # GRUPO 1, GRUPO 2, ..., GRUPO N
+        for i in range(1, self.quantidade_grupos + 1):  # GRUPO 1, GRUPO 2, ..., GRUPO N
             grupo_jogos = jogos.filter(fase=f'GRUPO {i}')
             if grupo_jogos:
                 jogos_por_fase['GRUPO'].append(grupo_jogos)
@@ -349,9 +394,14 @@ class Jogo(models.Model):
         return f'{self.dupla1} X {self.dupla2}'
 
     def save(self, *args, **kwargs):
-        if self.placar_dupla1 is not None and self.placar_dupla2 is not None:
-            self.concluido = True
-        super().save(*args, **kwargs)
+        if self.dupla1 is not None and self.dupla2 is not None:
+            self.concluido = (
+                self.placar_dupla1 is not None and
+                self.placar_dupla1 != '' and
+                self.placar_dupla2 is not None and
+                self.placar_dupla2 != ''
+            )
+            super().save(*args, **kwargs)
 
     @property
     def winner(self):
