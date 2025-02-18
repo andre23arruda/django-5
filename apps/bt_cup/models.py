@@ -28,8 +28,8 @@ QUANTIDADE_GRUPOS_CHOICES = [
 
 class Dupla(models.Model):
     id = ShortUUIDField(length=8, max_length=40, primary_key=True)
-    jogador1 = models.CharField(max_length=100)
-    jogador2 = models.CharField(max_length=100)
+    jogador1 = models.CharField(max_length=100, verbose_name='Jogador 1')
+    jogador2 = models.CharField(max_length=100, verbose_name='Jogador 2')
     telefone = models.CharField(max_length=20, blank=True, null=True)
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
     criado_em = models.DateTimeField(auto_now_add=True)
@@ -104,6 +104,7 @@ class Torneio(models.Model):
     quantidade_grupos = models.IntegerField(
         choices=QUANTIDADE_GRUPOS_CHOICES,
         default=2,
+        verbose_name='Nº grupos',
         help_text=format_html('''
             Selecione o número de grupos para distribuir as duplas
             <ul>
@@ -387,7 +388,7 @@ class Jogo(models.Model):
     placar_dupla1 = models.IntegerField(null=True, blank=True, verbose_name='')
     placar_dupla2 = models.IntegerField(null=True, blank=True, verbose_name='')
     fase = models.CharField(max_length=100, null=True, blank=True)
-    concluido = models.BooleanField(default=False)
+    concluido = models.BooleanField(default=False, verbose_name='Concluído')
     obs = models.TextField(null=True, blank=True, help_text='Alguma observação sobre o jogo. Ex: "Dupla 1 WO"')
 
     def __str__(self):
