@@ -16,8 +16,14 @@ english.DATETIME_FORMAT = 'H:i d/m/Y'
 @admin.register(Jogador)
 class JogadorAdmin(admin.ModelAdmin):
     exclude = ('criado_por', 'id',)
-    list_display = ('nome', 'telefone', 'email')
+    list_display = ['nome', 'telefone', 'email']
     search_fields = ('nome',)
+
+    def get_list_display(self, request):
+        list_display = super().get_list_display(request)
+        if request.user.is_superuser:
+            list_display.extend(['criado_por'])
+        return list_display
 
     def get_queryset(self, request):
         if request.user.is_superuser:
@@ -112,10 +118,16 @@ class TorneioAdmin(admin.ModelAdmin):
         ('Torneio', {'fields': ('nome', 'data', 'quadras', 'jogadores', 'ativo')}),
     ]
     change_form_template = 'admin/bt_league/torneio_change_form.html'
-    list_display = ('nome', 'data', 'total_jogadores', 'total_jogos', 'ativo')
+    list_display = ['nome', 'data', 'total_jogadores', 'total_jogos', 'ativo']
     autocomplete_fields = ['jogadores']
     list_filter = ('ativo',)
     inlines = [JogoInline, RankingInline]
+
+    def get_list_display(self, request):
+        list_display = super().get_list_display(request)
+        if request.user.is_superuser:
+            list_display.extend(['criado_por', 'criado_em'])
+        return list_display
 
     def get_form(self, request, obj=None, **kwargs):
         if request.user.is_superuser:

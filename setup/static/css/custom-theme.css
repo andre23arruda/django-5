@@ -38,6 +38,9 @@ body:not(.sidebar-collapse) #jazzy-sidebar .nav-header {
 }
 
 /* user */
+#user_form > p.text-center {
+    display: none !important;
+}
 .user-panel {
     align-items: center;
 }
@@ -119,6 +122,10 @@ input:not([type=submit]), textarea {
 }
 
 /* select */
+.dark-mode .select2-container--default .select2-selection--single {
+    background-color: transparent !important;
+}
+
 .dark-mode select option {
     background-color: var(--gray-dark);
 }

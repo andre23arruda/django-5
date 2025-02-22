@@ -51,6 +51,8 @@
     {% block extrahead %} {% endblock %}
 </head>
 <body class="hold-transition{% if not jazzmin_settings.show_sidebar %} no-sidebar{% else %} sidebar-mini{% endif %} {% sidebar_status request %} {% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %} {{ jazzmin_ui.body_classes }} {% if jazzmin_ui.dark_mode_theme %}theme-dark{% endif %}" data-admin-utc-offset="{% now "Z" %}">
+    {% block bodyclass_script %}{% endblock %}
+
     <div class="page-loader-wrapper">
         <div class="loader">
             <div class="md-preloader">
@@ -115,6 +117,7 @@
                 {% endif %}
 
                 <ul class="navbar-nav ml-auto">
+                    {% block darkmode_element %}{% endblock %}
 
                     {% if jazzmin_settings.show_ui_builder %}
                     <li class="nav-item">

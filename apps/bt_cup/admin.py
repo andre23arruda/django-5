@@ -8,9 +8,15 @@ from .models import Dupla, Torneio, Jogo
 @admin.register(Dupla)
 class DuplaAdmin(admin.ModelAdmin):
     exclude = ('id', 'criado_por')
-    list_display = ('__str__', 'telefone', 'ativo')
+    list_display = ['__str__', 'telefone', 'ativo']
     list_editable = ('ativo',)
     search_fields = ('jogador1', 'jogador2', 'ativo')
+
+    def get_list_display(self, request):
+        list_display = super().get_list_display(request)
+        if request.user.is_superuser:
+            list_display.extend(['criado_por', 'criado_em'])
+        return list_display
 
     def get_search_results(self, request, queryset, search_term):
         '''Sobrescreve os resultados da pesquisa no campo autocomplete.'''
@@ -116,11 +122,16 @@ class TorneioAdmin(admin.ModelAdmin):
         ('Torneio', {'fields': ('nome', 'data', 'duplas', 'quantidade_grupos', 'ativo')}),
     ]
     change_form_template = 'admin/bt_cup/torneio_change_form.html'
-    list_display = ('nome', 'data', 'total_duplas', 'grupos', 'total_jogos', 'ativo')
+    list_display = ['nome', 'data', 'total_duplas', 'grupos', 'total_jogos', 'ativo']
     autocomplete_fields = ['duplas']
-    # filter_horizontal = ['duplas']
     list_filter = ('ativo',)
     inlines = [JogoInline, RankingInline]
+
+    def get_list_display(self, request):
+        list_display = super().get_list_display(request)
+        if request.user.is_superuser:
+            list_display.extend(['criado_por', 'criado_em'])
+        return list_display
 
     def get_form(self, request, obj=None, **kwargs):
         if request.user.is_superuser:
