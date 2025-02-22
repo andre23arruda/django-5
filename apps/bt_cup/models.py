@@ -33,7 +33,7 @@ class Dupla(models.Model):
     telefone = models.CharField(max_length=20, blank=True, null=True)
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
     criado_em = models.DateTimeField(auto_now_add=True)
-    ativo = models.BooleanField(default=True)
+    ativo = models.BooleanField(default=True, verbose_name='Ativo')
 
     class Meta:
         verbose_name = 'Dupla'
@@ -325,6 +325,11 @@ class Torneio(models.Model):
                 jogo.save()
 
         return True
+
+    def finish(self):
+        self.duplas.all().update(ativo=False)
+        self.ativo = False
+        self.save()
 
     def is_finished(self):
         return Jogo.objects.filter(torneio=self, fase='FINAL', concluido=True).exists()

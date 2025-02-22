@@ -10,10 +10,13 @@ class Jogador(models.Model):
     email = models.EmailField(blank=True, null=True)
     telefone = models.CharField(max_length=20, blank=True, null=True)
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    ativo = models.BooleanField(default=True, verbose_name='Ativo')
 
     class Meta:
         verbose_name = 'Jogador'
         verbose_name_plural = 'Jogadores'
+        ordering = ['nome']
 
     def __str__(self):
         return self.nome
@@ -71,7 +74,7 @@ class Torneio(models.Model):
     criado_em = models.DateTimeField(auto_now_add=True)
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
-    quadras = models.IntegerField(default=1)
+    quadras = models.IntegerField(default=1, help_text='Quantidade de quadras para jogos simultâneos')
 
     def __str__(self):
         return self.nome
@@ -140,6 +143,12 @@ class Torneio(models.Model):
     def has_games(self):
         return Jogo.objects.filter(torneio=self).exists()
 
+    def finish(self):
+        self.jogadores.all().update(ativo=False)
+        self.ativo = False
+        self.save()
+
+
 class Jogo(models.Model):
     torneio = models.ForeignKey(Torneio, on_delete=models.CASCADE)
     quadra = models.IntegerField(default=1)
@@ -161,6 +170,10 @@ class Jogo(models.Model):
         return f'{self.dupla2_jogador1.nome}/{self.dupla2_jogador2.nome}'
 
     def save(self, *args, **kwargs):
-        if self.placar_dupla1 is not None and self.placar_dupla2 is not None:
-            self.concluido = True
+        self.concluido = (
+            self.placar_dupla1 is not None and
+            self.placar_dupla1 != '' and
+            self.placar_dupla2 is not None and
+            self.placar_dupla2 != ''
+        )
         super().save(*args, **kwargs)

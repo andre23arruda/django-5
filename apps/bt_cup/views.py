@@ -34,6 +34,14 @@ def create_games(request, torneio_id: str):
     return response
 
 
+def finish_tournament(request, torneio_id: str):
+    '''Finaliza torneio e desabilita todas as duplas'''
+    torneio = get_object_or_404(Torneio, pk=torneio_id)
+    torneio.finish()
+    messages.add_message(request, messages.SUCCESS, f'{ torneio } finalizado!')
+    return redirect('admin:bt_cup_torneio_changelist')
+
+
 @login_required(redirect_field_name='next', login_url='/admin/login/')
 def next_stage(request, torneio_id: str):
     '''Processa grupos e vai para a próxima fase'''

@@ -16,14 +16,23 @@ english.DATETIME_FORMAT = 'H:i d/m/Y'
 @admin.register(Jogador)
 class JogadorAdmin(admin.ModelAdmin):
     exclude = ('criado_por', 'id',)
-    list_display = ['nome', 'telefone', 'email']
+    list_display = ['nome', 'telefone', 'ativo']
+    list_editable = ['ativo']
+    list_filter = ['ativo']
     search_fields = ('nome',)
 
     def get_list_display(self, request):
-        list_display = super().get_list_display(request)
+        list_display = self.list_display
         if request.user.is_superuser:
-            list_display.extend(['criado_por'])
+            return list_display + ['criado_por', 'criado_em']
         return list_display
+
+    def get_search_results(self, request, queryset, search_term):
+        '''Sobrescreve os resultados da pesquisa no campo autocomplete.'''
+        queryset, use_distinct = super().get_search_results(request, queryset, search_term)
+        if '/admin/autocomplete/' in request.path:
+            queryset = queryset.filter(ativo=True)
+        return queryset, use_distinct
 
     def get_queryset(self, request):
         if request.user.is_superuser:
@@ -112,7 +121,7 @@ class RankingInline(admin.TabularInline):
 class TorneioAdmin(admin.ModelAdmin):
     class Media:
         css = {'all': ('css/custom-tabular-inline.css',)}
-        js = ['js/create-games-modal.js']
+        js = ['js/create-games-modal.js', 'js/finish-tournament-modal.js']
 
     fieldsets = [
         ('Torneio', {'fields': ('nome', 'data', 'quadras', 'jogadores', 'ativo')}),
@@ -124,9 +133,9 @@ class TorneioAdmin(admin.ModelAdmin):
     inlines = [JogoInline, RankingInline]
 
     def get_list_display(self, request):
-        list_display = super().get_list_display(request)
+        list_display = self.list_display
         if request.user.is_superuser:
-            list_display.extend(['criado_por', 'criado_em'])
+            return list_display + ['criado_por', 'criado_em']
         return list_display
 
     def get_form(self, request, obj=None, **kwargs):

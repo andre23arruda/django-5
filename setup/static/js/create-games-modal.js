@@ -1,15 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
-    var updateButton = document.getElementById('create-games');
-    var cancelButton = document.getElementById('games-cancel');
-    var gamesDialog = document.getElementById('games-dialog');
+    var updateButton = document.getElementById('create-games')
+    var cancelButton = document.getElementById('games-cancel')
+    var gamesDialog = document.getElementById('games-dialog')
 
     if (updateButton) {
         updateButton.addEventListener('click', function () {
-            gamesDialog.showModal();
-        });
+            gamesDialog.showModal()
+        })
 
         cancelButton.addEventListener('click', function () {
-            gamesDialog.close();
-        });
+            gamesDialog.close()
+        })
     }
 })

@@ -10,12 +10,13 @@ class DuplaAdmin(admin.ModelAdmin):
     exclude = ('id', 'criado_por')
     list_display = ['__str__', 'telefone', 'ativo']
     list_editable = ('ativo',)
-    search_fields = ('jogador1', 'jogador2', 'ativo')
+    list_filter = ['ativo']
+    search_fields = ('jogador1', 'jogador2')
 
     def get_list_display(self, request):
-        list_display = super().get_list_display(request)
+        list_display = self.list_display
         if request.user.is_superuser:
-            list_display.extend(['criado_por', 'criado_em'])
+            return list_display + ['criado_por', 'criado_em']
         return list_display
 
     def get_search_results(self, request, queryset, search_term):
@@ -116,7 +117,7 @@ class RankingInline(admin.TabularInline):
 class TorneioAdmin(admin.ModelAdmin):
     class Media:
         css = {'all': ('css/custom-tabular-inline.css',)}
-        js = ['js/create-games-modal.js']
+        js = ['js/create-games-modal.js', 'js/finish-tournament-modal.js']
 
     fieldsets = [
         ('Torneio', {'fields': ('nome', 'data', 'duplas', 'quantidade_grupos', 'ativo')}),
@@ -128,9 +129,9 @@ class TorneioAdmin(admin.ModelAdmin):
     inlines = [JogoInline, RankingInline]
 
     def get_list_display(self, request):
-        list_display = super().get_list_display(request)
+        list_display = self.list_display
         if request.user.is_superuser:
-            list_display.extend(['criado_por', 'criado_em'])
+            return list_display + ['criado_por', 'criado_em']
         return list_display
 
     def get_form(self, request, obj=None, **kwargs):
@@ -174,3 +175,8 @@ class TorneioAdmin(admin.ModelAdmin):
         if created:
             obj.criado_por = request.user
         super().save_model(request, obj, form, change)
+
+
+# @admin.register(Jogo)
+# class JogoAdmin(admin.ModelAdmin):
+#     list_display = ('torneio', 'fase', 'dupla1', 'dupla2', 'concluido')

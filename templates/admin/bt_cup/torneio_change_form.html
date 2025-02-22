@@ -4,7 +4,7 @@
     {{ block.super }}
     {% if original.pk %}
         {% if not original.has_games %}
-            <a href="#" id="create-games" class="btn btn-block btn-primary btn-sm mt-2">Gerar Jogos</a>
+            <button type="button" id="create-games" class="btn btn-block btn-primary btn-sm mt-2">Gerar Jogos</button>
 
             <dialog id="games-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
                 <section>
@@ -13,19 +13,15 @@
                 </section>
 
                 <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                    <a
+                    <button
+                        type="button"
                         id="games-cancel"
-                        href="#"
                         class="btn btn-primary btn-sm"
                     >
                         Cancelar
-                    </a>
+                    </button>
 
-                    <a
-                        id="confirm"
-                        class="btn btn-primary btn-sm"
-                        href="{% url 'bt_cup:create_games' original.pk %}"
-                    >
+                    <a class="btn btn-primary btn-sm" href="{% url 'bt_cup:create_games' original.pk %}">
                         Sim, criar
                     </a>
                 </div>
@@ -33,6 +29,31 @@
         {% else %}
             <a href="{% url 'bt_cup:qrcode_tournament' original.pk %}" class="btn btn-block btn-primary btn-sm mt-2" target="_blank">QR Code</a>
             <a href="{% url 'bt_cup:see_tournament' original.pk %}" class="btn btn-block btn-primary btn-sm mt-2" target="_blank">Ver Torneio</a>
+            <button type="button" id="finish-tournament" class="btn btn-block btn-primary btn-sm mt-2">Encerrar</button>
+
+            <dialog id="tournament-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
+                <section>
+                    <h4>Atenção!</h4>
+                    <h5>Tem certeza que deseja encerrar o torneio? A ação não pode ser desfeita!</h5>
+                </section>
+
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                    <button
+                        type="button"
+                        id="tournament-cancel"
+                        class="btn btn-primary btn-sm"
+                    >
+                        Cancelar
+                    </button>
+
+                    <a
+                        class="btn btn-primary btn-sm"
+                        href="{% url 'bt_cup:finish_tournament' original.pk %}"
+                    >
+                        Sim, encerrar
+                    </a>
+                </div>
+            </dialog>
         {% endif %}
 
         {% if not original.is_finished and original.has_games %}
