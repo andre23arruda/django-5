@@ -76,6 +76,11 @@ class Torneio(models.Model):
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
     quadras = models.IntegerField(default=1, help_text='Quantidade de quadras para jogos simultâneos')
 
+    class Meta:
+        verbose_name = 'Torneio'
+        verbose_name_plural = 'Torneios'
+        ordering = ['-data']
+
     def __str__(self):
         return self.nome
 

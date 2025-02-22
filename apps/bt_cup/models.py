@@ -119,6 +119,11 @@ class Torneio(models.Model):
     criado_por = models.ForeignKey('auth.User', related_name='torneios_criados', on_delete=models.SET_NULL, null=True)
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
 
+    class Meta:
+        verbose_name = 'Torneio'
+        verbose_name_plural = 'Torneios'
+        ordering = ['-data']
+
     def __str__(self):
         return self.nome
 
