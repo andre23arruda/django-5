@@ -52,7 +52,6 @@ class FeriadoPontoFacultativo(models.Model):
 class Plantonista(models.Model):
     id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     nome = models.CharField(max_length=100)
-    ordem_na_lista = models.IntegerField()
     email = models.EmailField(blank=True, null=True)
     telefone = models.CharField(max_length=20, blank=True, null=True)
     proximas_ferias = models.DateField(null=True, blank=True)
@@ -79,7 +78,6 @@ class Plantonista(models.Model):
 class Escala(models.Model):
     id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     nome = models.CharField(max_length=100)
-    plantonistas = models.ManyToManyField(Plantonista, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
     dois_turnos_fds = models.BooleanField(
@@ -102,13 +100,13 @@ class Escala(models.Model):
             plantonista = plantonistas[indice]
 
             # Verifica se o plantonista está online (não está de férias)
-            if plantonista.online(date):
-                return plantonista, indice
+            if plantonista.plantonista.online(date):
+                return plantonista.plantonista, indice
 
         # Se nenhum plantonista estiver disponível
         return None, None
 
-    def create_plantoes(self):
+    def create_plantoes(self, user):
         # Define o mês atual e próximo mês
         today = timezone.now().date()
         first_day = today.replace(day=6)
@@ -153,7 +151,8 @@ class Escala(models.Model):
                         escala=self,
                         plantonista=plantonista_manha,
                         turno=1,  # Manhã
-                        data=current_day
+                        data=current_day,
+                        criado_por=user
                     )
                     # Incrementa o índice
                     index_plantonista = i + 1
@@ -165,7 +164,8 @@ class Escala(models.Model):
                     escala=self,
                     plantonista=plantonista_noite,
                     turno=2,  # Noite
-                    data=current_day
+                    data=current_day,
+                    criado_por=user
                 )
                 # Incrementa o índice
                 index_plantonista = i + 1
@@ -174,6 +174,16 @@ class Escala(models.Model):
             current_day += timedelta(days=1)
 
         return True
+
+
+class OrdemPlantonista(models.Model):
+    escala = models.ForeignKey(Escala, related_name='plantonistas', on_delete=models.CASCADE, verbose_name='Escala')
+    plantonista = models.ForeignKey(Plantonista, on_delete=models.CASCADE)
+    ordem_na_lista = models.IntegerField()
+
+    class Meta:
+        verbose_name = 'Plantonista'
+        verbose_name_plural = 'Plantonistas'
 
 
 class Plantao(models.Model):

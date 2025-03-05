@@ -3,7 +3,13 @@ from django.conf.locale.pt_BR import formats as portuguese
 from django.conf.locale.en import formats as english
 from django.utils import timezone
 
-from .models import FeriadoPontoFacultativo, Escala, Plantao, Plantonista
+from .models import (
+    FeriadoPontoFacultativo,
+    Escala,
+    OrdemPlantonista,
+    Plantao,
+    Plantonista
+)
 
 portuguese.DATE_FORMAT = 'd/m/Y'
 portuguese.DATETIME_FORMAT = 'H:i d/m/Y'
@@ -37,8 +43,8 @@ class FeriadoPontoFacultativoAdmin(admin.ModelAdmin):
 
 @admin.register(Plantonista)
 class PlantonistaAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'telefone', 'ordem_na_lista', 'online')
-    ordering = ('ordem_na_lista',)
+    list_display = ('nome', 'telefone','online')
+    ordering = ('nome',)
     exclude = ('criado_por', 'id')
     search_fields = ('nome',)
 
@@ -52,6 +58,13 @@ class PlantonistaAdmin(admin.ModelAdmin):
         if created:
             obj.criado_por = request.user
         super().save_model(request, obj, form, change)
+
+
+class OrdemPlantonistaInline(admin.TabularInline):
+    model = OrdemPlantonista
+    extra = 0
+    fields = ('plantonista', 'ordem_na_lista')
+    can_delete = False
 
 
 class PlantaoInline(admin.TabularInline):
@@ -83,13 +96,12 @@ class EscalaAdmin(admin.ModelAdmin):
         css = {'all': ('css/escala-plantao.css',)}
 
     fieldsets = [
-        ('Informações', {'fields': ('nome', 'plantonistas', 'dois_turnos_fds', 'ativo')}),
+        ('Informações', {'fields': ('nome', 'dois_turnos_fds', 'ativo')}),
     ]
     change_form_template = 'admin/escala_de_plantao/escala_change_form.html'
     list_display = ('nome', 'count_plantonistas', 'ativo')
     exclude = ['criado_por', 'id']
-    autocomplete_fields = ('plantonistas',)
-    inlines = [PlantaoInline]
+    inlines = [OrdemPlantonistaInline, PlantaoInline]
     ordering = ('nome',)
 
     def count_plantonistas(self, obj):

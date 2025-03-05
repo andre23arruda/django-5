@@ -25,8 +25,9 @@ def calendario_plantoes(request, escala_id: str):
 @login_required(redirect_field_name='next', login_url='/admin/login/')
 def create_plantoes(request, escala_id: str):
     '''Cria plantões de uma escala'''
+    user = request.user
     escala = get_object_or_404(Escala, pk=escala_id)
-    result = escala.create_plantoes()
+    result = escala.create_plantoes(user)
     if result:
         messages.add_message(request, messages.INFO, 'Escala gerada com sucesso!')
     else:
