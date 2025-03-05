@@ -7,6 +7,8 @@
 
         <a href="{% url 'bt_league:see_tournament' original.pk %}" class="btn btn-block btn-primary btn-sm mt-2" target="_blank">Ver Torneio</a>
 
+        <a href="{% url 'bt_league:download' original.pk %}" class="btn btn-block btn-primary btn-sm mt-2" target="_blank">Planilha</a>
+
         <button type="button" id="create-games" class="btn btn-block btn-primary btn-sm mt-2">Gerar Jogos</button>
 
         <dialog id="games-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">

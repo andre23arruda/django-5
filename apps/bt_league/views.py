@@ -1,6 +1,7 @@
-import base64, io, os, qrcode, urllib
+import base64, csv, io, os, qrcode, urllib
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Torneio
 
@@ -71,3 +72,26 @@ def qrcode_tournament(request, torneio_id: str):
         'torneio': torneio,
     }
     return render(request, 'qrcode_tournament.html', context)
+
+
+def export_csv(request, torneio_id: str):
+    '''Gera um arquivo CSV com os dados dos jogadores'''
+    torneio = get_object_or_404(Torneio, pk=torneio_id)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{ torneio.nome }.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Jogador', 'Posição', 'Pontos', 'Vitórias'])
+
+    ranking = []
+    for jogador in torneio.jogadores.all():
+        vitorias, pontos = jogador.player_points(torneio)
+        ranking.append({
+            'jogador': jogador,
+            'posicao': jogador.ranking(torneio),
+            'pontos': pontos,
+            'vitorias': vitorias
+        })
+    ranking = sorted(ranking, key=lambda x: x['posicao'])
+    for jogador in ranking:
+        writer.writerow([jogador['jogador'].nome, jogador['posicao'], jogador['pontos'], jogador['vitorias']])
+    return response
