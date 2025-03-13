@@ -31,6 +31,7 @@ JAZZMIN_SETTINGS = {
         'escala_de_plantao.Plantonista': 'fas fa-users',
         'escala_de_plantao.Plantao': 'fas fa-briefcase',
         'escala_de_plantao.FeriadoPontoFacultativo': 'fas fa-calendar-alt',
+        'payments.InputOutput': 'fas fa-hand-holding-usd',
     },
     'default_icon_parents': 'fas fa-chevron-circle-right',
     'default_icon_children': 'fas fa-circle',

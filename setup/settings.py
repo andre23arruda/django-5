@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'bt_league',
     'bt_cup',
     'escala_de_plantao',
+    'payments',
 ]
 
 MIDDLEWARE = [
