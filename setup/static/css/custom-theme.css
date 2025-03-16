@@ -58,6 +58,10 @@ body:not(.sidebar-collapse) #jazzy-sidebar .nav-header {
     text-align: center;
 }
 
+#changelist-search #search_group .small.quiet {
+    margin: 10px;
+}
+
 /* changelist table */
 #changelist-form td,
 #changelist-form th {

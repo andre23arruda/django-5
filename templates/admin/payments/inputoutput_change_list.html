@@ -1,32 +1,23 @@
 {% extends "admin/change_list.html" %}
+{% load static %}
 
-{% block content %}
-{{ block.super }}
-<script>
-    function formatPrice(price) {
-        const result = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price)
-        return result
-    }
+{% block extrajs %}
+    {{ block.super }}
 
-    document.addEventListener('DOMContentLoaded', function() {
-        let total = 0
-
-        // Percorre todas as linhas da tabela e soma os valores
-        document.querySelectorAll('tbody tr').forEach(row => {
-            let type = row.querySelector('td.field-render_type span')?.innerText.trim()
-            let valueText = row.querySelector('td.field-value')?.innerText.trim().replace(',', '.')
-            if (type && valueText) {
-                let value = parseFloat(valueText)
-                if (!isNaN(value)) {
-                    total += (type === 'Entrada') ? value : -value
-                }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function formatPrice(price) {
+                const result = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price)
+                return result
             }
-        })
+            setTimeout(() => {
+                const renderPeriod = document.querySelector('span.select2-selection__rendered[title="Data"]')
+                renderPeriod.textContent = `{{ period }}`
+            }, 200)
 
-        // Adiciona o total na página do Django Admin
-        let totalDiv = document.createElement('div')
-        totalDiv.innerHTML = `<h3 style="text-align: right; margin: 20px 0">Saldo: ${formatPrice(total)}</h2>`
-        document.querySelector('#content-main').insertAdjacentElement('afterend', totalDiv)
-    })
-</script>
+            let totalDiv = document.createElement('div')
+            totalDiv.innerHTML = `<h3 style="margin: 10px 0">SALDO: R$ {{ total_value }}</h3>`
+            document.querySelector('.change-list-actions.row.pb-3').insertAdjacentElement('afterend', totalDiv)
+        })
+    </script>
 {% endblock %}

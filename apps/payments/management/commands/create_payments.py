@@ -8,8 +8,8 @@ def create_payments():
     '''Cria pagamentos'''
     fake = Faker('pt_BR')
     date_end = date.today()
-    date_start = date_end.replace(day=1, month=1)
-    for _ in range(100):
+    date_start = date_end.replace(day=1, month=1, year=2024)
+    for _ in range(1000):
         InputOutput.objects.create(
             date=fake.date_between_dates(date_start=date_start, date_end=date_end),
             value=fake.random_int(min=100, max=1000),

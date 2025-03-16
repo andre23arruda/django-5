@@ -9,7 +9,7 @@ INPUT_OUTPUT = (
 
 class InputOutput(models.Model):
     date = models.DateField(default=now, verbose_name='Data')
-    type = models.CharField(max_length=10, choices=INPUT_OUTPUT, default='Entrada', verbose_name='Tipo')
+    type = models.CharField(max_length=10, choices=INPUT_OUTPUT, default='Entrada', verbose_name='Entrada e Saída')
     value = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Valor (R$)')
     obs = models.TextField(verbose_name='Observação')
 
