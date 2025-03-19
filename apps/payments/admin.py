@@ -74,6 +74,11 @@ class InputOutputRegister(admin.ModelAdmin):
                 type__contains=type__exact,
                 obs__icontains=obs
             )
+        else:
+            qs_filtered = queryset.filter(
+                type__contains=type__exact,
+                obs__icontains=obs
+            )
 
         total = qs_filtered.aggregate(
             total_value=models.Sum(

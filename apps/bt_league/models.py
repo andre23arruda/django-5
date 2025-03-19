@@ -1,4 +1,4 @@
-import random
+import math, random
 from django.db import models
 from itertools import combinations
 from shortuuid.django_fields import ShortUUIDField
@@ -92,57 +92,57 @@ class Torneio(models.Model):
 
     def create_games(self):
         '''Gera jogos usando todas as duplas possíveis'''
-        n_jogadores = self.jogadores.count()
+        jogadores = list(self.jogadores.all())
+        n_jogadores = len(jogadores)
         excess_playes = n_jogadores % 4
         if excess_playes:
             return Exception(f'Não é possível gerar jogos com { n_jogadores } jogadores. Número de jogadores deve ser multiplo de 4.')
 
-        quadras_jogadores = (n_jogadores / self.quadras) % 4
+        quadras_jogadores = (n_jogadores / self.quadras) % 2
         if quadras_jogadores:
             return Exception(f'Não é possível gerar jogos para { self.quadras } quadras com { n_jogadores } jogadores.')
 
         if self.jogo_set.exists():
             self.jogo_set.all().delete()
 
-        duplas = self.create_teams()
-        jogos_gerados = []
-        jogadores_por_quadra = []
+        num_rodadas_total = n_jogadores - 1
+        rodadas, partidas, jogos_gerados = [], [], []
+        for rodada in range(num_rodadas_total):
+            matches = []
+            for i in range(n_jogadores // 2):
+                matches.append((jogadores[i], jogadores[n_jogadores - 1 - i]))
 
-        while duplas:
+            # Rotacionar jogadores exceto o primeiro
+            jogadores = [jogadores[0]] + [jogadores[-1]] + jogadores[1:-1]
+            rodadas.append(matches)
+
+        for rodada in rodadas:
+            for i in range(0, len(rodada), 2):
+                if i + 1 < len(rodada):
+                    partida = (rodada[i], rodada[i+1])
+                    partidas.append(partida)
+
+        # Distribuir partidas nas quadras
+        partidas_por_rodada = self.quadras
+        num_rodadas_necessarias = math.ceil(len(partidas) / partidas_por_rodada)
+        for rodada in range(num_rodadas_necessarias):
             for quadra in range(1, self.quadras + 1):
-                if quadra == 1:
-                    dupla1 = duplas.pop(0)
-                else:
-                    duplas_filtradas = [dupla for dupla in duplas if (dupla[0].id not in jogadores_por_quadra and dupla[1].id not in jogadores_por_quadra)]
-                    dupla1 = duplas_filtradas.pop(0)
-                    duplas.remove(dupla1)
-                jogadores_por_quadra.extend([dupla1[0].id, dupla1[1].id])
-
-                # Procura uma dupla2 que não tenha jogadores repetidos e não esteja jogando
-                for i, dupla2 in enumerate(duplas):
-                    if (len(set(dupla1 + dupla2)) == 4 and (dupla2[0].id not in jogadores_por_quadra and dupla2[1].id not in jogadores_por_quadra)):
-
-                        jogo = Jogo(
-                            torneio=self,
-                            quadra=quadra,
-                            dupla1_jogador1=dupla1[0],
-                            dupla1_jogador2=dupla1[1],
-                            dupla2_jogador1=dupla2[0],
-                            dupla2_jogador2=dupla2[1]
-                        )
-
-                        # Atualiza o conjunto de jogadores na quadra
-                        jogadores_por_quadra.extend([dupla2[0].id, dupla2[1].id])
-                        jogos_gerados.append(jogo)
-                        duplas.pop(i)
-                        break
-
-            jogadores_por_quadra =[]
+                indice_partida = rodada * partidas_por_rodada + (quadra - 1)
+                if indice_partida < len(partidas):
+                    dupla1, dupla2 = partidas[indice_partida]
+                    jogo = Jogo(
+                        torneio=self,
+                        quadra=quadra,
+                        dupla1_jogador1=dupla1[0],
+                        dupla1_jogador2=dupla1[1],
+                        dupla2_jogador1=dupla2[0],
+                        dupla2_jogador2=dupla2[1]
+                    )
+                    jogos_gerados.append(jogo)
 
         if self.quadras == 1:
             random.shuffle(jogos_gerados)
-        for jogo in jogos_gerados:
-            jogo.save()
+        Jogo.objects.bulk_create(jogos_gerados)
         return jogos_gerados
 
     def has_games(self):

@@ -13,7 +13,7 @@ def create_games(request, torneio_id: str):
     if isinstance(result, Exception):
         messages.add_message(request, messages.ERROR, result)
     else:
-        messages.add_message(request, messages.INFO, 'Jogos gerados com sucesso!')
+        messages.add_message(request, messages.INFO, f'{ len(result )} jogos gerados com sucesso!')
     response = redirect('admin:bt_league_torneio_change', torneio_id)
     response['location'] += '#jogos-tab'
     return response
