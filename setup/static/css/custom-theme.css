@@ -52,6 +52,7 @@ body:not(.sidebar-collapse) #jazzy-sidebar .nav-header {
 /* modal  */
 body.modal-open div.wrapper {
     position: fixed !important;
+    width: 100% !important;
 }
 .modal.modal-wide .modal-dialog {
     width: auto !important;
