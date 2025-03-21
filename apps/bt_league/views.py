@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Torneio
 
+
 @login_required(redirect_field_name='next', login_url='/admin/login/')
 def create_games(request, torneio_id: str):
     '''Cria jogos para o torneio'''
@@ -37,21 +38,30 @@ def see_tournament(request, torneio_id: str):
     # Calcular ranking
     ranking = []
     for jogador in torneio.jogadores.all():
-        vitorias, pontos = jogador.player_points(torneio)
+        vitorias, pontos, saldo = jogador.player_points(torneio)
         ranking.append({
             'jogador': jogador,
-            'posicao': jogador.ranking(torneio),
             'pontos': pontos,
+            'saldo': saldo,
             'vitorias': vitorias
         })
 
     # Ordenar ranking por posição
-    ranking = sorted(ranking, key=lambda x: x['posicao'])
+    ranking = sorted(ranking, key=lambda x: (-x['vitorias'], -x['pontos'], -x['saldo']))
+    ranking_result = []
+    j_0 = {'pontos': 0, 'saldo': 0, 'vitorias': 0, 'posicao': 1}
+    for i, j_1 in enumerate(ranking):
+        if (j_1['pontos'] == j_0['pontos']) and (j_1['saldo'] == j_0['saldo']) and (j_1['vitorias'] == j_0['vitorias']):
+            j_1['posicao'] = j_0['posicao']
+        else:
+            j_1['posicao'] = i + 1
+            j_0 = j_1
+        ranking_result.append(j_1)
 
     context = {
         'torneio': torneio,
         'jogos': jogos,
-        'ranking': ranking
+        'ranking': ranking_result
     }
     return render(request, 'bt_league/see_tournament.html', context)
 
@@ -80,18 +90,36 @@ def export_csv(request, torneio_id: str):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="{ torneio.nome }.csv"'
     writer = csv.writer(response)
-    writer.writerow(['Jogador', 'Posição', 'Pontos', 'Vitórias'])
+    writer.writerow(['Posição', 'Jogador', 'Vitórias', 'Pontos', 'Saldo'])
 
     ranking = []
     for jogador in torneio.jogadores.all():
-        vitorias, pontos = jogador.player_points(torneio)
+        vitorias, pontos, saldo = jogador.player_points(torneio)
         ranking.append({
             'jogador': jogador,
-            'posicao': jogador.ranking(torneio),
+            'vitorias': vitorias,
             'pontos': pontos,
-            'vitorias': vitorias
+            'saldo': saldo,
         })
-    ranking = sorted(ranking, key=lambda x: x['posicao'])
-    for jogador in ranking:
-        writer.writerow([jogador['jogador'].nome, jogador['posicao'], jogador['pontos'], jogador['vitorias']])
+
+    # Ordenar ranking por posição
+    ranking = sorted(ranking, key=lambda x: (-x['vitorias'], -x['pontos'], -x['saldo']))
+    ranking_result = []
+    j_0 = {'pontos': 0, 'saldo': 0, 'vitorias': 0, 'posicao': 1}
+    for i, j_1 in enumerate(ranking):
+        if (j_1['pontos'] == j_0['pontos']) and (j_1['saldo'] == j_0['saldo']) and (j_1['vitorias'] == j_0['vitorias']):
+            j_1['posicao'] = j_0['posicao']
+        else:
+            j_1['posicao'] = i + 1
+            j_0 = j_1
+        ranking_result.append(j_1)
+
+    for jogador in ranking_result:
+        writer.writerow([
+            jogador['posicao'],
+            jogador['jogador'].nome,
+            jogador['vitorias'],
+            jogador['pontos'],
+            jogador['saldo']
+        ])
     return response

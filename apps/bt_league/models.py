@@ -49,21 +49,27 @@ class Jogador(models.Model):
         if torneio:
             jogos = jogos.filter(torneio=torneio)
 
-        pontos = 0
-        vitorias = 0
+        pontos, vitorias, saldo = 0, 0, 0
         for jogo in jogos:
             if jogo.placar_dupla1 is None or jogo.placar_dupla2 is None:
                 continue
             elif (jogo.dupla1_jogador1 == self or jogo.dupla1_jogador2 == self):
-                jogo_pontos = jogo.placar_dupla1 or 0
+                pontos_a_favor = jogo.placar_dupla1 or 0
+                pontos_contra = jogo.placar_dupla2 or 0
                 if jogo.placar_dupla1 > jogo.placar_dupla2:
                     vitorias += 1
             else:
-                jogo_pontos = jogo.placar_dupla2 or 0
+                pontos_a_favor = jogo.placar_dupla2 or 0
+                pontos_contra = jogo.placar_dupla1 or 0
                 if jogo.placar_dupla1 < jogo.placar_dupla2:
                     vitorias += 1
-            pontos += jogo_pontos
-        return vitorias, pontos
+            pontos += pontos_a_favor
+            saldo += (pontos_a_favor - pontos_contra)
+        return vitorias, pontos, saldo
+
+    def admin_ranking(self, torneio):
+        vitorias, pontos, saldo = self.player_points(torneio)
+        return -vitorias, -pontos, -saldo, self.nome
 
 
 class Torneio(models.Model):

@@ -49,6 +49,16 @@ body:not(.sidebar-collapse) #jazzy-sidebar .nav-header {
     font-size: 1.4rem;
 }
 
+/* modal  */
+body.modal-open div.wrapper {
+    position: fixed !important;
+}
+.modal.modal-wide .modal-dialog {
+    width: auto !important;
+    max-width: 800px !important;
+    padding-left: 10px !important;
+}
+
 .alert a {
     color: var(--blue-white) !important;
 }

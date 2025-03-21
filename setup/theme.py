@@ -11,7 +11,8 @@ JAZZMIN_SETTINGS = {
     'copyright': 'ALCA Inovações Tecnológicas',
     'custom_css': 'css/custom-theme.css',
     'custom_js': 'js/custom-theme.js',
-    # "related_modal_active": True,
+    'related_modal_active': True,
+    # 'changeform_format': 'carousel',
     'topmenu_links': [
         {'name': 'Home',  'url': 'admin:index', 'permissions': ['auth.view_user']},
     ],
