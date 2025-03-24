@@ -69,8 +69,14 @@ body.modal-open div.wrapper {
     text-align: center;
 }
 
+/* changelist results */
 #changelist-search #search_group .small.quiet {
     margin: 10px;
+}
+
+/* changelist title */
+div.col-12 h1.h4.m-0.pr-3.mr-3.border-right {
+    display: none !important;
 }
 
 /* changelist table */

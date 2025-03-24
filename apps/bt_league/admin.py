@@ -1,8 +1,9 @@
+from django import forms
 from django.contrib import admin, messages
 from django.db.models import Case, When
 from django.shortcuts import redirect
 from django.utils.html import format_html
-from .models import Jogador, Torneio, Jogo
+from .models import Jogador, Jogo, Ranking, Torneio
 
 from django.conf.locale.pt_BR import formats as portuguese
 from django.conf.locale.en import formats as english
@@ -15,11 +16,11 @@ english.DATETIME_FORMAT = 'H:i d/m/Y'
 
 @admin.register(Jogador)
 class JogadorAdmin(admin.ModelAdmin):
-    exclude = ('criado_por', 'id',)
+    exclude = ['criado_por', 'id',]
     list_display = ['nome', 'telefone', 'ativo']
     list_editable = ['ativo']
     list_filter = ['ativo']
-    search_fields = ('nome',)
+    search_fields = ['nome',]
 
     def get_list_display(self, request):
         list_display = self.list_display
@@ -49,8 +50,8 @@ class JogadorAdmin(admin.ModelAdmin):
 class JogoInline(admin.TabularInline):
     model = Jogo
     extra = 0
-    fields = ('dupla_1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla_2', 'quadra', 'concluido')
-    readonly_fields = ('dupla_1', 'dupla_2', 'x', 'concluido', 'quadra')
+    fields = ['dupla_1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla_2', 'quadra', 'concluido']
+    readonly_fields = ['dupla_1', 'dupla_2', 'x', 'concluido', 'quadra']
     can_delete = False
 
     def has_add_permission(self, request, obj=None):
@@ -78,11 +79,11 @@ class JogoInline(admin.TabularInline):
 class RankingInline(admin.TabularInline):
     model = Torneio.jogadores.through
     extra = 0
-    fields = ('nome', 'pontos')
-    readonly_fields = ('nome', 'pontos')
+    fields = ['nome', 'pontos']
+    readonly_fields = ['nome', 'pontos']
     can_delete = False
-    verbose_name = 'Ranking'
-    verbose_name_plural = 'Ranking'
+    verbose_name = 'Jogadores'
+    verbose_name_plural = 'Jogadores'
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -107,9 +108,21 @@ class RankingInline(admin.TabularInline):
         return obj.jogador.nome
 
     def pontos(self, obj):
-        vitorias, pontos, saldo = obj.jogador.player_points(obj.torneio)
+        vitorias, pontos, saldo, jogos = obj.jogador.player_points(obj.torneio)
         return f'{vitorias} / {pontos} / {saldo}'
     pontos.short_description = 'V / P / S'
+
+
+class TorneioAdminForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['ranking'].widget.can_change_related = False
+        self.fields['ranking'].widget.can_delete_related = False
+        # self.fields['ranking'].widget.can_view_related = False
+
+    class Meta:
+        model = Torneio
+        fields = '__all__'
 
 
 @admin.register(Torneio)
@@ -119,13 +132,14 @@ class TorneioAdmin(admin.ModelAdmin):
         js = ['js/create-games-modal.js', 'js/finish-tournament-modal.js']
 
     fieldsets = [
-        ('Torneio', {'fields': ('nome', 'data', 'quadras', 'jogadores', 'ativo')}),
+        ['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ranking', 'ativo']}],
     ]
     change_form_template = 'admin/bt_league/torneio_change_form.html'
     list_display = ['nome', 'data', 'total_jogadores', 'total_jogos', 'ativo']
     autocomplete_fields = ['jogadores']
-    list_filter = ('ativo',)
+    list_filter = ['ativo',]
     inlines = [JogoInline, RankingInline]
+    form = TorneioAdminForm
 
     def get_list_display(self, request):
         list_display = self.list_display
@@ -164,6 +178,39 @@ class TorneioAdmin(admin.ModelAdmin):
         response = redirect('admin:bt_league_torneio_change', obj.id)
         response['location'] += '#jogos-tab'
         return response
+
+    def save_model(self, request, obj, form, change):
+        created = not change
+        if created:
+            obj.criado_por = request.user
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(Ranking)
+class RankingAdmin(admin.ModelAdmin):
+    change_form_template = 'admin/bt_league/ranking_change_form.html'
+    exclude = ['criado_por', 'id',]
+    list_display = ['nome', 'ativo']
+    list_filter = ['ativo']
+    search_fields = ['nome',]
+
+    def get_list_display(self, request):
+        list_display = self.list_display
+        if request.user.is_superuser:
+            return list_display + ['criado_por', 'criado_em']
+        return list_display
+
+    def get_search_results(self, request, queryset, search_term):
+        '''Sobrescreve os resultados da pesquisa no campo autocomplete.'''
+        queryset, use_distinct = super().get_search_results(request, queryset, search_term)
+        if '/admin/autocomplete/' in request.path:
+            queryset = queryset.filter(ativo=True)
+        return queryset, use_distinct
+
+    def get_queryset(self, request):
+        if request.user.is_superuser:
+            return super().get_queryset(request)
+        return super().get_queryset(request).filter(criado_por=request.user)
 
     def save_model(self, request, obj, form, change):
         created = not change

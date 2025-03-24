@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Torneio
+from .models import Ranking, Torneio
 
 
 @login_required(redirect_field_name='next', login_url='/admin/login/')
@@ -38,7 +38,7 @@ def see_tournament(request, torneio_id: str):
     # Calcular ranking
     ranking = []
     for jogador in torneio.jogadores.all():
-        vitorias, pontos, saldo = jogador.player_points(torneio)
+        vitorias, pontos, saldo, _ = jogador.player_points(torneio)
         ranking.append({
             'jogador': jogador,
             'pontos': pontos,
@@ -123,3 +123,44 @@ def export_csv(request, torneio_id: str):
             jogador['saldo']
         ])
     return response
+
+
+def see_ranking(request, ranking_id: str):
+    '''Visualiza o ranking geral dos jogadores em torneios'''
+    ranking = get_object_or_404(Ranking, pk=ranking_id)
+    torneios = Torneio.objects.filter(ranking=ranking)
+    jogadores = {}
+    for torneio in torneios:
+        for jogador in torneio.jogadores.all():
+            vitorias, pontos, saldo, jogos = jogador.player_points(torneio)
+            if jogador.id not in jogadores:
+                jogadores[jogador.id] = {
+                    'jogador': jogador.nome,
+                    'vitorias': vitorias,
+                    'pontos': pontos,
+                    'saldo': saldo,
+                    'jogos': jogos
+                }
+            else:
+                jogadores[jogador.id]['vitorias'] += vitorias
+                jogadores[jogador.id]['pontos'] += pontos
+                jogadores[jogador.id]['saldo'] += saldo
+                jogadores[jogador.id]['jogos'] += jogos
+
+    jogadores = list(jogadores.values())
+    jogadores = sorted(jogadores, key=lambda x: (-x['vitorias'], -x['pontos'], -x['saldo'], x['jogos']))
+    jogadores_ranking = []
+    j_0 = {'pontos': 0, 'saldo': 0, 'vitorias': 0, 'posicao': 1}
+    for i, j_1 in enumerate(jogadores):
+        if (j_1['pontos'] == j_0['pontos']) and (j_1['saldo'] == j_0['saldo']) and (j_1['vitorias'] == j_0['vitorias']):
+            j_1['posicao'] = j_0['posicao']
+        else:
+            j_1['posicao'] = i + 1
+            j_0 = j_1
+        jogadores_ranking.append(j_1)
+
+    context = {
+        'ranking': ranking,
+        'jogadores': jogadores_ranking
+    }
+    return render(request, 'bt_league/see_ranking.html', context)

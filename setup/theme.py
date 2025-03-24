@@ -25,6 +25,7 @@ JAZZMIN_SETTINGS = {
         'bookstore.Book': 'fas fa-book',
         'bookstore.Genre': 'fas fa-tag',
         'bt_league.Jogador': 'fas fa-users',
+        'bt_league.Ranking': 'fas fa-medal',
         'bt_league.Torneio': 'fas fa-trophy',
         'bt_cup.Dupla': 'fas fa-user-friends',
         'bt_cup.Torneio': 'fas fa-trophy',

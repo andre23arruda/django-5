@@ -12,6 +12,7 @@ class InputOutput(models.Model):
     type = models.CharField(max_length=10, choices=INPUT_OUTPUT, default='Entrada', verbose_name='Entrada e Saída')
     value = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Valor (R$)')
     obs = models.TextField(verbose_name='Observação')
+    # created_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, verbose_name='Criado por')
 
     class Meta:
         verbose_name = 'Entrada/Saída'

@@ -4,6 +4,22 @@ from itertools import combinations
 from shortuuid.django_fields import ShortUUIDField
 
 
+class Ranking(models.Model):
+    id = ShortUUIDField(length=8, max_length=40, primary_key=True)
+    nome = models.CharField(max_length=100)
+    criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    ativo = models.BooleanField(default=True, verbose_name='Ativo')
+
+    class Meta:
+        verbose_name = 'Ranking'
+        verbose_name_plural = 'Rankings'
+        ordering = ['nome']
+
+    def __str__(self):
+        return self.nome
+
+
 class Jogador(models.Model):
     id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     nome = models.CharField(max_length=100)
@@ -65,10 +81,10 @@ class Jogador(models.Model):
                     vitorias += 1
             pontos += pontos_a_favor
             saldo += (pontos_a_favor - pontos_contra)
-        return vitorias, pontos, saldo
+        return vitorias, pontos, saldo, len(jogos)
 
     def admin_ranking(self, torneio):
-        vitorias, pontos, saldo = self.player_points(torneio)
+        vitorias, pontos, saldo, jogos = self.player_points(torneio)
         return -vitorias, -pontos, -saldo, self.nome
 
 
@@ -81,6 +97,7 @@ class Torneio(models.Model):
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
     quadras = models.IntegerField(default=1, help_text='Quantidade de quadras para jogos simultâneos')
+    ranking = models.ForeignKey(Ranking, on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         verbose_name = 'Torneio'
@@ -155,7 +172,7 @@ class Torneio(models.Model):
         return Jogo.objects.filter(torneio=self).exists()
 
     def finish(self):
-        self.jogadores.all().update(ativo=False)
+        # self.jogadores.all().update(ativo=False)
         self.ativo = False
         self.save()
 

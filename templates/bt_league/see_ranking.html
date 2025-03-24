@@ -1,0 +1,45 @@
+{% extends '../base.html' %}
+
+{% load static %}
+
+{% block favicon %}
+    <link rel="shortcut icon" href="{% static 'images/bt.ico' %}" />
+{% endblock %}
+
+{% block title %}Ranking: {{ ranking.nome }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center">Ranking: {{ ranking.nome }}</h1>
+    <p class="text-center">{{ jogadores|length }} jogadores</>
+
+    <div class="card-body table-responsive mt-4">
+        <table class="table table-striped text-center mb-4">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nome</th>
+                    <th>V</th>
+                    <th>P</th>
+                    <th>S</th>
+                    <th>J</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in jogadores %}
+                <tr>
+                    <td>{{ item.posicao }}º</td>
+                    <td>{{ item.jogador }}</td>
+                    <td>{{ item.vitorias }}</td>
+                    <td>{{ item.pontos }}</td>
+                    <td>{{ item.saldo }}</td>
+                    <td>{{ item.jogos }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
