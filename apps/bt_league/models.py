@@ -116,7 +116,7 @@ class Torneio(models.Model):
     def create_games(self):
         '''Gera jogos usando todas as duplas possíveis'''
         jogadores = list(self.jogadores.all())
-        random.shuffle(jogadores)
+        # random.shuffle(jogadores)
         n_jogadores = len(jogadores)
         excess_playes = n_jogadores % 4
         if excess_playes:
