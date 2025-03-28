@@ -16,11 +16,15 @@ english.DATETIME_FORMAT = 'H:i d/m/Y'
 
 @admin.register(Jogador)
 class JogadorAdmin(admin.ModelAdmin):
-    exclude = ['criado_por', 'id',]
     list_display = ['nome', 'telefone', 'ativo']
     list_editable = ['ativo']
     list_filter = ['ativo']
     search_fields = ['nome',]
+
+    def get_exclude(self, request, obj):
+        if request.user.is_superuser:
+            return super().get_exclude(request, obj)
+        return ['criado_por', 'id',]
 
     def get_list_display(self, request):
         list_display = self.list_display
@@ -136,10 +140,15 @@ class TorneioAdmin(admin.ModelAdmin):
     ]
     change_form_template = 'admin/bt_league/torneio_change_form.html'
     list_display = ['nome', 'data', 'total_jogadores', 'total_jogos', 'ativo']
-    autocomplete_fields = ['jogadores']
-    list_filter = ['ativo',]
+    autocomplete_fields = ['jogadores', 'ranking']
+    list_filter = ['ativo']
     inlines = [JogoInline, RankingInline]
     form = TorneioAdminForm
+
+    def get_fieldsets(self, request, obj):
+        if request.user.is_superuser:
+            return [['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ranking', 'ativo', 'criado_por']}]]
+        return [['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ranking', 'ativo']}]]
 
     def get_list_display(self, request):
         list_display = self.list_display
@@ -189,10 +198,14 @@ class TorneioAdmin(admin.ModelAdmin):
 @admin.register(Ranking)
 class RankingAdmin(admin.ModelAdmin):
     change_form_template = 'admin/bt_league/ranking_change_form.html'
-    exclude = ['criado_por', 'id',]
     list_display = ['nome', 'ativo']
     list_filter = ['ativo']
     search_fields = ['nome',]
+
+    def get_exclude(self, request, obj):
+        if request.user.is_superuser:
+            return super().get_exclude(request, obj)
+        return ['criado_por', 'id',]
 
     def get_list_display(self, request):
         list_display = self.list_display
