@@ -67,14 +67,14 @@
                                             <th>Status</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody style="vertical-align: middle;">
                                         {% for jogo in jogos.jogos %}
                                             <tr>
-                                                <td>{{ jogo.dupla1 }}</td>
+                                                <td>{{ jogo.dupla1.render }}</td>
                                                 <td>
                                                     {{ jogo.placar_dupla1|default_if_none:'' }} X {{ jogo.placar_dupla2|default_if_none:'' }}
                                                 </td>
-                                                <td>{{ jogo.dupla2 }}</td>
+                                                <td>{{ jogo.dupla2.render }}</td>
                                                 <td>
                                                     {% if jogo.concluido %}
                                                         <span class="badge bg-success">Concluído</span>
@@ -106,11 +106,11 @@
                                             <th>P</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody style="vertical-align: middle;">
                                         {% for dupla, stats in jogos.classificacao %}
                                             <tr>
                                                 <td>{{ forloop.counter }}</td>
-                                                <td>{{ dupla }}</td>
+                                                <td>{{ dupla.render }}</td>
                                                 <td>{{ stats.vitorias }}</td>
                                                 <td>{{ stats.pontos }}</td>
                                             </tr>
@@ -147,14 +147,14 @@
                                     <th>Status</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody style="vertical-align: middle;">
                                 {% for jogo in jogos %}
                                     <tr>
-                                        <td>{{ jogo.dupla1|default_if_none:'Há definir' }}</td>
+                                        <td>{{ jogo.dupla1.render|default_if_none:'Há definir' }}</td>
                                         <td>
                                             {{ jogo.placar_dupla1|default_if_none:'' }} X {{ jogo.placar_dupla2|default_if_none:'' }}
                                         </td>
-                                        <td>{{ jogo.dupla2|default_if_none:'Há definir'}}</td>
+                                        <td>{{ jogo.dupla2.render|default_if_none:'Há definir'}}</td>
                                         <td>
                                             {% if jogo.concluido %}
                                                 <span class="badge bg-success">Concluído</span>
@@ -188,14 +188,14 @@
                                     <th>Status</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody style="vertical-align: middle;">
                                 {% for jogo in jogos %}
                                     <tr>
-                                        <td>{{ jogo.dupla1|default_if_none:'Há definir' }}</td>
+                                        <td>{{ jogo.dupla1.render|default_if_none:'Há definir' }}</td>
                                         <td>
                                             {{ jogo.placar_dupla1|default_if_none:'' }} X {{ jogo.placar_dupla2|default_if_none:'' }}
                                         </td>
-                                        <td>{{ jogo.dupla2|default_if_none:'Há definir' }}</td>
+                                        <td>{{ jogo.dupla2.render|default_if_none:'Há definir' }}</td>
                                         <td>
                                             {% if jogo.concluido %}
                                                 <span class="badge bg-success">Concluído</span>

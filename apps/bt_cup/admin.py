@@ -75,8 +75,8 @@ class RankingInline(admin.TabularInline):
     fields = ('nome', 'info', 'grupo')
     readonly_fields = ('grupo', 'nome', 'info')
     can_delete = False
-    verbose_name = 'Ranking'
-    verbose_name_plural = 'Ranking'
+    verbose_name = 'Grupos'
+    verbose_name_plural = 'Grupos'
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

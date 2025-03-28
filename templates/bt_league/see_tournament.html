@@ -61,13 +61,21 @@
                             </tr>
                         </thead>
 
-                        <tbody>
+                        <tbody style="vertical-align: middle;">
                             {% for jogo in jogos %}
                             <tr>
                                 <td>{{ jogo.quadra }}</td>
-                                <td>{{ jogo.dupla1_jogador1.nome }} / {{ jogo.dupla1_jogador2.nome }}</td>
+                                <td>
+                                    {{ jogo.dupla1_jogador1.nome }}
+                                    <br/>
+                                    {{ jogo.dupla1_jogador2.nome }}
+                                </td>
                                 <td>{{ jogo.placar_dupla1|default_if_none:'-' }} x {{ jogo.placar_dupla2|default_if_none:'-' }}</td>
-                                <td>{{ jogo.dupla2_jogador1.nome }} / {{ jogo.dupla2_jogador2.nome }}</td>
+                                <td>
+                                    {{ jogo.dupla2_jogador1.nome }}
+                                    <br/>
+                                    {{ jogo.dupla2_jogador2.nome }}
+                                </td>
                                 <td>
                                     {% if jogo.concluido %}
                                         <span class="badge bg-success">Concluído</span>

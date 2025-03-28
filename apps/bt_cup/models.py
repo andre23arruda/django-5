@@ -43,6 +43,9 @@ class Dupla(models.Model):
     def __str__(self):
         return f'{self.jogador1}/{self.jogador2}'
 
+    def render(self):
+        return format_html('{}<br/>{}', self.jogador1, self.jogador2)
+
     def get_group(self, torneio):
         '''Retorna o grupo no qual a dupla está jogando em um torneio específico.'''
         jogos = Jogo.objects.filter(
