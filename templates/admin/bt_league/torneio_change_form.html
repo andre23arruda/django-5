@@ -3,59 +3,94 @@
 {% block submit_buttons_bottom %}
     {{ block.super }}
     {% if original.pk %}
-        <a href="{% url 'bt_league:qrcode_tournament' original.pk %}" class="btn btn-block btn-primary btn-sm mt-2" target="_blank">QR Code</a>
+        {% if original.ativo %}
+            <button
+                type="button"
+                id="create-games"
+                class="btn btn-block btn-primary btn-sm mt-2"
+            >
+                Gerar Jogos
+            </button>
 
-        <a href="{% url 'bt_league:see_tournament' original.pk %}" class="btn btn-block btn-primary btn-sm mt-2" target="_blank">Ver Torneio</a>
+            <dialog id="games-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
+                <section>
+                    <h4>Atenção!</h4>
+                    <h5>Tem certeza que deseja criar os jogos? A ação não pode ser desfeita!</h5>
+                </section>
 
-        <a href="{% url 'bt_league:download' original.pk %}" class="btn btn-block btn-primary btn-sm mt-2" target="_blank">Planilha</a>
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                    <button
+                        id="games-cancel"
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                    >
+                        Cancelar
+                    </button>
 
-        <button type="button" id="create-games" class="btn btn-block btn-primary btn-sm mt-2">Gerar Jogos</button>
+                    <a
+                        class="btn btn-primary btn-sm"
+                        href="{% url 'bt_league:create_games' original.pk %}"
+                    >
+                        Sim, criar
+                    </a>
+                </div>
+            </dialog>
 
-        <dialog id="games-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
-            <section>
-                <h4>Atenção!</h4>
-                <h5>Tem certeza que deseja criar os jogos? A ação não pode ser desfeita!</h5>
-            </section>
+            <button
+                type="button"
+                id="finish-tournament"
+                class="btn btn-block btn-primary btn-sm mt-2"
+            >
+                Encerrar
+            </button>
 
-            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                <button
-                    id="games-cancel"
-                    type="button"
-                    class="btn btn-primary btn-sm"
-                >
-                    Cancelar
-                </button>
+            <dialog id="tournament-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
+                <section>
+                    <h4>Atenção!</h4>
+                    <h5>Tem certeza que deseja encerrar o torneio? A ação não pode ser desfeita!</h5>
+                </section>
 
-                <a class="btn btn-primary btn-sm" href="{% url 'bt_league:create_games' original.pk %}">
-                    Sim, criar
-                </a>
-            </div>
-        </dialog>
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                    <button
+                        type="button"
+                        id="tournament-cancel"
+                        class="btn btn-primary btn-sm"
+                    >
+                        Cancelar
+                    </button>
 
-        <button type="button" id="finish-tournament" class="btn btn-block btn-primary btn-sm mt-2">Encerrar</button>
+                    <a
+                        class="btn btn-primary btn-sm"
+                        href="{% url 'bt_league:finish_tournament' original.pk %}"
+                    >
+                        Sim, encerrar
+                    </a>
+                </div>
+            </dialog>
 
-        <dialog id="tournament-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
-            <section>
-                <h4>Atenção!</h4>
-                <h5>Tem certeza que deseja encerrar o torneio? A ação não pode ser desfeita!</h5>
-            </section>
+            <a
+                class="btn btn-block btn-primary btn-sm mt-2"
+                href="{% url 'bt_league:qrcode_tournament' original.pk %}"
+                target="_blank"
+            >
+                QR Code
+            </a>
+        {% else %}
+            <a
+                class="btn btn-block btn-primary btn-sm mt-2"
+                href="{% url 'bt_league:download' original.pk %}"
+                target="_blank"
+            >
+                Planilha
+            </a>
+        {% endif %}
 
-            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                <button
-                    type="button"
-                    id="tournament-cancel"
-                    class="btn btn-primary btn-sm"
-                >
-                    Cancelar
-                </button>
-
-                <a
-                    class="btn btn-primary btn-sm"
-                    href="{% url 'bt_league:finish_tournament' original.pk %}"
-                >
-                    Sim, encerrar
-                </a>
-            </div>
-        </dialog>
+        <a
+            class="btn btn-block btn-primary btn-sm mt-2"
+            href="{% url 'bt_league:see_tournament' original.pk %}"
+            target="_blank"
+        >
+            Ver Torneio
+        </a>
     {% endif %}
 {% endblock %}

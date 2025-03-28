@@ -45,66 +45,74 @@
         <h2 class="text-center"><s>FINALIZADO</s></h2>
     {% endif %}
 
-    <h3 class="mt-5">Jogos</h3>
-    <div class="card-body table-responsive">
-        <table class="table table-striped text-center mb-4">
-            <thead>
-                <tr>
-                    <th>Quadra</th>
-                    <th>Dupla 1</th>
-                    <th>Placar</th>
-                    <th>Dupla 2</th>
-                    <th></th>
-                </tr>
-            </thead>
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-lg-6">
+                <h4 class="mt-3 mb-1 text-center">Jogos</h4>
+                <div class="card-body table-responsive">
+                    <table class="table table-striped text-center mb-4">
+                        <thead>
+                            <tr>
+                                <th>Quadra</th>
+                                <th>Dupla 1</th>
+                                <th>Placar</th>
+                                <th>Dupla 2</th>
+                                <th></th>
+                            </tr>
+                        </thead>
 
-            <tbody>
-                {% for jogo in jogos %}
-                <tr>
-                    <td>{{ jogo.quadra }}</td>
-                    <td>{{ jogo.dupla1_jogador1.nome }} / {{ jogo.dupla1_jogador2.nome }}</td>
-                    <td>{{ jogo.placar_dupla1|default_if_none:'-' }} x {{ jogo.placar_dupla2|default_if_none:'-' }}</td>
-                    <td>{{ jogo.dupla2_jogador1.nome }} / {{ jogo.dupla2_jogador2.nome }}</td>
-                    <td>
-                        {% if jogo.concluido %}
-                            <span class="badge bg-success">Concluído</span>
-                        {% else %}
-                            <span class="badge bg-warning text-dark">Pendente</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                        <tbody>
+                            {% for jogo in jogos %}
+                            <tr>
+                                <td>{{ jogo.quadra }}</td>
+                                <td>{{ jogo.dupla1_jogador1.nome }} / {{ jogo.dupla1_jogador2.nome }}</td>
+                                <td>{{ jogo.placar_dupla1|default_if_none:'-' }} x {{ jogo.placar_dupla2|default_if_none:'-' }}</td>
+                                <td>{{ jogo.dupla2_jogador1.nome }} / {{ jogo.dupla2_jogador2.nome }}</td>
+                                <td>
+                                    {% if jogo.concluido %}
+                                        <span class="badge bg-success">Concluído</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Pendente</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
 
-    <hr/>
+                <hr class="d-lg-none"/>
+            </div>
 
-    <h3 class="mt-5 mb-2">Ranking</h3>
-    <div class="card-body table-responsive">
-        <table class="table table-striped text-center mb-4">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Nome</th>
-                    <th>V</th>
-                    <th>P</th>
-                    <th>S</th>
-                </tr>
-            </thead>
+            <div class="col-12 col-lg-6">
+                <h4 class="mt-3 mb-2 text-center">Ranking</h4>
+                <div class="card-body table-responsive">
+                    <table class="table table-striped text-center mb-4">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Nome</th>
+                                <th>V</th>
+                                <th>P</th>
+                                <th>S</th>
+                            </tr>
+                        </thead>
 
-            <tbody>
-                {% for item in ranking %}
-                <tr>
-                    <td>{{ item.posicao }}º</td>
-                    <td>{{ item.jogador.nome }}</td>
-                    <td>{{ item.vitorias }}</td>
-                    <td>{{ item.pontos }}</td>
-                    <td>{{ item.saldo }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        <tbody>
+                            {% for item in ranking %}
+                            <tr>
+                                <td>{{ item.posicao }}º</td>
+                                <td>{{ item.jogador.nome }}</td>
+                                <td>{{ item.vitorias }}</td>
+                                <td>{{ item.pontos }}</td>
+                                <td>{{ item.saldo }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
