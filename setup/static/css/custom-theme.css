@@ -50,14 +50,23 @@ body:not(.sidebar-collapse) #jazzy-sidebar .nav-header {
 }
 
 /* modal  */
+body.modal-open {
+    padding-right: 8px !important;
+}
 body.modal-open div.wrapper {
-    position: fixed !important;
-    width: 100% !important;
+    filter: none !important;
 }
 .modal.modal-wide .modal-dialog {
     width: auto !important;
     max-width: 800px !important;
-    padding-left: 10px !important;
+}
+.modal.fade.modal-wide.show {
+    padding-right: 0px !important;
+}
+@media (hover: none) and (pointer: coarse) {
+    body.modal-open {
+        padding-right: 0px !important;
+    }
 }
 
 .alert a {
