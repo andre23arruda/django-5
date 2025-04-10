@@ -119,6 +119,7 @@ input[type=number] {
     border-radius: 0.25rem;
     box-shadow: inset 0 0 0 transparent;
     transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    max-width: 100% !important;
 }
 input[type=file] {
     padding: 5px;
@@ -152,6 +153,9 @@ input:not([type=submit]), textarea {
 }
 
 /* select */
+.select2.select2-container.select2-container--admin-autocomplete {
+    width: 100% !important;
+}
 .dark-mode .select2-container--default .select2-selection--single {
     background-color: transparent !important;
 }

@@ -1,5 +1,6 @@
 import math, random
 from django.db import models
+from django.utils.safestring import mark_safe
 from itertools import combinations
 from shortuuid.django_fields import ShortUUIDField
 
@@ -193,10 +194,10 @@ class Jogo(models.Model):
         return f'{self.dupla1_jogador1.nome}/{self.dupla1_jogador2.nome} X {self.dupla2_jogador1.nome}/{self.dupla2_jogador2.nome}'
 
     def dupla_1(self):
-        return f'{self.dupla1_jogador1.nome}/{self.dupla1_jogador2.nome}'
+        return mark_safe(f'<span>{self.dupla1_jogador1.nome}<br/>{self.dupla1_jogador2.nome}</span>')
 
     def dupla_2(self):
-        return f'{self.dupla2_jogador1.nome}/{self.dupla2_jogador2.nome}'
+        return mark_safe(f'<span>{self.dupla2_jogador1.nome}<br/>{self.dupla2_jogador2.nome}</span>')
 
     def save(self, *args, **kwargs):
         self.concluido = (

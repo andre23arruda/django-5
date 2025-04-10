@@ -51,14 +51,18 @@ td.field-placar_dupla2 input.vIntegerField {
     max-width: 70px !important;
 }
 
-td.field-x {
+td.field-x,
+td.field-dupla_1,
+td.field-dupla_2 {
     text-align: center !important;
     vertical-align: middle !important;
     padding-right: 0px !important;
     padding-left: 0px !important;
 }
 
-td.field-x p {
+td.field-x p,
+td.field-dupla_1 p,
+td.field-dupla_2 p {
     margin-bottom: 0px !important;
 }
 
