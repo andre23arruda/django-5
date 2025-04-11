@@ -40,6 +40,13 @@ class Jogador(models.Model):
     def __str__(self):
         return self.nome
 
+    def short_name(self):
+        name_split = self.nome.split(' ')
+        if len(name_split) > 1:
+            return name_split[0][0] + '. ' + name_split[1]
+        else:
+            return name_split[0]
+
     def ranking(self, torneio):
         '''Calcula a posição do jogador no ranking de um torneio'''
         # Obtém todos os jogadores do torneio
@@ -194,13 +201,13 @@ class Jogo(models.Model):
     concluido = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'{self.dupla1_jogador1.nome}/{self.dupla1_jogador2.nome} X {self.dupla2_jogador1.nome}/{self.dupla2_jogador2.nome}'
+        return f'{self.dupla1_jogador1.short_name()}/{self.dupla1_jogador2.short_name()} X {self.dupla2_jogador1.short_name()}/{self.dupla2_jogador2.short_name()}'
 
     def dupla_1(self):
-        return mark_safe(f'<span>{self.dupla1_jogador1.nome}<br/>{self.dupla1_jogador2.nome}</span>')
+        return mark_safe(f'<span>{self.dupla1_jogador1.short_name()}<br/>{self.dupla1_jogador2.short_name()}</span>')
 
     def dupla_2(self):
-        return mark_safe(f'<span>{self.dupla2_jogador1.nome}<br/>{self.dupla2_jogador2.nome}</span>')
+        return mark_safe(f'<span>{self.dupla2_jogador1.short_name()}<br/>{self.dupla2_jogador2.short_name()}</span>')
 
     def save(self, *args, **kwargs):
         self.concluido = (
