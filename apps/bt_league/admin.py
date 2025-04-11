@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib import admin, messages
-from django.db.models import Case, When
+from django.db.models import Case, Q, When
 from django.shortcuts import redirect
 from django.utils.html import format_html
 from .models import Jogador, Jogo, Ranking, Torneio
@@ -24,12 +24,12 @@ class JogadorAdmin(admin.ModelAdmin):
     def get_exclude(self, request, obj):
         if request.user.is_superuser:
             return super().get_exclude(request, obj)
-        return ['criado_por', 'id',]
+        return ['criado_por', 'id', 'grupo_criador']
 
     def get_list_display(self, request):
         list_display = self.list_display
         if request.user.is_superuser:
-            return list_display + ['criado_por', 'criado_em']
+            return list_display + ['criado_por', 'criado_em', 'grupo_criador']
         return list_display
 
     def get_search_results(self, request, queryset, search_term):
@@ -42,12 +42,16 @@ class JogadorAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         if request.user.is_superuser:
             return super().get_queryset(request)
-        return super().get_queryset(request).filter(criado_por=request.user)
+        user_group = request.user.groups.first()
+        if user_group:
+            return super().get_queryset(request).filter(Q(criado_por=request.user) | Q(grupo_criador=user_group))
+        return super().get_queryset(request).filter(Q(criado_por=request.user))
 
     def save_model(self, request, obj, form, change):
         created = not change
-        if created:
+        if created and not request.user.is_superuser:
             obj.criado_por = request.user
+            obj.grupo_criador = request.user.groups.first()
         super().save_model(request, obj, form, change)
 
 
@@ -147,25 +151,32 @@ class TorneioAdmin(admin.ModelAdmin):
 
     def get_fieldsets(self, request, obj):
         if request.user.is_superuser:
-            return [['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ranking', 'ativo', 'criado_por']}]]
+            return [['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ranking', 'ativo', 'criado_por', 'grupo_criador']}]]
         return [['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ranking', 'ativo']}]]
 
     def get_list_display(self, request):
         list_display = self.list_display
         if request.user.is_superuser:
-            return list_display + ['criado_por', 'criado_em']
+            return list_display + ['criado_por', 'criado_em', 'grupo_criador']
         return list_display
 
     def get_form(self, request, obj=None, **kwargs):
         if request.user.is_superuser:
             return super().get_form(request, obj, **kwargs)
         form = super().get_form(request, obj, **kwargs)
-        form.base_fields['jogadores'].queryset = Jogador.objects.filter(criado_por=request.user).order_by('nome')
+        user_group = request.user.groups.first()
+        if user_group:
+            form.base_fields['jogadores'].queryset = Jogador.objects.filter(Q(criado_por=request.user) | Q(grupo_criador=user_group)).order_by('nome')
+        else:
+            form.base_fields['jogadores'].queryset = Jogador.objects.filter(criado_por=request.user).order_by('nome')
         return form
 
     def get_queryset(self, request):
         if request.user.is_superuser:
             return super().get_queryset(request)
+        user_group = request.user.groups.first()
+        if user_group:
+            return super().get_queryset(request).filter(Q(criado_por=request.user) | Q(grupo_criador=user_group))
         return super().get_queryset(request).filter(criado_por=request.user)
 
     def total_jogadores(self, obj):
@@ -190,8 +201,9 @@ class TorneioAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         created = not change
-        if created:
+        if created and not request.user.is_superuser:
             obj.criado_por = request.user
+            obj.grupo_criador = request.user.groups.first()
         super().save_model(request, obj, form, change)
 
 
@@ -205,12 +217,12 @@ class RankingAdmin(admin.ModelAdmin):
     def get_exclude(self, request, obj):
         if request.user.is_superuser:
             return super().get_exclude(request, obj)
-        return ['criado_por', 'id',]
+        return ['criado_por', 'id', 'grupo_criador']
 
     def get_list_display(self, request):
         list_display = self.list_display
         if request.user.is_superuser:
-            return list_display + ['criado_por', 'criado_em']
+            return list_display + ['criado_por', 'criado_em', 'grupo_criador']
         return list_display
 
     def get_search_results(self, request, queryset, search_term):
@@ -223,10 +235,14 @@ class RankingAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         if request.user.is_superuser:
             return super().get_queryset(request)
+        user_group = request.user.groups.first()
+        if user_group:
+            return super().get_queryset(request).filter(Q(criado_por=request.user) | Q(grupo_criador=user_group))
         return super().get_queryset(request).filter(criado_por=request.user)
 
     def save_model(self, request, obj, form, change):
         created = not change
-        if created:
+        if created and not request.user.is_superuser:
             obj.criado_por = request.user
+            obj.grupo_criador = request.user.groups.first()
         super().save_model(request, obj, form, change)

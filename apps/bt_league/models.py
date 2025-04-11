@@ -9,6 +9,7 @@ class Ranking(models.Model):
     id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     nome = models.CharField(max_length=100)
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
+    grupo_criador = models.ForeignKey('auth.Group', on_delete=models.SET_NULL, null=True, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
 
@@ -27,6 +28,7 @@ class Jogador(models.Model):
     email = models.EmailField(blank=True, null=True)
     telefone = models.CharField(max_length=20, blank=True, null=True)
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
+    grupo_criador = models.ForeignKey('auth.Group', on_delete=models.SET_NULL, null=True, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
 
@@ -96,6 +98,7 @@ class Torneio(models.Model):
     jogadores = models.ManyToManyField(Jogador, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
+    grupo_criador = models.ForeignKey('auth.Group', on_delete=models.SET_NULL, null=True, blank=True)
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
     quadras = models.IntegerField(default=1, help_text='Quantidade de quadras para jogos simultâneos')
     ranking = models.ForeignKey(Ranking, on_delete=models.SET_NULL, blank=True, null=True)
