@@ -146,8 +146,14 @@ class TorneioAdmin(admin.ModelAdmin):
     list_display = ['nome', 'data', 'total_jogadores', 'total_jogos', 'ativo']
     autocomplete_fields = ['jogadores', 'ranking']
     list_filter = ['ativo']
-    inlines = [JogoInline, RankingInline]
     form = TorneioAdminForm
+
+    def get_inlines(self, request, obj):
+        if not obj:
+            return []
+        if obj.jogadores.count() > 0:
+            return [JogoInline, RankingInline]
+        return super().get_inlines(request, obj)
 
     def get_fieldsets(self, request, obj):
         if request.user.is_superuser:
