@@ -104,15 +104,17 @@
                                             <th>Dupla</th>
                                             <th>V</th>
                                             <th>P</th>
+                                            <th>S</th>
                                         </tr>
                                     </thead>
                                     <tbody style="vertical-align: middle;">
-                                        {% for dupla, stats in jogos.classificacao %}
+                                        {% for dupla in jogos.classificacao %}
                                             <tr>
-                                                <td>{{ forloop.counter }}</td>
-                                                <td>{{ dupla.render }}</td>
-                                                <td>{{ stats.vitorias }}</td>
-                                                <td>{{ stats.pontos }}</td>
+                                                <td>{{ dupla.posicao }}</td>
+                                                <td>{{ dupla.dupla.render }}</td>
+                                                <td>{{ dupla.vitorias }}</td>
+                                                <td>{{ dupla.pontos }}</td>
+                                                <td>{{ dupla.saldo }}</td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>

@@ -135,7 +135,7 @@ class Torneio(models.Model):
         if len(duplas) < self.quantidade_grupos:
             return Exception(f'Número de duplas {len(duplas)} menor que número de grupos {self.quantidade_grupos}')
 
-        # amanho base de cada grupo e duplas extras
+        # Tamanho base de cada grupo e duplas extras
         tamanho_base = len(duplas) // self.quantidade_grupos
         duplas_extras = len(duplas) % self.quantidade_grupos
 
@@ -155,6 +155,9 @@ class Torneio(models.Model):
 
     def create_games(self):
         '''Cria jogos de um torneio automaticamente, com todos jogando contra todos no grupo'''
+        if self.jogo_set.exists():
+            self.jogo_set.all().delete()
+
         duplas = list(self.duplas.all())
 
         random.shuffle(duplas)
@@ -172,20 +175,18 @@ class Torneio(models.Model):
 
         # Criar jogos de grupos
         for i, grupo in enumerate(grupos, 1):
-            # Criar todos os jogos possíveis dentro do grupo
+            rodadas = self.organizar_jogos_por_rodadas(grupo)
             grupo_jogos = []
 
-            # Usa itertools.combinations para garantir que cada dupla jogue contra todas as outras
-            grupo_combinations = list(combinations(grupo, 2))
-            random.shuffle(grupo_combinations)
-            for dupla1, dupla2 in grupo_combinations:
-                jogo = Jogo.objects.create(
-                    torneio=self,
-                    dupla1=dupla1,
-                    dupla2=dupla2,
-                    fase=f'GRUPO {i}'
-                )
-                grupo_jogos.append(jogo)
+            for num_rodada, jogos_rodada in enumerate(rodadas, 1):
+                for dupla1, dupla2 in jogos_rodada:
+                    jogo = Jogo.objects.create(
+                        torneio=self,
+                        dupla1=dupla1,
+                        dupla2=dupla2,
+                        fase=f'GRUPO {i}',
+                    )
+                    grupo_jogos.append(jogo)
 
             jogos_criados['grupos'][f'grupo {i}'] = grupo_jogos
 
@@ -335,7 +336,7 @@ class Torneio(models.Model):
         return True
 
     def finish(self):
-        self.duplas.all().update(ativo=False)
+        # self.duplas.all().update(ativo=False)
         self.ativo = False
         self.save()
 
@@ -368,9 +369,19 @@ class Torneio(models.Model):
             # Coletar estatísticas de cada dupla
             for jogo in jogos_do_grupo:
                 if jogo.dupla1 not in estatisticas:
-                    estatisticas[jogo.dupla1] = {'vitorias': 0, 'pontos': 0}
+                    estatisticas[jogo.dupla1] = {
+                        'vitorias': 0,
+                        'pontos': 0,
+                        'saldo': 0,
+                        'dupla': jogo.dupla1
+                    }
                 if jogo.dupla2 not in estatisticas:
-                    estatisticas[jogo.dupla2] = {'vitorias': 0, 'pontos': 0}
+                    estatisticas[jogo.dupla2] = {
+                        'vitorias': 0,
+                        'pontos': 0,
+                        'saldo': 0,
+                        'dupla': jogo.dupla2
+                    }
 
                 if jogo.concluido:
                     # Atualiza vitórias e pontos
@@ -380,19 +391,119 @@ class Torneio(models.Model):
                         estatisticas[jogo.dupla2]['vitorias'] += 1
 
                     estatisticas[jogo.dupla1]['pontos'] += jogo.placar_dupla1
+                    estatisticas[jogo.dupla1]['saldo'] += jogo.placar_dupla1
+                    estatisticas[jogo.dupla1]['saldo'] -= jogo.placar_dupla2
+
                     estatisticas[jogo.dupla2]['pontos'] += jogo.placar_dupla2
+                    estatisticas[jogo.dupla2]['saldo'] += jogo.placar_dupla2
+                    estatisticas[jogo.dupla2]['saldo'] -= jogo.placar_dupla1
 
             # Ordenar as duplas por vitórias e pontos
-            ranking = sorted(
-                estatisticas.items(),
-                key=lambda item: (item[1]['vitorias'], item[1]['pontos']),
-                reverse=True
-            )
+            items = estatisticas.values()
+            ranking = sorted(items, key=lambda x: (-x['vitorias'], -x['pontos'], -x['saldo']))
+            ranking_result = []
+            j_0 = {'pontos': 0, 'saldo': 0, 'vitorias': 0, 'posicao': 1}
+            for i, j_1 in enumerate(ranking):
+                if (j_1['pontos'] == j_0['pontos']) and (j_1['saldo'] == j_0['saldo']) and (j_1['vitorias'] == j_0['vitorias']):
+                    j_1['posicao'] = j_0['posicao']
+                else:
+                    j_1['posicao'] = i + 1
+                    j_0 = j_1
+                ranking_result.append(j_1)
 
             # Salvar classificação no dicionário
-            classificacao[grupo] = ranking
+            classificacao[grupo] = ranking_result
 
         return classificacao
+
+    def organizar_jogos_por_rodadas(self, grupo):
+        '''
+        Organiza jogos de um grupo em rodadas para equilibrar o descanso das duplas.
+
+        Args:
+            grupo (list): Lista de duplas do grupo
+
+        Returns:
+            list: Lista de rodadas, onde cada rodada é uma lista de tuplas (dupla1, dupla2)
+        '''
+        n_duplas = len(grupo)
+
+        if n_duplas < 2:
+            return []
+
+        # Algoritmo Round Robin para organizar os jogos
+        # Cria uma matriz de jogos onde cada dupla joga contra todas as outras
+        rodadas = []
+
+        # Para grupos com número par de duplas
+        if n_duplas % 2 == 0:
+            rodadas = self.round_robin_par(grupo)
+        else:
+            # Para grupos com número ímpar de duplas
+            rodadas = self.round_robin_impar(grupo)
+
+        return rodadas
+
+    def round_robin_par(self, duplas):
+        '''Algoritmo Round Robin para número par de duplas'''
+        n = len(duplas)
+        rodadas = []
+
+        # Fixa a primeira dupla e rotaciona as outras
+        duplas_rotacao = duplas[1:]  # Remove a primeira dupla
+
+        for rodada in range(n - 1):
+            jogos_rodada = []
+
+            # Primeiro jogo: primeira dupla vs a dupla atual da rotação
+            jogos_rodada.append((duplas[0], duplas_rotacao[0]))
+
+            # Outros jogos: emparelha as duplas restantes
+            for i in range(1, n // 2):
+                dupla1 = duplas_rotacao[i]
+                dupla2 = duplas_rotacao[n - 1 - i]
+                jogos_rodada.append((dupla1, dupla2))
+
+            rodadas.append(jogos_rodada)
+
+            # Rotaciona as duplas (menos a primeira que fica fixa)
+            duplas_rotacao = [duplas_rotacao[-1]] + duplas_rotacao[:-1]
+
+        return rodadas
+
+    def round_robin_impar(self, duplas):
+        '''Algoritmo Round Robin para número ímpar de duplas (com bye)'''
+        # Adiciona uma dupla "fantasma" para tornar o número par
+        duplas_com_bye = duplas + [None]  # None representa o "bye"
+        n = len(duplas_com_bye)
+        rodadas = []
+
+        duplas_rotacao = duplas_com_bye[1:]  # Remove a primeira dupla
+
+        for rodada in range(n - 1):
+            jogos_rodada = []
+
+            # Primeiro "jogo": primeira dupla vs a dupla atual da rotação
+            oponente = duplas_rotacao[0]
+            if oponente is not None:  # Se não é bye
+                jogos_rodada.append((duplas_com_bye[0], oponente))
+
+            # Outros jogos: emparelha as duplas restantes
+            for i in range(1, n // 2):
+                dupla1 = duplas_rotacao[i]
+                dupla2 = duplas_rotacao[n - 1 - i]
+
+                # Só adiciona se nenhuma das duplas é None (bye)
+                if dupla1 is not None and dupla2 is not None:
+                    jogos_rodada.append((dupla1, dupla2))
+
+            if jogos_rodada:  # Só adiciona rodadas que tenham jogos
+                rodadas.append(jogos_rodada)
+
+            # Rotaciona as duplas (menos a primeira que fica fixa)
+            duplas_rotacao = [duplas_rotacao[-1]] + duplas_rotacao[:-1]
+
+        return rodadas
 
 class Jogo(models.Model):
     torneio = models.ForeignKey(Torneio, on_delete=models.CASCADE)

@@ -69,50 +69,6 @@ class JogoInline(admin.TabularInline):
     x.short_description = ''
 
 
-class RankingInline(admin.TabularInline):
-    model = Torneio.duplas.through
-    extra = 0
-    fields = ('nome', 'info', 'grupo')
-    readonly_fields = ('grupo', 'nome', 'info')
-    can_delete = False
-    verbose_name = 'Grupos'
-    verbose_name_plural = 'Grupos'
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        torneio = request.resolver_match.kwargs.get('object_id')
-
-        if torneio:
-            qs = qs.filter(torneio=torneio)
-            torneio_obj = Torneio.objects.get(pk=torneio)
-            qs_sorted = sorted(
-                qs,
-                key=lambda q: q.dupla.get_group_data(torneio_obj),
-                reverse=True
-            )
-            pk_list = [q.pk for q in qs_sorted]
-            preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(pk_list)])
-            qs = qs.order_by(preserved)
-        return qs
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def nome(self, obj):
-        return obj.dupla.__str__()
-
-    def grupo(self, obj):
-        return obj.dupla.get_group(obj.torneio).replace('GRUPO ', '') or '-'
-
-    def info(self, obj):
-        _, pos, v, p = obj.dupla.get_group_data(obj.torneio)
-        result = f'{ -pos } / { v } / { p }'
-        if pos == -1 or pos == -2:
-            return format_html('<u><strong>{}</strong></u>', result)
-        return result
-    info.short_description = '#  /  V  /  P'
-
-
 @admin.register(Torneio)
 class TorneioAdmin(admin.ModelAdmin):
     class Media:
@@ -126,7 +82,7 @@ class TorneioAdmin(admin.ModelAdmin):
     list_display = ['nome', 'data', 'total_duplas', 'grupos', 'total_jogos', 'ativo']
     autocomplete_fields = ['duplas']
     list_filter = ('ativo',)
-    inlines = [JogoInline, RankingInline]
+    inlines = [JogoInline]
 
     def get_list_display(self, request):
         list_display = self.list_display
