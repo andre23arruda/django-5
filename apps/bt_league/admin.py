@@ -68,14 +68,14 @@ class JogoInline(admin.TabularInline):
     def dupla_1(self, obj):
         if obj.placar_dupla1 is not None and obj.placar_dupla2 is not None:
             if obj.placar_dupla1 > obj.placar_dupla2:
-                return format_html('<u><strong>{}</strong></u>', obj.dupla_1())
+                return format_html('<u style="color: green"><strong>{}</strong></u>', obj.dupla_1())
         return obj.dupla_1()
     dupla_1.short_description = 'Dupla 1'
 
     def dupla_2(self, obj):
         if obj.placar_dupla1 is not None and obj.placar_dupla2 is not None:
             if obj.placar_dupla2 > obj.placar_dupla1:
-                return format_html('<u><strong>{}</strong></u>', obj.dupla_2())
+                return format_html('<u style="color: green"><strong>{}</strong></u>', obj.dupla_2())
         return obj.dupla_2()
     dupla_2.short_description = 'Dupla 2'
 
@@ -142,7 +142,7 @@ class TorneioAdmin(admin.ModelAdmin):
     fieldsets = [
         ['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ranking', 'ativo']}],
     ]
-    change_form_template = 'admin/bt_league/torneio_change_form.html'
+    change_form_template = 'admin/bt_league/league_change_form.html'
     list_display = ['nome', 'data', 'total_jogadores', 'total_jogos', 'ativo']
     autocomplete_fields = ['jogadores', 'ranking']
     list_filter = ['ativo']
@@ -152,7 +152,7 @@ class TorneioAdmin(admin.ModelAdmin):
         if not obj:
             return []
         if obj.jogadores.count() > 0:
-            return [JogoInline, RankingInline]
+            return [JogoInline]
         return super().get_inlines(request, obj)
 
     def get_fieldsets(self, request, obj):

@@ -49,16 +49,16 @@ class JogoInline(admin.TabularInline):
         if obj.dupla1 is not None:
             if obj.dupla1 == obj.winner:
                 trophy = '🏆' if obj.fase == 'FINAL' else ''
-                return format_html('<u><strong>{}</strong>{}</u>', obj.dupla1, trophy)
-        return obj.dupla1 or '-'
+                return format_html('<u style="color: green"><strong>{}</strong>{}</u>', obj.dupla1.render(), trophy)
+        return obj.dupla1.render() or '-'
     dupla_1.short_description = 'Dupla 1'
 
     def dupla_2(self, obj):
         if obj.dupla2 is not None:
             if obj.dupla2 == obj.winner:
                 trophy = '🏆' if obj.fase == 'FINAL' else ''
-                return format_html('<u><strong>{}</strong></u>{}', obj.dupla2, trophy)
-        return obj.dupla2 or '-'
+                return format_html('<u style="color: green"><strong>{}</strong></u>{}', obj.dupla2.render(), trophy)
+        return obj.dupla2.render() or '-'
     dupla_2.short_description = 'Dupla 2'
 
     def has_add_permission(self, request, obj=None):
@@ -78,7 +78,7 @@ class TorneioAdmin(admin.ModelAdmin):
     fieldsets = [
         ('Torneio', {'fields': ('nome', 'data', 'duplas', 'quantidade_grupos', 'ativo')}),
     ]
-    change_form_template = 'admin/bt_cup/torneio_change_form.html'
+    change_form_template = 'admin/bt_cup/cup_change_form.html'
     list_display = ['nome', 'data', 'total_duplas', 'grupos', 'total_jogos', 'ativo']
     autocomplete_fields = ['duplas']
     list_filter = ('ativo',)
