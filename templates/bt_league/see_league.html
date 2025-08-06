@@ -9,6 +9,17 @@
 {% block title %}{{ torneio.nome }} ({{ torneio.data }}){% endblock %}
 
 {% block content %}
+<style>
+    td.winner, span.winner {
+        font-weight: bold;
+        color: green;
+    }
+
+    td.loser, span.loser {
+        color: red;
+    }
+</style>
+
 <div class="container my-5">
     {% if torneio.ativo %}
         <h1 class="text-center">{{ torneio.nome }} ({{ torneio.data }})</h1>
@@ -81,17 +92,21 @@
                             {% for jogo in jogos %}
                             <tr>
                                 <td>{{ jogo.quadra }}</td>
-                                <td>
+
+                                <td class="{% if jogo.concluido and jogo.placar_dupla1 > jogo.placar_dupla2 %}winner{% elif jogo.concluido and jogo.placar_dupla1 < jogo.placar_dupla2 %}loser{% endif %}">
                                     {{ jogo.dupla1_jogador1.short_name }}
                                     <br/>
                                     {{ jogo.dupla1_jogador2.short_name }}
                                 </td>
+
                                 <td>{{ jogo.placar_dupla1|default_if_none:'-' }} x {{ jogo.placar_dupla2|default_if_none:'-' }}</td>
-                                <td>
+
+                                <td class="{% if jogo.concluido and jogo.placar_dupla2 > jogo.placar_dupla1 %}winner{% elif jogo.concluido and jogo.placar_dupla2 < jogo.placar_dupla1 %}loser{% endif %}">
                                     {{ jogo.dupla2_jogador1.short_name }}
                                     <br/>
                                     {{ jogo.dupla2_jogador2.short_name }}
                                 </td>
+
                                 <td>
                                     {% if jogo.concluido %}
                                         <span class="text-success">
