@@ -65,7 +65,7 @@ def see_tournament(request, torneio_id: str):
         'jogos_restantes': jogos.filter(concluido=False).count(),
         'ranking': ranking_result
     }
-    return render(request, 'bt_league/see_tournament.html', context)
+    return render(request, 'bt_league/see_league.html', context)
 
 
 @login_required(redirect_field_name='next', login_url='/admin/login/')

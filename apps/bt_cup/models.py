@@ -1,7 +1,6 @@
 import random
 from django.db import models
 from django.utils.html import format_html
-from itertools import combinations
 from shortuuid.django_fields import ShortUUIDField
 
 
@@ -417,31 +416,15 @@ class Torneio(models.Model):
         return classificacao
 
     def organizar_jogos_por_rodadas(self, grupo):
-        '''
-        Organiza jogos de um grupo em rodadas para equilibrar o descanso das duplas.
-
-        Args:
-            grupo (list): Lista de duplas do grupo
-
-        Returns:
-            list: Lista de rodadas, onde cada rodada é uma lista de tuplas (dupla1, dupla2)
-        '''
+        '''Organiza jogos de um grupo em rodadas para equilibrar o descanso das duplas'''
         n_duplas = len(grupo)
-
         if n_duplas < 2:
             return []
-
-        # Algoritmo Round Robin para organizar os jogos
-        # Cria uma matriz de jogos onde cada dupla joga contra todas as outras
         rodadas = []
-
-        # Para grupos com número par de duplas
         if n_duplas % 2 == 0:
             rodadas = self.round_robin_par(grupo)
         else:
-            # Para grupos com número ímpar de duplas
             rodadas = self.round_robin_impar(grupo)
-
         return rodadas
 
     def round_robin_par(self, duplas):
@@ -512,7 +495,7 @@ class Jogo(models.Model):
     placar_dupla1 = models.IntegerField(null=True, blank=True, verbose_name='')
     placar_dupla2 = models.IntegerField(null=True, blank=True, verbose_name='')
     fase = models.CharField(max_length=100, null=True, blank=True)
-    concluido = models.BooleanField(default=False, verbose_name='Concluído')
+    concluido = models.BooleanField(default=False, verbose_name='')
     obs = models.TextField(null=True, blank=True, help_text='Alguma observação sobre o jogo. Ex: "Dupla 1 WO"')
 
     def __str__(self):

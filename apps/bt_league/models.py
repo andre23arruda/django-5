@@ -111,8 +111,8 @@ class Torneio(models.Model):
     ranking = models.ForeignKey(Ranking, on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
-        verbose_name = 'Torneio'
-        verbose_name_plural = 'Torneios'
+        verbose_name = 'Campeonato'
+        verbose_name_plural = 'Campeonatos'
         ordering = ['-data']
 
     def __str__(self):
@@ -198,7 +198,7 @@ class Jogo(models.Model):
     dupla2_jogador2 = models.ForeignKey(Jogador, related_name='dupla2_jogador2', on_delete=models.CASCADE)
     placar_dupla1 = models.IntegerField(null=True, blank=True, verbose_name='')
     placar_dupla2 = models.IntegerField(null=True, blank=True, verbose_name='')
-    concluido = models.BooleanField(default=False)
+    concluido = models.BooleanField(default=False, verbose_name='')
 
     def __str__(self):
         return f'{self.dupla1_jogador1.short_name()}/{self.dupla1_jogador2.short_name()} X {self.dupla2_jogador1.short_name()}/{self.dupla2_jogador2.short_name()}'

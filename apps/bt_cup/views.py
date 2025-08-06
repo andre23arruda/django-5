@@ -20,15 +20,11 @@ def distribute_classifieds(classifieds):
 def create_games(request, torneio_id: str):
     '''Cria jogos para o torneio'''
     torneio = get_object_or_404(Torneio, pk=torneio_id)
-    if torneio.jogo_set.exists():
-        messages.add_message(request, messages.ERROR, 'Jogos já gerados para este torneio.')
+    result = torneio.create_games()
+    if isinstance(result, Exception):
+        messages.add_message(request, messages.ERROR, result)
     else:
-        result = torneio.create_games()
-        if isinstance(result, Exception):
-            messages.add_message(request, messages.ERROR, result)
-        else:
-            messages.add_message(request, messages.INFO, 'Jogos gerados com sucesso!')
-
+        messages.add_message(request, messages.INFO, 'Jogos gerados com sucesso!')
     response = redirect('admin:bt_cup_torneio_change', torneio_id)
     response['location'] += '#jogos-tab'
     return response
@@ -89,6 +85,7 @@ def next_stage(request, torneio_id: str):
                 oitavas = jogos.filter(fase='OITAVAS')[i//2]
                 oitavas.dupla1 = dupla1
                 oitavas.dupla2 = dupla2
+                oitavas.save()
         messages.add_message(request, messages.INFO, 'Confrontos gerados com sucesso!')
 
     response = redirect('admin:bt_cup_torneio_change', torneio_id)
@@ -104,6 +101,7 @@ def see_tournament(request, torneio_id: str):
 
     # Separar jogos por grupos
     grupos = {}
+    groups_finished = True
     for i in range(1, 5):  # Grupos 1 a 4
         grupo_jogos = jogos.filter(fase=f'GRUPO {i}')
         if grupo_jogos.exists():
@@ -111,6 +109,8 @@ def see_tournament(request, torneio_id: str):
                 'jogos': grupo_jogos,
                 'classificacao': classificacao[f'GRUPO {i}']
             }
+            not_finished = grupo_jogos.filter(concluido=False).exists()
+            groups_finished = groups_finished and not not_finished
 
     # Separar jogos das próximas fases
     proximas_fases = {}
@@ -131,10 +131,10 @@ def see_tournament(request, torneio_id: str):
         'grupos': grupos,
         'proximas_fases': proximas_fases,
         'fases_finais': fases_finais,
-        'classificacao': classificacao
+        'classificacao': classificacao,
+        'groups_finished': groups_finished,
     }
-
-    return render(request, 'bt_cup/see_tournament.html', context)
+    return render(request, 'bt_cup/see_cup.html', context)
 
 
 @login_required(redirect_field_name='next', login_url='/admin/login/')
