@@ -35,7 +35,9 @@ def finish_tournament(request, torneio_id: str):
     torneio = get_object_or_404(Torneio, pk=torneio_id)
     torneio.finish()
     messages.add_message(request, messages.SUCCESS, f'{ torneio } finalizado!')
-    return redirect('admin:bt_cup_torneio_changelist')
+    response = redirect('admin:bt_cup_torneio_change', torneio_id)
+    response['location'] += '#jogos-tab'
+    return response
 
 
 @login_required(redirect_field_name='next', login_url='/admin/login/')
@@ -95,6 +97,12 @@ def next_stage(request, torneio_id: str):
 
 def see_tournament(request, torneio_id: str):
     '''Visualiza torneio'''
+    CARD_STYLE_DICT = {
+        'OITAVAS': 'col-sm-3',
+        'QUARTAS': 'col-sm-4',
+        'SEMIFINAIS': 'col-sm-6',
+        'FINAL': 'col-sm-6',
+    }
     torneio = Torneio.objects.get(id=torneio_id)
     jogos = Jogo.objects.filter(torneio=torneio)
     classificacao = torneio.get_groups_ranking()
@@ -112,27 +120,21 @@ def see_tournament(request, torneio_id: str):
             not_finished = grupo_jogos.filter(concluido=False).exists()
             groups_finished = groups_finished and not not_finished
 
-    # Separar jogos das próximas fases
-    proximas_fases = {}
-    for fase in ['OITAVAS', 'QUARTAS']:
-        fase_jogos = jogos.filter(fase=fase)
-        if fase_jogos.exists():
-            proximas_fases[fase] = fase_jogos
-
     # Separar fases finais (semifinais e final)
     fases_finais = {}
-    for fase in ['SEMIFINAIS', 'FINAL']:
+    for fase in ['FINAL', 'SEMIFINAIS', 'QUARTAS', 'OITAVAS']:
         fase_jogos = jogos.filter(fase=fase)
         if fase_jogos.exists():
             fases_finais[fase] = fase_jogos
+            playoff_card_style = CARD_STYLE_DICT[fase]
 
     context = {
         'torneio': torneio,
         'grupos': grupos,
-        'proximas_fases': proximas_fases,
         'fases_finais': fases_finais,
         'classificacao': classificacao,
         'groups_finished': groups_finished,
+        'playoff_card_style': playoff_card_style,
     }
     return render(request, 'bt_cup/see_cup.html', context)
 

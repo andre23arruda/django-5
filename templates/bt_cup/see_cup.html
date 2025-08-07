@@ -18,6 +18,7 @@
         display: flex;
         margin: 0px;
         row-gap: 50px;
+        justify-content: center;
     }
 
     .round {
@@ -29,7 +30,7 @@
 
     .match {
         position: relative;
-        width: 200px;
+        width: 100%;
         margin: 10px 0;
     }
 
@@ -206,10 +207,10 @@
 
             <div class="row bracket">
                 <!-- Oitavas -->
-                {% if 'OITAVAS' in proximas_fases %}
-                <div class="round col-6 col-lg-3 p-0">
-                    <h5 class="text-center">Oitavas de Final</h5>
-                    {% for jogo in proximas_fases.OITAVAS %}
+                {% if 'OITAVAS' in fases_finais %}
+                <div class="round col-6 {{ playoff_card_style }}">
+                    <h5 class="text-center m-0">Oitavas de Final</h5>
+                    {% for jogo in fases_finais.OITAVAS %}
                     <div class="match">
                         <div class="card p-2">
                             <div class="team">
@@ -241,10 +242,10 @@
                 {% endif %}
 
                 <!-- Quartas -->
-                {% if 'QUARTAS' in proximas_fases %}
-                <div class="round col-6 col-lg-3 p-0">
-                    <h5 class="text-center">Quartas de Final</h5>
-                    {% for jogo in proximas_fases.QUARTAS %}
+                {% if 'QUARTAS' in fases_finais %}
+                <div class="round col-6 {{ playoff_card_style }}">
+                    <h5 class="text-center m-0">Quartas de Final</h5>
+                    {% for jogo in fases_finais.QUARTAS %}
                     <div class="match">
                         <div class="card p-2">
                             <div class="team">
@@ -277,8 +278,8 @@
 
                 <!-- Semifinais -->
                 {% if 'SEMIFINAIS' in fases_finais %}
-                <div class="round col-6 col-lg-3 p-0">
-                    <h5 class="text-center">Semifinal</h5>
+                <div class="round col-6 {{ playoff_card_style }}">
+                    <h5 class="text-center m-0">Semifinal</h5>
                     {% for jogo in fases_finais.SEMIFINAIS %}
                     <div class="match">
                         <div class="card p-2">
@@ -312,8 +313,8 @@
 
                 <!-- Final -->
                 {% if 'FINAL' in fases_finais %}
-                <div class="round col-6 col-lg-3 p-0">
-                    <h5 class="text-center">Final</h5>
+                <div class="round {{ playoff_card_style }}">
+                    <h5 class="text-center m-0">Final</h5>
                     {% for jogo in fases_finais.FINAL %}
                     <div class="match">
                         <div class="card p-2">
@@ -347,4 +348,10 @@
         </div>
     </div>
 </div>
+
+<footer class="w-100 p-5 text-center">
+    <span class="text-muted">
+        Feito por <a href="https://andrearruda-links.vercel.app/" target="_blank">ALCA Inovações Tecnológicas</a>
+    </span>
+</footer>
 {% endblock %}
