@@ -25,7 +25,9 @@ def finish_tournament(request, torneio_id: str):
     torneio = get_object_or_404(Torneio, pk=torneio_id)
     torneio.finish()
     messages.add_message(request, messages.SUCCESS, f'{ torneio } finalizado!')
-    return redirect('admin:bt_league_torneio_changelist')
+    response = redirect('admin:bt_league_torneio_change', torneio_id)
+    response['location'] += '#jogos-tab'
+    return response
 
 
 def see_tournament(request, torneio_id: str):
@@ -92,16 +94,17 @@ def export_csv(request, torneio_id: str):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="{ torneio.nome }.csv"'
     writer = csv.writer(response)
-    writer.writerow(['Posição', 'Jogador', 'Vitórias', 'Pontos', 'Saldo'])
+    writer.writerow(['Posição', 'Jogador', 'Vitórias', 'Pontos', 'Saldo', 'Jogos'])
 
     ranking = []
     for jogador in torneio.jogadores.all():
-        vitorias, pontos, saldo = jogador.player_points(torneio)
+        vitorias, pontos, saldo, jogos = jogador.player_points(torneio)
         ranking.append({
             'jogador': jogador,
             'vitorias': vitorias,
             'pontos': pontos,
             'saldo': saldo,
+            'jogos': jogos
         })
 
     # Ordenar ranking por posição
@@ -122,7 +125,8 @@ def export_csv(request, torneio_id: str):
             jogador['jogador'].nome,
             jogador['vitorias'],
             jogador['pontos'],
-            jogador['saldo']
+            jogador['saldo'],
+            jogador['jogos']
         ])
     return response
 
