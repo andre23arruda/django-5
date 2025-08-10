@@ -49,7 +49,7 @@ class JogoInline(admin.TabularInline):
         if obj.dupla1 is not None:
             if obj.dupla1 == obj.winner:
                 trophy = '🏆' if obj.fase == 'FINAL' else ''
-                return format_html('<u style="color: green"><strong>{}</strong>{}</u>', obj.dupla1.render(), trophy)
+                return format_html('<u style="color: #00a50b"><strong>{}</strong>{}</u>', obj.dupla1.render(), trophy)
         return obj.dupla1.render() or '-'
     dupla_1.short_description = 'Dupla 1'
 
@@ -57,7 +57,7 @@ class JogoInline(admin.TabularInline):
         if obj.dupla2 is not None:
             if obj.dupla2 == obj.winner:
                 trophy = '🏆' if obj.fase == 'FINAL' else ''
-                return format_html('<u style="color: green"><strong>{}</strong></u>{}', obj.dupla2.render(), trophy)
+                return format_html('<u style="color: #00a50b"><strong>{}</strong></u>{}', obj.dupla2.render(), trophy)
         return obj.dupla2.render() or '-'
     dupla_2.short_description = 'Dupla 2'
 
