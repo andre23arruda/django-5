@@ -76,7 +76,7 @@ class TorneioAdmin(admin.ModelAdmin):
         js = ['js/create-games-modal.js', 'js/finish-tournament-modal.js']
 
     fieldsets = [
-        ('Torneio', {'fields': ('nome', 'data', 'duplas', 'quantidade_grupos', 'ativo')}),
+        ('Torneio', {'fields': ('nome', 'data', 'duplas', 'quantidade_grupos', 'playoffs', 'ativo')}),
     ]
     change_form_template = 'admin/bt_cup/cup_change_form.html'
     list_display = ['nome', 'data', 'total_duplas', 'grupos', 'total_jogos', 'ativo']

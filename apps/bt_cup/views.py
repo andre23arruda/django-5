@@ -106,6 +106,7 @@ def see_tournament(request, torneio_id: str):
     torneio = Torneio.objects.get(id=torneio_id)
     jogos = Jogo.objects.filter(torneio=torneio)
     classificacao = torneio.get_groups_ranking()
+    playoff_card_style = ''
 
     # Separar jogos por grupos
     grupos = {}

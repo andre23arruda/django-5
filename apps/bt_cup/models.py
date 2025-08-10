@@ -119,6 +119,11 @@ class Torneio(models.Model):
     )
     criado_em = models.DateTimeField(auto_now_add=True)
     criado_por = models.ForeignKey('auth.User', related_name='torneios_criados', on_delete=models.SET_NULL, null=True)
+    playoffs = models.BooleanField(
+        default=True,
+        verbose_name='Playoffs',
+        help_text='Ativar para criar jogos de playoffs (OITAVAS, QUARTAS, SEMIFINAIS e FINAL)'
+    )
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
 
     class Meta:
@@ -189,46 +194,47 @@ class Torneio(models.Model):
 
             jogos_criados['grupos'][f'grupo {i}'] = grupo_jogos
 
-        # Preparar próximas fases
-        n_grupos = self.quantidade_grupos
-        if n_grupos == 8:
-            for i in range(8): # Oitavas de final
-                oitava = Jogo.objects.create(
-                    torneio=self,
-                    dupla1=None,  # Será preenchido após grupos
-                    dupla2=None,  # Será preenchido após grupos
-                    fase='OITAVAS'
-                )
-                jogos_criados['oitavas'].append(oitava)
+        # Próximas fases
+        if self.playoffs:
+            n_grupos = self.quantidade_grupos
+            if n_grupos == 8:
+                for i in range(8): # Oitavas de final
+                    oitava = Jogo.objects.create(
+                        torneio=self,
+                        dupla1=None,  # Será preenchido após grupos
+                        dupla2=None,  # Será preenchido após grupos
+                        fase='OITAVAS'
+                    )
+                    jogos_criados['oitavas'].append(oitava)
 
-        if n_grupos >= 4:
-            for i in range(4): # Quartas de final
-                quarta = Jogo.objects.create(
-                    torneio=self,
-                    dupla1=None,  # Será preenchido após oitavas
-                    dupla2=None,  # Será preenchido após oitavas
-                    fase='QUARTAS'
-                )
-                jogos_criados['quartas'].append(quarta)
+            if n_grupos >= 4:
+                for i in range(4): # Quartas de final
+                    quarta = Jogo.objects.create(
+                        torneio=self,
+                        dupla1=None,  # Será preenchido após oitavas
+                        dupla2=None,  # Será preenchido após oitavas
+                        fase='QUARTAS'
+                    )
+                    jogos_criados['quartas'].append(quarta)
 
-        if n_grupos >= 2:
-            for i in range(2): # Semifinais
-                semi = Jogo.objects.create(
-                    torneio=self,
-                    dupla1=None,  # Será preenchido após oitavas
-                    dupla2=None,  # Será preenchido após oitavas
-                    fase='SEMIFINAIS'
-                )
-                jogos_criados['semifinais'].append(semi)
+            if n_grupos >= 2:
+                for i in range(2): # Semifinais
+                    semi = Jogo.objects.create(
+                        torneio=self,
+                        dupla1=None,  # Será preenchido após oitavas
+                        dupla2=None,  # Será preenchido após oitavas
+                        fase='SEMIFINAIS'
+                    )
+                    jogos_criados['semifinais'].append(semi)
 
-        # Final sempre será criado
-        final = Jogo.objects.create(
-            torneio=self,
-            dupla1=None,
-            dupla2=None,
-            fase='FINAL'
-        )
-        jogos_criados['final'] = final
+            # Final sempre será criado
+            final = Jogo.objects.create(
+                torneio=self,
+                dupla1=None,
+                dupla2=None,
+                fase='FINAL'
+            )
+            jogos_criados['final'] = final
 
         return jogos_criados
 

@@ -82,7 +82,7 @@
             Ver Torneio
         </a>
 
-        {% if not original.is_finished and original.has_games and original.ativo %}
+        {% if not original.is_finished and original.has_games and original.ativo and original.playoffs %}
             <a
                 href="{% url 'bt_cup:next_stage' original.pk %}"
                 class="btn btn-block btn-primary btn-sm mt-2"
