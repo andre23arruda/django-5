@@ -33,8 +33,6 @@ def finish_tournament(request, torneio_id: str):
 def see_tournament(request, torneio_id: str):
     '''Visualiza torneio'''
     torneio = get_object_or_404(Torneio, pk=torneio_id)
-
-    # Obter jogos do torneio
     jogos = torneio.jogo_set.all()
 
     # Calcular ranking
@@ -49,7 +47,7 @@ def see_tournament(request, torneio_id: str):
         })
 
     # Ordenar ranking por posição
-    ranking = sorted(ranking, key=lambda x: (-x['vitorias'], -x['pontos'], -x['saldo']))
+    ranking = sorted(ranking, key=lambda x: (-x['vitorias'], -x['saldo'], -x['pontos']))
     ranking_result = []
     j_0 = {'pontos': 0, 'saldo': 0, 'vitorias': 0, 'posicao': 1}
     for i, j_1 in enumerate(ranking):
@@ -94,7 +92,7 @@ def export_csv(request, torneio_id: str):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="{ torneio.nome }.csv"'
     writer = csv.writer(response)
-    writer.writerow(['Posição', 'Jogador', 'Vitórias', 'Pontos', 'Saldo', 'Jogos'])
+    writer.writerow(['Posição', 'Jogador', 'Vitórias', 'Saldo', 'Pontos', 'Jogos'])
 
     ranking = []
     for jogador in torneio.jogadores.all():
@@ -108,7 +106,8 @@ def export_csv(request, torneio_id: str):
         })
 
     # Ordenar ranking por posição
-    ranking = sorted(ranking, key=lambda x: (-x['vitorias'], -x['pontos'], -x['saldo']))
+    # ranking = sorted(ranking, key=lambda x: (-x['vitorias'], -x['pontos'], -x['saldo']))
+    ranking = sorted(ranking, key=lambda x: (-x['vitorias'], -x['saldo'], -x['pontos']))
     ranking_result = []
     j_0 = {'pontos': 0, 'saldo': 0, 'vitorias': 0, 'posicao': 1}
     for i, j_1 in enumerate(ranking):
@@ -124,8 +123,8 @@ def export_csv(request, torneio_id: str):
             jogador['posicao'],
             jogador['jogador'].nome,
             jogador['vitorias'],
-            jogador['pontos'],
             jogador['saldo'],
+            jogador['pontos'],
             jogador['jogos']
         ])
     return response
@@ -143,18 +142,18 @@ def see_ranking(request, ranking_id: str):
                 jogadores[jogador.id] = {
                     'jogador': jogador.nome,
                     'vitorias': vitorias,
-                    'pontos': pontos,
                     'saldo': saldo,
+                    'pontos': pontos,
                     'jogos': jogos
                 }
             else:
                 jogadores[jogador.id]['vitorias'] += vitorias
-                jogadores[jogador.id]['pontos'] += pontos
                 jogadores[jogador.id]['saldo'] += saldo
+                jogadores[jogador.id]['pontos'] += pontos
                 jogadores[jogador.id]['jogos'] += jogos
 
     jogadores = list(jogadores.values())
-    jogadores = sorted(jogadores, key=lambda x: (-x['vitorias'], -x['pontos'], -x['saldo'], x['jogos']))
+    jogadores = sorted(jogadores, key=lambda x: (-x['vitorias'], -x['saldo'], -x['pontos'], x['jogos']))
     jogadores_ranking = []
     j_0 = {'pontos': 0, 'saldo': 0, 'vitorias': 0, 'posicao': 1}
     for i, j_1 in enumerate(jogadores):

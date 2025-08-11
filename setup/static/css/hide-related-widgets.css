@@ -1,0 +1,23 @@
+.column-dupla1 {
+    text-align: right;
+}
+
+.field-dupla1 {
+    display: flex;
+    justify-content: end;
+    text-align: right;
+}
+
+.field-dupla1 .related-widget-wrapper-link,
+.field-dupla2 .related-widget-wrapper-link {
+    display: none !important;
+}
+
+.column-fase, .field-fase {
+    display: none !important;
+}
+
+.field-obs textarea {
+    width: 150px !important;
+    height: 40px;
+}

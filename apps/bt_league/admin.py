@@ -151,6 +151,7 @@ class TorneioAdmin(admin.ModelAdmin):
     def get_inlines(self, request, obj):
         if not obj:
             return []
+        # if obj.jogadores.count() > 0 and obj.jogo_set.count() > 0:
         if obj.jogadores.count() > 0:
             return [JogoInline]
         return super().get_inlines(request, obj)

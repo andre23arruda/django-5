@@ -69,20 +69,69 @@ class JogoInline(admin.TabularInline):
     x.short_description = ''
 
 
+class JogoOpenInline(admin.TabularInline):
+    model = Jogo
+    extra = 1
+    fields = ('field_concluido', 'fase', 'dupla1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla2', 'obs')
+    # raw_id_fields = ('dupla1', 'dupla2')
+    readonly_fields = ('x', 'field_concluido')
+    can_delete = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.parent_obj = None
+
+    def get_formset(self, request, obj=None, **kwargs):
+        self.parent_obj = obj
+        return super().get_formset(request, obj, **kwargs)
+
+    def get_formset(self, request, obj=None, **kwargs):
+        self.parent_obj = obj
+        formset = super().get_formset(request, obj, **kwargs)
+        formset.form.base_fields['fase'].initial = 'GRUPO 1'
+        return formset
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name in ["dupla1", "dupla2"] and self.parent_obj:
+            kwargs["queryset"] = self.parent_obj.duplas.all()
+        else:
+            kwargs["queryset"] = Dupla.objects.none()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    @admin.display(boolean=True)
+    def field_concluido(self, obj):
+        return obj.concluido
+    field_concluido.short_description = ''
+
+    def has_add_permission(self, request, obj=None):
+        return True
+
+    def x(self, obj):
+        return 'x'
+    x.short_description = ''
+
+
 @admin.register(Torneio)
 class TorneioAdmin(admin.ModelAdmin):
     class Media:
-        css = {'all': ('css/custom-tabular-inline.css',)}
+        css = {'all': ('css/custom-tabular-inline.css', 'css/hide-related-widgets.css')}
         js = ['js/create-games-modal.js', 'js/finish-tournament-modal.js']
 
     fieldsets = [
-        ('Torneio', {'fields': ('nome', 'data', 'duplas', 'quantidade_grupos', 'playoffs', 'ativo')}),
+        ('Torneio', {'fields': ('nome', 'data', 'duplas', 'quantidade_grupos', 'playoffs', 'open', 'ativo')}),
     ]
     change_form_template = 'admin/bt_cup/cup_change_form.html'
     list_display = ['nome', 'data', 'total_duplas', 'grupos', 'total_jogos', 'ativo']
     autocomplete_fields = ['duplas']
     list_filter = ('ativo',)
-    inlines = [JogoInline]
+
+    def get_inlines(self, request, obj):
+        if obj:
+            if obj.open:
+                return [JogoOpenInline]
+            else:
+                return [JogoInline]
+        return super().get_inlines(request, obj)
 
     def get_list_display(self, request):
         list_display = self.list_display

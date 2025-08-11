@@ -124,6 +124,11 @@ class Torneio(models.Model):
         verbose_name='Playoffs',
         help_text='Ativar para criar jogos de playoffs (OITAVAS, QUARTAS, SEMIFINAIS e FINAL)'
     )
+    open = models.BooleanField(
+        default=False,
+        verbose_name='Torneio aberto',
+        help_text='Ativar para criar jogos criados manualmente (Apenas um grupo, sem playoffs)'
+    )
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
 
     class Meta:

@@ -3,7 +3,7 @@
 {% block submit_buttons_bottom %}
     {{ block.super }}
     {% if original.pk %}
-        {% if original.ativo %}
+        {% if original.ativo and not original.open %}
             <button
                 type="button"
                 id="create-games"

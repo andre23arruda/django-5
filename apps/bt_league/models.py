@@ -49,20 +49,12 @@ class Jogador(models.Model):
 
     def ranking(self, torneio):
         '''Calcula a posição do jogador no ranking de um torneio'''
-        # Obtém todos os jogadores do torneio
         jogadores = torneio.jogadores.all()
-
-        # Cria lista de tuplas (jogador, pontos)
         ranking = [(jogador, jogador.player_points(torneio)) for jogador in jogadores]
-
-        # Ordena por pontos em ordem decrescente
         ranking_ordenado = sorted(ranking, key=lambda x: x[1], reverse=True)
-
-        # Encontra a posição do jogador
         for posicao, (jogador, pontos) in enumerate(ranking_ordenado, 1):
             if jogador == self:
                 return posicao
-
         return None
 
     def player_points(self, torneio=None):
