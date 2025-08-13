@@ -136,6 +136,7 @@ def see_tournament(request, torneio_id: str):
         'classificacao': classificacao,
         'groups_finished': groups_finished,
         'playoff_card_style': playoff_card_style,
+        'can_edit': request.user.is_superuser or torneio.criado_por == request.user,
     }
     return render(request, 'bt_cup/see_cup.html', context)
 
@@ -145,7 +146,7 @@ def qrcode_tournament(request, torneio_id: str):
     '''Cria QR Code do torneio'''
     torneio = get_object_or_404(Torneio, pk=torneio_id)
     site_url = os.getenv('HOST_ADDRESS')
-    img = qrcode.make(f'{ site_url }/copa/{ torneio_id }')
+    img = qrcode.make(f'{ site_url }/torneio/{ torneio_id }')
     buf = io.BytesIO()
     img.save(buf, 'PNG')
     buf.seek(0)
