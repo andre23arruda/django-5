@@ -131,6 +131,10 @@ input:not([type=submit]), textarea {
 .dark-mode textarea {
     color: white !important;
 }
+.dark-mode dialog {
+    background-color: #3d3d3d;
+    color: white;
+}
 
 /* buttons */
 .dark-mode .btn-outline-success {

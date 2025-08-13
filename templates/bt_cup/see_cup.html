@@ -3,153 +3,163 @@
 {% load static %}
 
 {% block favicon %}
-    <link rel="shortcut icon" href="{% static 'images/bt.ico' %}" />
+    <link rel="shortcut icon" href="{% static 'images/trophy.ico' %}" />
 {% endblock %}
 
 {% block title %}{{ torneio.nome }} ({{ torneio.data }}){% endblock %}
 
+{% block style %}
+    <style>
+        body {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+        }
+
+        .group {
+            row-gap: 5px;
+        }
+
+        .bracket {
+            display: flex;
+            margin: 0px;
+            row-gap: 50px;
+            justify-content: center;
+        }
+
+        .round {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .match {
+            position: relative;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .team {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .team:last-child {
+            border-bottom: none;
+        }
+
+        .score {
+            float: right;
+            font-weight: bold;
+        }
+
+        td.winner, span.winner {
+            font-weight: bold;
+            color: #00a50b !important;
+        }
+
+        td.loser, span.loser {
+            color: #ff2323 !important;
+        }
+
+        .bg-classified {
+            background-color: #c9ffc7 !important;
+            font-weight: bold;
+        }
+
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        body.dark-mode .card {
+            background-color: #484848;
+            color: #ffffff;
+        }
+
+        body.dark-mode .card-header {
+            background-color: #3b3b3b;
+            color: #ffffff;
+        }
+
+        body.dark-mode .table-striped tr:nth-of-type(odd) *,
+        body.dark-mode .table-striped tr:nth-of-type(even) * {
+            background-color: #3b3b3b !important;
+            color: #ffffff;
+        }
+
+        body.dark-mode .table-striped tr:nth-of-type(odd) .bg-classified,
+        body.dark-mode .table-striped tr:nth-of-type(even) .bg-classified {
+            background-color: #00a50b !important;
+        }
+
+        body.dark-mode .table-striped th {
+            background-color: #333333 !important;
+            color: #ffffff;
+        }
+
+        body.dark-mode .text-muted,
+        body.dark-mode input::placeholder {
+            color: #999999 !important;
+        }
+
+        .admin-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            opacity: 0.7;
+        }
+
+        .theme-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .theme-switch button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            line-height: normal;
+            opacity: 0.7;
+        }
+
+        #reload {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            opacity: 0.7;
+            z-index: 1000;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
-<style>
-    body {
-        position: absolute;
-        height: 100%;
-        width: 100%;
-    }
-
-    .group {
-        row-gap: 5px;
-    }
-
-    .bracket {
-        display: flex;
-        margin: 0px;
-        row-gap: 50px;
-        justify-content: center;
-    }
-
-    .round {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .match {
-        position: relative;
-        width: 100%;
-        margin: 10px 0;
-    }
-
-    .team {
-        padding: 5px;
-        border-bottom: 1px solid #eee;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .team:last-child {
-        border-bottom: none;
-    }
-
-    .score {
-        float: right;
-        font-weight: bold;
-    }
-
-    td.winner, span.winner {
-        font-weight: bold;
-        color: #00a50b !important;
-    }
-
-    td.loser, span.loser {
-        color: #ff2323 !important;
-    }
-
-    .bg-classified {
-        background-color: #c9ffc7 !important;
-        font-weight: bold;
-    }
-
-    body.dark-mode {
-        background-color: #1a1a1a;
-        color: #ffffff;
-    }
-
-    body.dark-mode .card {
-        background-color: #484848;
-        color: #ffffff;
-    }
-
-    body.dark-mode .card-header {
-        background-color: #3b3b3b;
-        color: #ffffff;
-    }
-
-    body.dark-mode .table-striped tr:nth-of-type(odd) *,
-    body.dark-mode .table-striped tr:nth-of-type(even) * {
-        background-color: #3b3b3b !important;
-        color: #ffffff;
-    }
-
-    body.dark-mode .table-striped tr:nth-of-type(odd) .bg-classified,
-    body.dark-mode .table-striped tr:nth-of-type(even) .bg-classified {
-        background-color: #00a50b !important;
-    }
-
-    body.dark-mode .table-striped th {
-        background-color: #333333 !important;
-        color: #ffffff;
-    }
-
-    body.dark-mode .text-muted,
-    body.dark-mode input::placeholder {
-        color: #999999 !important;
-    }
-
-    .theme-switch {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-    }
-
-    .theme-switch button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        cursor: pointer;
-        background-color: #969696;
-        transition: all 0.3s;
-    }
-
-    .theme-switch button:hover {
-        filter: brightness(1.2);
-        background-color: #636363;
-    }
-
-    #reload {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        opacity: 0.7;
-        z-index: 1000;
-        font-size: 20pt;
-    }
-</style>
-
 <div class="theme-switch">
-    <button id="themeToggle" class="btn" title="Alternar modo escuro">🌙</button>
+    <button id="themeToggle" class="btn btn-secondary" title="Alternar modo escuro">🌙</button>
 </div>
+
+{% if can_edit %}
+    <div class="admin-button">
+        {% url 'admin:bt_cup_torneio_change' torneio.id as admin_url %}
+        <a href="{{ admin_url }}#jogos-tab" class="btn btn-secondary" title="Editar torneio">✏️</a>
+    </div>
+{% endif %}
 
 <div class="container h-100 d-flex flex-column justify-content-between">
     <div class="pt-5">
@@ -438,7 +448,6 @@
         </span>
     </footer>
 </div>
-
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

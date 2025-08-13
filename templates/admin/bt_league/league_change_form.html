@@ -2,16 +2,11 @@
 
 {% block submit_buttons_bottom %}
     {{ block.super }}
+
+    <span id="canCreateGames"/>
+
     {% if original.pk %}
         {% if original.ativo %}
-            <button
-                type="button"
-                id="create-games"
-                class="btn btn-block btn-primary btn-sm mt-2"
-            >
-                Gerar Jogos
-            </button>
-
             <dialog id="games-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
                 <section>
                     <h4>Atenção!</h4>
@@ -88,7 +83,6 @@
         <a
             class="btn btn-block btn-primary btn-sm mt-2"
             href="{% url 'bt_league:see_tournament' original.pk %}"
-            target="_blank"
         >
             Ver Torneio
         </a>
