@@ -67,7 +67,7 @@ class Jogador(models.Model):
         if torneio:
             jogos = jogos.filter(torneio=torneio)
 
-        pontos, vitorias, saldo = 0, 0, 0
+        pontos, vitorias, saldo, n_jogos = 0, 0, 0, 0
         for jogo in jogos:
             if jogo.placar_dupla1 is None or jogo.placar_dupla2 is None:
                 continue
@@ -83,7 +83,8 @@ class Jogador(models.Model):
                     vitorias += 1
             pontos += pontos_a_favor
             saldo += (pontos_a_favor - pontos_contra)
-        return vitorias, pontos, saldo, len(jogos)
+            n_jogos += 1
+        return vitorias, pontos, saldo, n_jogos
 
     def admin_ranking(self, torneio):
         vitorias, pontos, saldo, jogos = self.player_points(torneio)
@@ -94,7 +95,7 @@ class Torneio(models.Model):
     id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     nome = models.CharField(max_length=100)
     data = models.DateField()
-    jogadores = models.ManyToManyField(Jogador, blank=True)
+    jogadores = models.ManyToManyField(Jogador, blank=True, help_text='O número de jogadores deve ser multiplo de 4.')
     criado_em = models.DateTimeField(auto_now_add=True)
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
     grupo_criador = models.ForeignKey('auth.Group', on_delete=models.SET_NULL, null=True, blank=True)

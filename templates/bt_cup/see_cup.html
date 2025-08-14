@@ -266,6 +266,7 @@
                                                 <th>V</th>
                                                 <th>P</th>
                                                 <th>S</th>
+                                                <th>J</th>
                                             </tr>
                                         </thead>
 
@@ -277,6 +278,7 @@
                                                     <td class="{% if groups_finished and forloop.counter < 3 %}bg-classified{% endif %}">{{ dupla.vitorias }}</td>
                                                     <td class="{% if groups_finished and forloop.counter < 3 %}bg-classified{% endif %}">{{ dupla.pontos }}</td>
                                                     <td class="{% if groups_finished and forloop.counter < 3 %}bg-classified{% endif %}">{{ dupla.saldo }}</td>
+                                                    <td class="{% if groups_finished and forloop.counter < 3 %}bg-classified{% endif %}">{{ dupla.jogos }}</td>
                                                 </tr>
                                             {% endfor %}
                                         </tbody>

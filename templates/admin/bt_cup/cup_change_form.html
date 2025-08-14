@@ -3,12 +3,10 @@
 {% block submit_buttons_bottom %}
     {{ block.super }}
 
-    {% if not original.open %}
-        <span id="canCreateGames"/>
-    {% endif %}
-
     {% if original.pk %}
-        {% if original.ativo and not original.open %}
+    {% if original.ativo and not original.open %}
+            <span id="canCreateGames"/>
+
             <dialog id="games-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
                 <section>
                     <h4>Atenção!</h4>

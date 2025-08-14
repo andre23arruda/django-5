@@ -3,10 +3,11 @@
 {% block submit_buttons_bottom %}
     {{ block.super }}
 
-    <span id="canCreateGames"/>
 
     {% if original.pk %}
-        {% if original.ativo %}
+    {% if original.ativo %}
+            <span id="canCreateGames"/>
+
             <dialog id="games-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
                 <section>
                     <h4>Atenção!</h4>

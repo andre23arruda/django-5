@@ -383,14 +383,16 @@ class Torneio(models.Model):
                         'vitorias': 0,
                         'pontos': 0,
                         'saldo': 0,
-                        'dupla': jogo.dupla1
+                        'dupla': jogo.dupla1,
+                        'jogos': 0
                     }
                 if jogo.dupla2 not in estatisticas:
                     estatisticas[jogo.dupla2] = {
                         'vitorias': 0,
                         'pontos': 0,
                         'saldo': 0,
-                        'dupla': jogo.dupla2
+                        'dupla': jogo.dupla2,
+                        'jogos': 0
                     }
 
                 if jogo.concluido:
@@ -403,10 +405,12 @@ class Torneio(models.Model):
                     estatisticas[jogo.dupla1]['pontos'] += jogo.placar_dupla1
                     estatisticas[jogo.dupla1]['saldo'] += jogo.placar_dupla1
                     estatisticas[jogo.dupla1]['saldo'] -= jogo.placar_dupla2
+                    estatisticas[jogo.dupla1]['jogos'] += 1
 
                     estatisticas[jogo.dupla2]['pontos'] += jogo.placar_dupla2
                     estatisticas[jogo.dupla2]['saldo'] += jogo.placar_dupla2
                     estatisticas[jogo.dupla2]['saldo'] -= jogo.placar_dupla1
+                    estatisticas[jogo.dupla2]['jogos'] += 1
 
             # Ordenar as duplas por vitórias e pontos
             items = estatisticas.values()

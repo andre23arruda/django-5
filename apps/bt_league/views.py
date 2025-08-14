@@ -38,12 +38,13 @@ def see_tournament(request, torneio_id: str):
     # Calcular ranking
     ranking = []
     for jogador in torneio.jogadores.all():
-        vitorias, pontos, saldo, _ = jogador.player_points(torneio)
+        vitorias, pontos, saldo, n_jogos = jogador.player_points(torneio)
         ranking.append({
             'jogador': jogador,
             'pontos': pontos,
             'saldo': saldo,
-            'vitorias': vitorias
+            'vitorias': vitorias,
+            'jogos': n_jogos
         })
 
     # Ordenar ranking por posição
