@@ -118,12 +118,13 @@ class TorneioAdmin(admin.ModelAdmin):
         js = ['js/create-games-modal.js', 'js/finish-tournament-modal.js']
 
     fieldsets = [
-        ('Torneio', {'fields': ('nome', 'data', 'duplas', 'quantidade_grupos', 'playoffs', 'open', 'ativo')}),
+        ('Torneio', {'fields': ('nome', 'data', 'open', 'duplas', 'quantidade_grupos', 'playoffs', 'ativo')}),
     ]
     change_form_template = 'admin/bt_cup/cup_change_form.html'
     list_display = ['nome', 'data', 'total_duplas', 'grupos', 'total_jogos', 'ativo']
     autocomplete_fields = ['duplas']
     list_filter = ('ativo',)
+    search_fields = ['nome']
 
     def get_inlines(self, request, obj):
         if obj:
@@ -132,6 +133,11 @@ class TorneioAdmin(admin.ModelAdmin):
             else:
                 return [JogoInline]
         return super().get_inlines(request, obj)
+
+    def get_fieldsets(self, request, obj):
+        if request.user.is_superuser:
+            return [['Torneio', {'fields': ['nome', 'data', 'open', 'duplas', 'quantidade_grupos', 'playoffs', 'ativo', 'criado_por']}]]
+        return [['Torneio', {'fields': ['nome', 'data', 'open', 'duplas', 'quantidade_grupos', 'playoffs', 'ativo']}]]
 
     def get_list_display(self, request):
         list_display = self.list_display
@@ -177,8 +183,10 @@ class TorneioAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         created = not change
-        if created:
+        if created and not request.user.is_superuser:
             obj.criado_por = request.user
+        # if form.cleaned_data.get('open'):
+        #     obj.playoffs = False
         super().save_model(request, obj, form, change)
 
 

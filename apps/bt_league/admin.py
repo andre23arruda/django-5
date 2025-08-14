@@ -124,8 +124,8 @@ class RankingInline(admin.TabularInline):
 class TorneioAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['ranking'].widget.can_change_related = False
-        self.fields['ranking'].widget.can_delete_related = False
+        # self.fields['ranking'].widget.can_change_related = False
+        # self.fields['ranking'].widget.can_delete_related = False
         # self.fields['ranking'].widget.can_view_related = False
 
     class Meta:
@@ -140,12 +140,13 @@ class TorneioAdmin(admin.ModelAdmin):
         js = ['js/create-games-modal.js', 'js/finish-tournament-modal.js']
 
     fieldsets = [
-        ['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ranking', 'ativo']}],
+        ['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ativo']}],
     ]
     change_form_template = 'admin/bt_league/league_change_form.html'
     list_display = ['nome', 'data', 'total_jogadores', 'total_jogos', 'ativo']
-    autocomplete_fields = ['jogadores', 'ranking']
+    autocomplete_fields = ['jogadores']
     list_filter = ['ativo']
+    search_fields = ['nome']
     form = TorneioAdminForm
 
     def get_inlines(self, request, obj):
@@ -159,7 +160,7 @@ class TorneioAdmin(admin.ModelAdmin):
     def get_fieldsets(self, request, obj):
         if request.user.is_superuser:
             return [['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ranking', 'ativo', 'criado_por', 'grupo_criador']}]]
-        return [['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ranking', 'ativo']}]]
+        return [['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ativo']}]]
 
     def get_list_display(self, request):
         list_display = self.list_display
@@ -214,7 +215,7 @@ class TorneioAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 
-@admin.register(Ranking)
+# @admin.register(Ranking)
 class RankingAdmin(admin.ModelAdmin):
     change_form_template = 'admin/bt_league/ranking_change_form.html'
     list_display = ['nome', 'ativo']
