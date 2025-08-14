@@ -1,4 +1,12 @@
 document.addEventListener('DOMContentLoaded', function() {
+    const hidePhase = document.getElementById('hidePhase');
+    if (hidePhase) {
+        const table = document.querySelector('#jogos-tab table');
+        if (table) {
+            table.classList.add('hide-phase');
+        }
+    }
+
     const canCreateGames = document.getElementById('canCreateGames');
     const jogosTab = document.getElementById('jogos-tab');
     if (jogosTab && canCreateGames) {

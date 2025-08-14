@@ -4,6 +4,10 @@
     {{ block.super }}
 
     {% if original.pk %}
+        {% if not original.open and not original.playoffs %}
+            <span id="hidePhase"/>
+        {% endif %}
+
         {% if original.ativo and not original.open %}
             <span id="canCreateGames"/>
 

@@ -77,7 +77,9 @@ td.field-dupla_2 p {
     padding-left: 5px !important;
 }
 
-#jogos-tab table .original {
+#jogos-tab table .original,
+#jogos-tab table.hide-phase .column-fase,
+#jogos-tab table.hide-phase .field-fase {
     display: none !important;
 }
 
@@ -85,6 +87,10 @@ td.field-dupla_2 p {
     td.field-placar_dupla1 input.vIntegerField,
     td.field-placar_dupla2 input.vIntegerField {
         max-width: 40px !important;
+    }
+
+    .content-wrapper>.content {
+        padding: .5rem !important;
     }
 }
 
