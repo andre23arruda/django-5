@@ -56,14 +56,29 @@ td.field-dupla_1,
 td.field-dupla_2 {
     text-align: center !important;
     vertical-align: middle !important;
-    padding-right: 0px !important;
-    padding-left: 0px !important;
+    padding: 0px !important;
 }
 
 td.field-x p,
 td.field-dupla_1 p,
 td.field-dupla_2 p {
     margin-bottom: 0px !important;
+}
+
+th.column-dupla_1,
+td.field-dupla_1 p {
+    text-align: right !important;
+    padding-right: 5px !important;
+}
+
+th.column-dupla_2,
+td.field-dupla_2 p {
+    text-align: left !important;
+    padding-left: 5px !important;
+}
+
+#jogos-tab table .original {
+    display: none !important;
 }
 
 @media (max-width: 500px) {

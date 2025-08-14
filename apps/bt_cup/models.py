@@ -5,15 +5,15 @@ from shortuuid.django_fields import ShortUUIDField
 
 
 FASE_CHOICES = [
-    ('GRUPO 1', 'GRUPO 1'),
-    ('GRUPO 2', 'GRUPO 2'),
-    ('GRUPO 3', 'GRUPO 3'),
-    ('GRUPO 4', 'GRUPO 4'),
-    ('OITAVAS', 'OITAVAS'),
-    ('QUARTAS', 'QUARTAS'),
-    ('SEMIFINAIS', 'SEMI-FINAIS'),
-    ('FINAL', 'FINAL'),
-    ('CAMPEAO', 'CAMPEÃO'),
+    ('GRUPO 1', 'G1'),
+    ('GRUPO 2', 'G2'),
+    ('GRUPO 3', 'G3'),
+    ('GRUPO 4', 'G4'),
+    ('OITAVAS', 'OF'),
+    ('QUARTAS', 'QF'),
+    ('SEMIFINAIS', 'SF'),
+    ('FINAL', 'F'),
+    ('CAMPEAO', 'C'),
 ]
 
 
@@ -509,7 +509,7 @@ class Jogo(models.Model):
     dupla2 = models.ForeignKey(Dupla, related_name='dupla2', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Dupla 2')
     placar_dupla1 = models.IntegerField(null=True, blank=True, verbose_name='')
     placar_dupla2 = models.IntegerField(null=True, blank=True, verbose_name='')
-    fase = models.CharField(max_length=100, null=True, blank=True)
+    fase = models.CharField(choices=FASE_CHOICES, default='GRUPO 1', max_length=100, null=True, blank=True)
     concluido = models.BooleanField(default=False, verbose_name='')
     obs = models.TextField(null=True, blank=True, help_text='Alguma observação sobre o jogo. Ex: "Dupla 1 WO"')
 

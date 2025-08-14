@@ -160,7 +160,7 @@ class TorneioAdmin(admin.ModelAdmin):
     def get_fieldsets(self, request, obj):
         if request.user.is_superuser:
             return [['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ranking', 'ativo', 'criado_por', 'grupo_criador']}]]
-        return [['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ativo']}]]
+        return super().get_fieldsets(request, obj)
 
     def get_list_display(self, request):
         list_display = self.list_display

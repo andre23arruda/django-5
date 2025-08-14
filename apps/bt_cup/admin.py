@@ -71,8 +71,8 @@ class JogoInline(admin.TabularInline):
 
 class JogoOpenInline(admin.TabularInline):
     model = Jogo
-    extra = 1
-    fields = ('field_concluido', 'fase', 'dupla1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla2', 'obs')
+    extra = 0
+    fields = ('field_concluido', 'dupla1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla2', 'obs')
     # raw_id_fields = ('dupla1', 'dupla2')
     readonly_fields = ('x', 'field_concluido')
     can_delete = True
@@ -81,21 +81,26 @@ class JogoOpenInline(admin.TabularInline):
         super().__init__(*args, **kwargs)
         self.parent_obj = None
 
+    def get_fields(self, request, obj):
+        if request.user.is_superuser:
+            return ('field_concluido', 'fase', 'dupla1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla2', 'obs')
+        return super().get_fields(request, obj)
+
     def get_formset(self, request, obj=None, **kwargs):
         self.parent_obj = obj
         return super().get_formset(request, obj, **kwargs)
 
-    def get_formset(self, request, obj=None, **kwargs):
-        self.parent_obj = obj
-        formset = super().get_formset(request, obj, **kwargs)
-        formset.form.base_fields['fase'].initial = 'GRUPO 1'
-        return formset
+    # def get_formset(self, request, obj=None, **kwargs):
+    #     self.parent_obj = obj
+    #     formset = super().get_formset(request, obj, **kwargs)
+    #     formset.form.base_fields['fase'].initial = 'GRUPO 1'
+    #     return formset
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name in ["dupla1", "dupla2"] and self.parent_obj:
-            kwargs["queryset"] = self.parent_obj.duplas.all()
+        if db_field.name in ['dupla1', 'dupla2'] and self.parent_obj:
+            kwargs['queryset'] = self.parent_obj.duplas.all()
         else:
-            kwargs["queryset"] = Dupla.objects.none()
+            kwargs['queryset'] = Dupla.objects.none()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     @admin.display(boolean=True)
@@ -137,7 +142,7 @@ class TorneioAdmin(admin.ModelAdmin):
     def get_fieldsets(self, request, obj):
         if request.user.is_superuser:
             return [['Torneio', {'fields': ['nome', 'data', 'open', 'duplas', 'quantidade_grupos', 'playoffs', 'ativo', 'criado_por']}]]
-        return [['Torneio', {'fields': ['nome', 'data', 'open', 'duplas', 'quantidade_grupos', 'playoffs', 'ativo']}]]
+        return super().get_fieldsets(request, obj)
 
     def get_list_display(self, request):
         list_display = self.list_display
