@@ -1,3 +1,4 @@
+import os
 from django.contrib import admin, messages
 from django.db.models import Case, When
 from django.shortcuts import redirect
@@ -130,6 +131,13 @@ class TorneioAdmin(admin.ModelAdmin):
     autocomplete_fields = ['duplas']
     list_filter = ('ativo',)
     search_fields = ['nome']
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['APP_LINK'] = os.getenv('APP_LINK')
+        return super().change_view(
+            request, object_id, form_url, extra_context=extra_context,
+        )
 
     def get_inlines(self, request, obj):
         if obj:

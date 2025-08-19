@@ -77,9 +77,19 @@
             </a>
         {% endif %}
 
+        {% comment %}
+            <a
+                class="btn btn-block btn-primary btn-sm mt-2"
+                href="{% url 'bt_cup:see_tournament' original.pk %}"
+            >
+                Ver Torneio
+            </a>
+        {% endcomment %}
+
         <a
-            href="{% url 'bt_cup:see_tournament' original.pk %}"
             class="btn btn-block btn-primary btn-sm mt-2"
+            href="{{ APP_LINK }}/torneio/{{original.pk}}"
+            target="_blank"
         >
             Ver Torneio
         </a>

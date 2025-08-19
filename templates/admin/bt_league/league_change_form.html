@@ -85,9 +85,19 @@
             </a>
         {% endif %}
 
+        {% comment %}
+            <a
+                class="btn btn-block btn-primary btn-sm mt-2"
+                href="{% url 'bt_league:see_tournament' original.pk %}"
+            >
+                Ver Torneio
+            </a>
+        {% endcomment %}
+
         <a
             class="btn btn-block btn-primary btn-sm mt-2"
-            href="{% url 'bt_league:see_tournament' original.pk %}"
+            href="{{ APP_LINK }}/rei-rainha/{{original.pk}}"
+            target="_blank"
         >
             Ver Torneio
         </a>

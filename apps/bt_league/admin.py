@@ -1,3 +1,4 @@
+import os
 from django import forms
 from django.contrib import admin, messages
 from django.db.models import Case, Q, When
@@ -148,6 +149,13 @@ class TorneioAdmin(admin.ModelAdmin):
     list_filter = ['ativo']
     search_fields = ['nome']
     form = TorneioAdminForm
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['APP_LINK'] = os.getenv('APP_LINK')
+        return super().change_view(
+            request, object_id, form_url, extra_context=extra_context,
+        )
 
     def get_inlines(self, request, obj):
         if not obj:
