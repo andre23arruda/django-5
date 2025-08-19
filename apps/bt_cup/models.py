@@ -3,7 +3,6 @@ from django.db import models
 from django.utils.html import format_html
 from shortuuid.django_fields import ShortUUIDField
 
-
 FASE_CHOICES = [
     ('GRUPO 1', 'G1'),
     ('GRUPO 2', 'G2'),
@@ -16,13 +15,18 @@ FASE_CHOICES = [
     ('CAMPEAO', 'C'),
 ]
 
-
 QUANTIDADE_GRUPOS_CHOICES = [
     (1, '1'),
     (2, '2'),
     (4, '4'),
     (8, '8')
 ]
+
+GAME_STATUS = (
+    ('P', '❌'),
+    ('A', '⌛'),
+    ('C', '✅'),
+)
 
 
 class Dupla(models.Model):
@@ -395,7 +399,7 @@ class Torneio(models.Model):
                         'jogos': 0
                     }
 
-                if jogo.concluido:
+                if jogo.concluido == 'C':
                     # Atualiza vitórias e pontos
                     if jogo.placar_dupla1 > jogo.placar_dupla2:
                         estatisticas[jogo.dupla1]['vitorias'] += 1
@@ -510,7 +514,7 @@ class Jogo(models.Model):
     placar_dupla1 = models.IntegerField(null=True, blank=True, verbose_name='')
     placar_dupla2 = models.IntegerField(null=True, blank=True, verbose_name='')
     fase = models.CharField(choices=FASE_CHOICES, default='GRUPO 1', max_length=100, null=True, blank=True)
-    concluido = models.BooleanField(default=False, verbose_name='')
+    concluido = models.CharField(max_length=2, default='P', choices=GAME_STATUS, verbose_name='Status')
     obs = models.TextField(null=True, blank=True, help_text='Alguma observação sobre o jogo. Ex: "Dupla 1 WO"')
 
     def __str__(self):
@@ -521,12 +525,14 @@ class Jogo(models.Model):
             self.placar_dupla1 = None
             self.placar_dupla2 = None
 
-        self.concluido = (
+        finished = (
             self.placar_dupla1 is not None and
             self.placar_dupla1 != '' and
             self.placar_dupla2 is not None and
             self.placar_dupla2 != ''
         )
+        if finished:
+            self.concluido = 'C'
         super().save(*args, **kwargs)
 
     @property

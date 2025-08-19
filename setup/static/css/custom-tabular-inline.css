@@ -35,6 +35,11 @@
     display: none !important;
 } */
 
+th.column-quadra {
+    opacity: 0;
+    max-width: 10px !important;
+}
+
 th.column-dupla_1,
 th.column-dupla_2,
 td.field-dupla_1,
@@ -96,5 +101,18 @@ td.field-dupla_2 p {
 
 #jazzy-actions input[name="_addanother"],
 #jazzy-actions input[name="_continue"] {
+    display: none !important;
+}
+
+.field-fase select.select2-hidden-accessible,
+.field-concluido select.select2-hidden-accessible {
+    width: 40px !important;
+    height: 20px !important;
+    clip: auto !important;
+    clip-path: none !important;
+    position: relative !important;
+}
+.field-fase span.select2.select2-container.select2-container--default,
+.field-concluido span.select2.select2-container.select2-container--default {
     display: none !important;
 }

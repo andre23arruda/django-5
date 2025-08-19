@@ -219,6 +219,7 @@ def get_tournament_data(request, torneio_id: str):
                 'placar_dupla1': jogo.placar_dupla1,
                 'placar_dupla2': jogo.placar_dupla2,
                 'concluido': jogo.concluido,
+                'quadra': jogo.quadra
             } for jogo in jogos
         ],
         'estatisticas': {

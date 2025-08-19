@@ -4,6 +4,11 @@ from django.utils.safestring import mark_safe
 from itertools import combinations
 from shortuuid.django_fields import ShortUUIDField
 
+GAME_STATUS = (
+    ('P', '❌'),
+    ('A', '⌛'),
+    ('C', '✅'),
+)
 
 class Ranking(models.Model):
     id = ShortUUIDField(length=8, max_length=40, primary_key=True)
@@ -191,7 +196,7 @@ class Jogo(models.Model):
     dupla2_jogador2 = models.ForeignKey(Jogador, related_name='dupla2_jogador2', on_delete=models.CASCADE)
     placar_dupla1 = models.IntegerField(null=True, blank=True, verbose_name='')
     placar_dupla2 = models.IntegerField(null=True, blank=True, verbose_name='')
-    concluido = models.BooleanField(default=False, verbose_name='')
+    concluido = models.CharField(max_length=2, default='P', choices=GAME_STATUS, verbose_name='Status')
 
     def __str__(self):
         return f'{self.dupla1_jogador1.short_name()}/{self.dupla1_jogador2.short_name()} X {self.dupla2_jogador1.short_name()}/{self.dupla2_jogador2.short_name()}'
@@ -203,10 +208,12 @@ class Jogo(models.Model):
         return mark_safe(f'<span>{self.dupla2_jogador1.short_name()}<br/>{self.dupla2_jogador2.short_name()}</span>')
 
     def save(self, *args, **kwargs):
-        self.concluido = (
+        finished = (
             self.placar_dupla1 is not None and
             self.placar_dupla1 != '' and
             self.placar_dupla2 is not None and
             self.placar_dupla2 != ''
         )
+        if finished:
+            self.concluido = 'C'
         super().save(*args, **kwargs)

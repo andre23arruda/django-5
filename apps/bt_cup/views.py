@@ -119,7 +119,7 @@ def see_tournament(request, torneio_id: str):
                 'jogos': grupo_jogos,
                 'classificacao': classificacao[f'GRUPO {i}']
             }
-            not_finished = grupo_jogos.filter(concluido=False).exists()
+            not_finished = grupo_jogos.exclude(concluido='C').exists()
             groups_finished = groups_finished and not not_finished
 
     # Separar fases finais (semifinais e final)
@@ -196,7 +196,7 @@ def get_tournament_data(request, torneio_id: str):
                     } for dupla in classificacao[f'GRUPO {i}']
                 ]
             }
-            groups_finished = groups_finished and not grupo_jogos.filter(concluido=False).exists()
+            groups_finished = groups_finished and not grupo_jogos.exclude(concluido='C').exists()
 
     # Process playoffs
     fases_finais = {}

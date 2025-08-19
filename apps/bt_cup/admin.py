@@ -43,7 +43,7 @@ class JogoInline(admin.TabularInline):
     model = Jogo
     extra = 0
     fields = ('fase', 'dupla_1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla_2', 'concluido')
-    readonly_fields = ('fase', 'dupla_1', 'dupla_2', 'x', 'concluido')
+    readonly_fields = ('fase', 'dupla_1', 'dupla_2', 'x')
     can_delete = False
 
     def dupla_1(self, obj):
@@ -73,9 +73,9 @@ class JogoInline(admin.TabularInline):
 class JogoOpenInline(admin.TabularInline):
     model = Jogo
     extra = 0
-    fields = ('field_concluido', 'dupla1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla2', 'obs')
+    fields = ('dupla1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla2', 'obs', 'concluido')
     # raw_id_fields = ('dupla1', 'dupla2')
-    readonly_fields = ('x', 'field_concluido')
+    readonly_fields = ('x',)
     can_delete = True
 
     def __init__(self, *args, **kwargs):
@@ -84,7 +84,7 @@ class JogoOpenInline(admin.TabularInline):
 
     def get_fields(self, request, obj):
         if request.user.is_superuser:
-            return ('field_concluido', 'fase', 'dupla1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla2', 'obs')
+            return ('fase', 'dupla1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla2', 'obs', 'concluido')
         return super().get_fields(request, obj)
 
     def get_formset(self, request, obj=None, **kwargs):
@@ -103,11 +103,6 @@ class JogoOpenInline(admin.TabularInline):
         else:
             kwargs['queryset'] = Dupla.objects.none()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-    @admin.display(boolean=True)
-    def field_concluido(self, obj):
-        return obj.concluido
-    field_concluido.short_description = ''
 
     def has_add_permission(self, request, obj=None):
         return True
