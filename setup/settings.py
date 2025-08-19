@@ -24,11 +24,13 @@ INSTALLED_APPS = [
     'bt_cup',
     'escala_de_plantao',
     'payments',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -95,6 +97,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # locale
 LOCALE_PATHS = [ BASE_DIR / 'locale' ]
+
+# CORS
+CORS_ALLOWED_ORIGINS = json.loads(os.getenv('CORS_ALLOWED_ORIGINS', '[]'))
 
 # Jazzmin
 from .theme import JAZZMIN_UI_TWEAKS, JAZZMIN_SETTINGS
