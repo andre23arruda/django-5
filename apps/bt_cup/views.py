@@ -192,6 +192,7 @@ def get_tournament_data(request, torneio_id: str):
                         'vitorias': dupla['vitorias'],
                         'pontos': dupla['pontos'],
                         'saldo': dupla['saldo'],
+                        'jogos': dupla['jogos'],
                     } for dupla in classificacao[f'GRUPO {i}']
                 ]
             }

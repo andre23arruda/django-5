@@ -412,9 +412,9 @@ class Torneio(models.Model):
                     estatisticas[jogo.dupla2]['saldo'] -= jogo.placar_dupla1
                     estatisticas[jogo.dupla2]['jogos'] += 1
 
-            # Ordenar as duplas por vitórias e pontos
+            # Ordenar as duplas por vitórias, saldo e pontos
             items = estatisticas.values()
-            ranking = sorted(items, key=lambda x: (-x['vitorias'], -x['pontos'], -x['saldo']))
+            ranking = sorted(items, key=lambda x: (-x['vitorias'], -x['saldo'], -x['pontos']))
             ranking_result = []
             j_0 = {'pontos': 0, 'saldo': 0, 'vitorias': 0, 'posicao': 1}
             for i, j_1 in enumerate(ranking):
