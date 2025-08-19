@@ -1,7 +1,7 @@
 import base64, csv, io, os, qrcode, urllib
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Ranking, Torneio
 
@@ -171,3 +171,62 @@ def see_ranking(request, ranking_id: str):
         'jogadores': jogadores_ranking
     }
     return render(request, 'bt_league/see_ranking.html', context)
+
+
+def get_tournament_data(request, torneio_id: str):
+    '''Returns tournament data as JSON for React frontend'''
+    torneio = Torneio.objects.filter(pk=torneio_id).first()
+    if not torneio:
+        return JsonResponse({'error': 'Torneio não encontrado'}, status=404)
+    jogos = torneio.jogo_set.all()
+
+    # Calculate ranking
+    ranking = []
+    for jogador in torneio.jogadores.all():
+        vitorias, pontos, saldo, n_jogos = jogador.player_points(torneio)
+        ranking.append({
+            'jogador': jogador.nome,
+            'pontos': pontos,
+            'saldo': saldo,
+            'vitorias': vitorias,
+            'jogos': n_jogos
+        })
+
+    # Sort ranking by position
+    ranking = sorted(ranking, key=lambda x: (-x['vitorias'], -x['saldo'], -x['pontos']))
+    ranking_result = []
+    j_0 = {'pontos': 0, 'saldo': 0, 'vitorias': 0, 'posicao': 1}
+    for i, j_1 in enumerate(ranking):
+        if (j_1['pontos'] == j_0['pontos']) and (j_1['saldo'] == j_0['saldo']) and (j_1['vitorias'] == j_0['vitorias']):
+            j_1['posicao'] = j_0['posicao']
+        else:
+            j_1['posicao'] = i + 1
+            j_0 = j_1
+        ranking_result.append(j_1)
+
+    data = {
+        'torneio': {
+            'id': torneio.id,
+            'nome': torneio.nome,
+            'data': torneio.data,
+            'ativo': torneio.ativo,
+        },
+        'jogos': [
+            {
+                'id': jogo.id,
+                'dupla1': jogo.dupla_1(),
+                'dupla2': jogo.dupla_2(),
+                'placar_dupla1': jogo.placar_dupla1,
+                'placar_dupla2': jogo.placar_dupla2,
+                'concluido': jogo.concluido,
+            } for jogo in jogos
+        ],
+        'estatisticas': {
+            'total_jogos': jogos.count(),
+            'jogos_restantes': jogos.filter(concluido=False).count(),
+        },
+        'ranking': ranking_result,
+        'can_edit': request.user.is_superuser or torneio.criado_por == request.user,
+    }
+
+    return JsonResponse(data)

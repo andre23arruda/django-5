@@ -1,6 +1,7 @@
 import base64, io, os, qrcode, urllib
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Jogo, Torneio
 
@@ -157,3 +158,72 @@ def qrcode_tournament(request, torneio_id: str):
         'torneio': torneio,
     }
     return render(request, 'qrcode_tournament.html', context)
+
+
+def get_tournament_data(request, torneio_id: str):
+    '''Returns tournament data as JSON for React frontend'''
+    torneio = Torneio.objects.filter(pk=torneio_id).first()
+    if not torneio:
+        return JsonResponse({'error': 'Torneio não encontrado'}, status=404)
+    jogos = Jogo.objects.filter(torneio=torneio)
+    classificacao = torneio.get_groups_ranking()
+
+    # Process groups
+    grupos = {}
+    groups_finished = True
+    for i in range(1, 5):
+        grupo_jogos = jogos.filter(fase=f'GRUPO {i}')
+        if grupo_jogos.exists():
+            grupos[f'GRUPO {i}'] = {
+                'jogos': [
+                    {
+                        'id': jogo.id,
+                        'dupla1': jogo.dupla1.render() if jogo.dupla1 else None,
+                        'dupla2': jogo.dupla2.render() if jogo.dupla2 else None,
+                        'placar_dupla1': jogo.placar_dupla1,
+                        'placar_dupla2': jogo.placar_dupla2,
+                        'concluido': jogo.concluido,
+                    } for jogo in grupo_jogos
+                ],
+                'classificacao': [
+                    {
+                        'posicao': dupla['posicao'],
+                        'dupla': dupla['dupla'].render(),
+                        'vitorias': dupla['vitorias'],
+                        'pontos': dupla['pontos'],
+                        'saldo': dupla['saldo'],
+                    } for dupla in classificacao[f'GRUPO {i}']
+                ]
+            }
+            groups_finished = groups_finished and not grupo_jogos.filter(concluido=False).exists()
+
+    # Process playoffs
+    fases_finais = {}
+    for fase in ['FINAL', 'SEMIFINAIS', 'QUARTAS', 'OITAVAS']:
+        fase_jogos = jogos.filter(fase=fase)
+        if fase_jogos.exists():
+            fases_finais[fase] = [
+                {
+                    'id': jogo.id,
+                    'dupla1': jogo.dupla1.render() if jogo.dupla1 else None,
+                    'dupla2': jogo.dupla2.render() if jogo.dupla2 else None,
+                    'placar_dupla1': jogo.placar_dupla1,
+                    'placar_dupla2': jogo.placar_dupla2,
+                    'concluido': jogo.concluido,
+                } for jogo in fase_jogos
+            ]
+
+    data = {
+        'torneio': {
+            'id': torneio.id,
+            'nome': torneio.nome,
+            'data': torneio.data,
+            'ativo': torneio.ativo,
+        },
+        'grupos': grupos,
+        'fases_finais': fases_finais,
+        'groups_finished': groups_finished,
+        'can_edit': request.user.is_superuser or torneio.criado_por == request.user,
+    }
+
+    return JsonResponse(data)
