@@ -162,11 +162,18 @@ def qrcode_tournament(request, torneio_id: str):
 
 def get_tournament_data(request, torneio_id: str):
     '''Returns tournament data as JSON for React frontend'''
+    CARD_STYLE_DICT = {
+        'OITAVAS': 'md:w-1/4',
+        'QUARTAS': 'md:w-1/3',
+        'SEMIFINAIS': 'md:w-1/2',
+        'FINAL': 'md:w-1/2',
+    }
     torneio = Torneio.objects.filter(pk=torneio_id).first()
     if not torneio:
         return JsonResponse({'error': 'Torneio não encontrado'}, status=404)
     jogos = Jogo.objects.filter(torneio=torneio)
     classificacao = torneio.get_groups_ranking()
+    playoff_card_style = ''
 
     # Process groups
     grupos = {}
@@ -213,6 +220,7 @@ def get_tournament_data(request, torneio_id: str):
                     'concluido': jogo.concluido,
                 } for jogo in fase_jogos
             ]
+            playoff_card_style = CARD_STYLE_DICT[fase]
 
     data = {
         'torneio': {
@@ -225,6 +233,7 @@ def get_tournament_data(request, torneio_id: str):
         'fases_finais': fases_finais,
         'groups_finished': groups_finished,
         'can_edit': request.user.is_superuser or torneio.criado_por == request.user,
+        'card_style': playoff_card_style,
     }
 
     return JsonResponse(data)
