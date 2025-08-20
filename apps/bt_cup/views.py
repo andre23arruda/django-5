@@ -51,10 +51,7 @@ def next_stage(request, torneio_id: str):
         dupla1__isnull=False,
         dupla2__isnull=False
     )
-    jogos_grupos_nao_finalizados = jogos.filter(
-        fase__startswith='GRUPO',
-        concluido=False
-    )
+    jogos_grupos_nao_finalizados = jogos.filter(fase__startswith='GRUPO').exclude(concluido='C')
 
     if jogos_grupos_nao_finalizados.exists():
         messages.add_message(request, messages.ERROR, 'Jogos de grupos ainda não foram finalizados.')

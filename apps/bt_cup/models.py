@@ -303,7 +303,7 @@ class Torneio(models.Model):
 
         for i, fase in enumerate(fases):
             # Buscar os jogos da fase atual
-            jogos_atuais = Jogo.objects.filter(torneio=self, fase=fase, concluido=True)
+            jogos_atuais = Jogo.objects.filter(torneio=self, fase=fase, concluido='C')
 
             # Verificar se todos os jogos da fase atual foram concluídos
             if len(jogos_atuais) == 0: # Nenhum jogo concluído, ignorar a fase
@@ -355,7 +355,7 @@ class Torneio(models.Model):
         self.save()
 
     def is_finished(self):
-        return Jogo.objects.filter(torneio=self, fase='FINAL', concluido=True).exists()
+        return Jogo.objects.filter(torneio=self, fase='FINAL', concluido='C').exists()
 
     def has_games(self):
         return Jogo.objects.filter(torneio=self).exists()

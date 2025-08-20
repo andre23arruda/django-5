@@ -63,7 +63,7 @@ def see_tournament(request, torneio_id: str):
         'torneio': torneio,
         'jogos': jogos,
         'n_jogos': jogos.count(),
-        'jogos_restantes': jogos.filter(concluido=False).count(),
+        'jogos_restantes': jogos.exclude(concluido='C').count(),
         'ranking': ranking_result,
         'can_edit': request.user.is_superuser or torneio.criado_por == request.user,
     }
@@ -224,7 +224,7 @@ def get_tournament_data(request, torneio_id: str):
         ],
         'estatisticas': {
             'total_jogos': jogos.count(),
-            'jogos_restantes': jogos.filter(concluido=False).count(),
+            'jogos_restantes': jogos.exclude(concluido='C').count(),
         },
         'ranking': ranking_result,
         'can_edit': request.user.is_superuser or torneio.criado_por == request.user,
