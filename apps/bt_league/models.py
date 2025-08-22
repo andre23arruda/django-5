@@ -216,4 +216,6 @@ class Jogo(models.Model):
         )
         if finished:
             self.concluido = 'C'
+        else:
+            self.concluido = 'P'
         super().save(*args, **kwargs)
