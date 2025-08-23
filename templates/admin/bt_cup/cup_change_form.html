@@ -31,7 +31,7 @@
                     <button
                         type="button"
                         id="games-cancel"
-                        class="btn btn-primary btn-sm"
+                        class="btn btn-secondary btn-sm"
                     >
                         Cancelar
                     </button>
@@ -45,7 +45,7 @@
             <button
                 type="button"
                 id="finish-tournament"
-                class="btn btn-block btn-primary btn-sm mt-2"
+                class="btn btn-block btn-danger btn-sm mt-2"
             >
                 Encerrar
             </button>
@@ -60,7 +60,7 @@
                     <button
                         type="button"
                         id="tournament-cancel"
-                        class="btn btn-primary btn-sm"
+                        class="btn btn-secondary btn-sm"
                     >
                         Cancelar
                     </button>
@@ -76,7 +76,7 @@
 
             <a
                 href="{% url 'bt_cup:qrcode_tournament' original.pk %}"
-                class="btn btn-block btn-primary btn-sm mt-2"
+                class="btn btn-block btn-secondary btn-sm mt-2"
                 target="_blank"
             >
                 QR Code
@@ -85,7 +85,7 @@
 
         {% comment %}
             <a
-                class="btn btn-block btn-primary btn-sm mt-2"
+                class="btn btn-block btn-secondary btn-sm mt-2"
                 href="{% url 'bt_cup:see_tournament' original.pk %}"
             >
                 Ver Torneio
@@ -93,7 +93,7 @@
         {% endcomment %}
 
         <a
-            class="btn btn-block btn-primary btn-sm mt-2"
+            class="btn btn-block btn-secondary btn-sm mt-2"
             href="{{ APP_LINK }}/torneio/{{original.pk}}"
             target="_blank"
         >
@@ -101,13 +101,37 @@
         </a>
 
         {% if not original.is_finished and original.has_games and original.ativo and original.playoffs %}
-            <a
+            <button
+                type="button"
                 id="nextStage"
-                href="{% url 'bt_cup:next_stage' original.pk %}"
-                class="btn btn-block btn-primary btn-sm mt-2"
+                class="btn btn-block btn-primary btn-sm mb-2"
             >
                 Próxima fase
-            </a>
+            </button>
+
+            <dialog id="stage-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
+                <section>
+                    <h4>Atenção!</h4>
+                    <h5>Tem certeza que deseja gerar a próxima fase do torneio? <br/><br/>A ação não pode ser desfeita!</h5>
+                </section>
+
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                    <button
+                        type="button"
+                        id="stage-cancel"
+                        class="btn btn-secondary btn-sm"
+                    >
+                        Cancelar
+                    </button>
+
+                    <a
+                        class="btn btn-primary btn-sm"
+                        href="{% url 'bt_cup:next_stage' original.pk %}"
+                    >
+                        Sim, avançar
+                    </a>
+                </div>
+            </dialog>
         {% endif %}
     {% endif %}
 {% endblock %}
