@@ -3,10 +3,15 @@
 {% block submit_buttons_bottom %}
     {{ block.super }}
 
-
     {% if original.pk %}
-    {% if original.ativo %}
-            <span id="canCreateGames"/>
+        {% if original.ativo %}
+            <button
+                id="create-games"
+                type="button"
+                class="btn btn-block btn-primary btn-sm mt-2"
+            >
+                Gerar Jogos
+            </button>
 
             <dialog id="games-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
                 <section>

@@ -9,7 +9,13 @@
         {% endif %}
 
         {% if original.ativo and not original.open %}
-            <span id="canCreateGames"/>
+            <button
+                id="create-games"
+                type="button"
+                class="btn btn-block btn-primary btn-sm mt-2"
+            >
+                Gerar Jogos
+            </button>
 
             <dialog id="games-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
                 <section>
@@ -96,6 +102,7 @@
 
         {% if not original.is_finished and original.has_games and original.ativo and original.playoffs %}
             <a
+                id="nextStage"
                 href="{% url 'bt_cup:next_stage' original.pk %}"
                 class="btn btn-block btn-primary btn-sm mt-2"
             >

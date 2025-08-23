@@ -7,26 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    const canCreateGames = document.getElementById('canCreateGames');
-    const jogosTab = document.getElementById('jogos-tab');
-    if (jogosTab && canCreateGames) {
-        jogosTab.innerHTML += `
-            <button
-                id="create-games"
-                type="button"
-                class="btn btn-block btn-primary btn-sm mt-2"
-                style="
-                    position: absolute;
-                    top: 10px;
-                    right: 20px;
-                    max-width: 100px;
-                "
-            >
-                Gerar Jogos
-            </button>
-        `
-    }
-
     const gamesButton = document.getElementById('create-games')
     const cancelButton = document.getElementById('games-cancel')
     const gamesDialog = document.getElementById('games-dialog')
@@ -39,5 +19,21 @@ document.addEventListener('DOMContentLoaded', function() {
         cancelButton.addEventListener('click', function () {
             gamesDialog.close()
         })
+
+        const jogosTab = document.getElementById('jogos-tab');
+        gamesButton.style.maxWidth = '100px';
+        gamesButton.style.position = 'absolute';
+        gamesButton.style.top = '10px';
+        gamesButton.style.right = '20px';
+        jogosTab.appendChild(gamesButton);
+    }
+
+    const nextStage = document.getElementById('nextStage');
+    if (nextStage) {
+        nextStage.style.maxWidth = '100px';
+        nextStage.style.float = 'right';
+        nextStage.style.marginBottom = '10px';
+        const jogoSetGroup = document.getElementById('jogo_set-group');
+        jogoSetGroup.appendChild(nextStage);
     }
 })
