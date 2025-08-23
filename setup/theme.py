@@ -1,7 +1,7 @@
 JAZZMIN_SETTINGS = {
-    'site_title': 'Painel de Gestão',
-    'site_header': 'Painel de Gestão',
-    'site_brand': 'Painel de Gestão',
+    'site_title': 'Pódio Digital',
+    'site_header': 'Pódio Digital',
+    'site_brand': 'Pódio Digital',
     'site_logo': 'images/adm.ico',
     'login_logo': 'images/adm.ico',
     'login_logo_dark': None,
