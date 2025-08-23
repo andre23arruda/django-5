@@ -1,12 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const hidePhase = document.getElementById('hidePhase');
-    if (hidePhase) {
-        const table = document.querySelector('#jogos-tab table');
-        if (table) {
-            table.classList.add('hide-phase');
-        }
-    }
-
     const gamesButton = document.getElementById('create-games')
     const cancelButton = document.getElementById('games-cancel')
     const gamesDialog = document.getElementById('games-dialog')
@@ -26,14 +18,5 @@ document.addEventListener('DOMContentLoaded', function() {
         gamesButton.style.top = '10px';
         gamesButton.style.right = '20px';
         jogosTab.appendChild(gamesButton);
-    }
-
-    const nextStage = document.getElementById('nextStage');
-    if (nextStage) {
-        nextStage.style.maxWidth = '100px';
-        nextStage.style.float = 'right';
-        nextStage.style.marginBottom = '10px';
-        const jogoSetGroup = document.getElementById('jogo_set-group');
-        jogoSetGroup.appendChild(nextStage);
     }
 })

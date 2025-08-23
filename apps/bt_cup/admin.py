@@ -116,10 +116,15 @@ class JogoOpenInline(admin.TabularInline):
 class TorneioAdmin(admin.ModelAdmin):
     class Media:
         css = {'all': ('css/custom-tabular-inline.css', 'css/hide-related-widgets.css')}
-        js = ['js/create-games-modal.js', 'js/finish-tournament-modal.js']
+        js = [
+            'js/create-games-modal.js',
+            'js/finish-tournament-modal.js',
+            'js/hide-phase.js',
+            'js/next-stage-modal.js'
+        ]
 
     fieldsets = [
-        ('Torneio', {'fields': ('nome', 'data', 'open', 'duplas', 'quantidade_grupos', 'playoffs', 'ativo')}),
+        ('Torneio', {'fields': ('nome', 'data', 'duplas', 'quantidade_grupos', 'playoffs', 'open', 'ativo')}),
     ]
     change_form_template = 'admin/bt_cup/cup_change_form.html'
     list_display = ['nome', 'data', 'total_duplas', 'grupos', 'total_jogos', 'ativo']
@@ -144,7 +149,7 @@ class TorneioAdmin(admin.ModelAdmin):
 
     def get_fieldsets(self, request, obj):
         if request.user.is_superuser:
-            return [['Torneio', {'fields': ['nome', 'data', 'open', 'duplas', 'quantidade_grupos', 'playoffs', 'ativo', 'criado_por']}]]
+            return [['Torneio', {'fields': ['nome', 'data', 'duplas', 'quantidade_grupos', 'playoffs', 'open', 'ativo', 'criado_por']}]]
         return super().get_fieldsets(request, obj)
 
     def get_list_display(self, request):

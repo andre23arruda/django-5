@@ -130,7 +130,7 @@ class Torneio(models.Model):
     )
     open = models.BooleanField(
         default=False,
-        verbose_name='Torneio aberto',
+        verbose_name='Criar jogos manualmente',
         help_text='Ativar para criar jogos manualmente (Apenas um grupo, sem playoffs)'
     )
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
