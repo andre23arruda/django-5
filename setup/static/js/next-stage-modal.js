@@ -6,9 +6,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (nextStageButton) {
         nextStageButton.style.maxWidth = '100px';
         nextStageButton.style.float = 'right';
-        nextStageButton.style.marginBottom = '10px';
-        const jogoSetGroup = document.getElementById('jogo_set-group');
-        jogoSetGroup.appendChild(nextStageButton);
+        const jogosTab = document.getElementById('jogos-tab');
+        jogosTab.appendChild(nextStageButton);
 
         nextStageButton.addEventListener('click', function () {
             tournamentDialog.showModal()
