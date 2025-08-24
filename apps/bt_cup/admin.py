@@ -112,6 +112,21 @@ class JogoOpenInline(admin.TabularInline):
     x.short_description = ''
 
 
+class DuplasInline(admin.TabularInline):
+    model = Torneio.duplas.through
+    extra = 0
+    verbose_name = 'Dupla'
+    verbose_name_plural = 'Duplas'
+    fields = ('dupla',)
+    can_delete = False
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).order_by('dupla__jogador1')
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(Torneio)
 class TorneioAdmin(admin.ModelAdmin):
     class Media:
@@ -142,9 +157,9 @@ class TorneioAdmin(admin.ModelAdmin):
     def get_inlines(self, request, obj):
         if obj:
             if obj.open:
-                return [JogoOpenInline]
+                return [JogoOpenInline, DuplasInline]
             else:
-                return [JogoInline]
+                return [JogoInline, DuplasInline]
         return super().get_inlines(request, obj)
 
     def get_fieldsets(self, request, obj):

@@ -122,6 +122,21 @@ class RankingInline(admin.TabularInline):
     pontos.short_description = 'V / P / S'
 
 
+class JogadoresInline(admin.TabularInline):
+    model = Torneio.jogadores.through
+    extra = 0
+    verbose_name = 'Jogador'
+    verbose_name_plural = 'Jogadores'
+    fields = ('jogador',)
+    can_delete = False
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).order_by('jogador__nome')
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 class TorneioAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -137,8 +152,11 @@ class TorneioAdminForm(forms.ModelForm):
 @admin.register(Torneio)
 class TorneioAdmin(admin.ModelAdmin):
     class Media:
-        css = {'all': ('css/custom-tabular-inline.css',)}
-        js = ['js/create-games-modal.js', 'js/finish-tournament-modal.js']
+        css = {'all': ('css/custom-tabular-inline.css', 'css/hide-related-widgets.css')}
+        js = [
+            'js/create-games-modal.js',
+            'js/finish-tournament-modal.js'
+        ]
 
     fieldsets = [
         ['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ativo']}],
@@ -162,7 +180,7 @@ class TorneioAdmin(admin.ModelAdmin):
             return []
         # if obj.jogadores.count() > 0 and obj.jogo_set.count() > 0:
         if obj.jogadores.count() > 0:
-            return [JogoInline]
+            return [JogoInline, JogadoresInline]
         return super().get_inlines(request, obj)
 
     def get_fieldsets(self, request, obj):
