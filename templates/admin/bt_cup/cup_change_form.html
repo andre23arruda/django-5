@@ -81,6 +81,14 @@
             >
                 QR Code
             </a>
+        {% else %}
+            <a
+                class="btn btn-block btn-secondary btn-sm mt-2"
+                href="{% url 'bt_cup:download' original.pk %}"
+                target="_blank"
+            >
+                Planilha
+            </a>
         {% endif %}
 
         {% comment %}
@@ -104,7 +112,7 @@
             <button
                 type="button"
                 id="nextStage"
-                class="btn btn-block btn-primary btn-sm mb-2"
+                class="btn btn-block btn-primary btn-sm"
             >
                 Próxima fase
             </button>

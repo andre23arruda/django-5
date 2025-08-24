@@ -1,10 +1,10 @@
-import base64, io, os, qrcode, urllib
+import base64, csv, io, os, qrcode, urllib
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
 from .models import Jogo, Torneio
-
 
 def distribute_classifieds(classifieds):
     '''Distribui classificados [1,2,3,4,5,6,7,8,9,10] -> [1,10,2,9,3,8,4,7,5,6]'''
@@ -235,3 +235,86 @@ def get_tournament_data(request, torneio_id: str):
     }
 
     return JsonResponse(data)
+
+
+def export_csv(request, torneio_id: str):
+    '''Export tournament data as CSV'''
+    torneio = get_object_or_404(Torneio, pk=torneio_id)
+    jogos = Jogo.objects.filter(torneio=torneio)
+    classificacao = torneio.get_groups_ranking()
+    response = HttpResponse(
+        content_type='text/csv',
+        headers={
+            'Content-Disposition': f'attachment; filename="{torneio.nome}_{timezone.now().strftime("%Y%m%d")}.csv"'
+        },
+    )
+
+    writer = csv.writer(response)
+    writer.writerow(['Torneio', torneio.nome, '', '', '', 'Data', torneio.data.strftime('%d/%m/%Y')])
+    writer.writerow([])
+    writer.writerow([])
+
+    # Write group games
+    for i in range(1, 5):
+        grupo_jogos = jogos.filter(fase=f'GRUPO {i}')
+        if grupo_jogos.exists():
+            writer.writerow([f'GRUPO {i}'])
+            # Headers side by side
+            writer.writerow(['JOGOS', '', '', '', '', 'RANKING'])
+            writer.writerow(['Dupla 1', 'Placar', 'Dupla 2', 'Status', '', 'Posição', 'Dupla', 'Vitórias', 'Pontos', 'Saldo', 'Jogos'])
+
+            # Get all games and rankings for this group
+            games_list = list(grupo_jogos)
+            ranking_list = classificacao[f'GRUPO {i}']
+            max_rows = max(len(games_list), len(ranking_list))
+
+            # Write games and rankings side by side
+            for row in range(max_rows):
+                game_data = ['', '', '', '']  # Empty game data as default
+                ranking_data = ['', '', '', '', '', '']  # Empty ranking data as default
+
+                # Fill game data if available
+                if row < len(games_list):
+                    jogo = games_list[row]
+                    game_data = [
+                        jogo.dupla1.__str__() if jogo.dupla1 else 'A definir',
+                        f'{jogo.placar_dupla1 or "-"} x {jogo.placar_dupla2 or "-"}',
+                        jogo.dupla2.__str__() if jogo.dupla2 else 'A definir',
+                        'Concluído' if jogo.concluido == 'C' else 'Pendente'
+                    ]
+
+                # Fill ranking data if available
+                if row < len(ranking_list):
+                    dupla = ranking_list[row]
+                    ranking_data = [
+                        dupla['posicao'],
+                        dupla['dupla'].__str__(),
+                        dupla['vitorias'],
+                        dupla['pontos'],
+                        dupla['saldo'],
+                        dupla['jogos']
+                    ]
+
+                # Write both game and ranking data in the same row
+                writer.writerow([*game_data, '', *ranking_data])
+
+            writer.writerow([])  # Empty row for spacing
+            writer.writerow([])  # Empty row for spacing
+
+    # Write playoff games
+    for fase in ['OITAVAS', 'QUARTAS', 'SEMIFINAIS', 'FINAL']:
+        fase_jogos = jogos.filter(fase=fase)
+        if fase_jogos.exists():
+            writer.writerow([fase])
+            writer.writerow(['Dupla 1', 'Placar', 'Dupla 2', 'Status'])
+            for jogo in fase_jogos:
+                writer.writerow([
+                    jogo.dupla1.__str__() if jogo.dupla1 else 'A definir',
+                    f'{jogo.placar_dupla1 or "-"} x {jogo.placar_dupla2 or "-"}',
+                    jogo.dupla2.__str__() if jogo.dupla2 else 'A definir',
+                    'Concluído' if jogo.concluido == 'C' else 'Pendente'
+                ])
+            writer.writerow([])  # Empty row for spacing
+            writer.writerow([])  # Empty row for spacing
+
+    return response
