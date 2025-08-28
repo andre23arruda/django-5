@@ -60,8 +60,13 @@ class JogoInline(admin.TabularInline):
     model = Jogo
     extra = 0
     fields = ['quadra', 'dupla_1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla_2', 'concluido']
-    readonly_fields = ['dupla_1', 'dupla_2', 'x', 'quadra']
     can_delete = False
+
+    def get_readonly_fields(self, request, obj=None):
+        fields = ['dupla_1', 'dupla_2', 'x', 'quadra']
+        if not obj.ativo:
+            fields += ['placar_dupla1', 'placar_dupla2']
+        return fields
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -129,6 +134,12 @@ class JogadoresInline(admin.TabularInline):
     verbose_name_plural = 'Jogadores'
     fields = ('jogador',)
     can_delete = False
+
+    def get_readonly_fields(self, request, obj=None):
+        fields = []
+        if not obj.ativo:
+            fields += ['jogador']
+        return fields
 
     def get_queryset(self, request):
         return super().get_queryset(request).order_by('jogador__nome')
