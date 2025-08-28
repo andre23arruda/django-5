@@ -164,6 +164,7 @@ def get_tournament_data(request, torneio_id: str):
         'OITAVAS': 'md:w-1/4',
         'QUARTAS': 'md:w-1/3',
         'SEMIFINAIS': 'md:w-1/2',
+        'TERCEIRO LUGAR': 'md:w-1/2',
         'FINAL': 'md:w-1/2',
     }
     torneio = Torneio.objects.filter(pk=torneio_id).first()
@@ -205,7 +206,7 @@ def get_tournament_data(request, torneio_id: str):
 
     # Process playoffs
     fases_finais = {}
-    for fase in ['FINAL', 'SEMIFINAIS', 'QUARTAS', 'OITAVAS']:
+    for fase in ['FINAL', 'TERCEIRO LUGAR', 'SEMIFINAIS', 'QUARTAS', 'OITAVAS']:
         fase_jogos = jogos.filter(fase=fase)
         if fase_jogos.exists():
             fases_finais[fase] = [
@@ -245,23 +246,33 @@ def export_csv(request, torneio_id: str):
     response = HttpResponse(
         content_type='text/csv',
         headers={
-            'Content-Disposition': f'attachment; filename="{torneio.nome}_{timezone.now().strftime("%Y%m%d")}.csv"'
+            'Content-Disposition': f'attachment; filename="{torneio.nome}_{torneio.data.strftime("%d-%m-%Y")}.csv"'
         },
     )
 
     writer = csv.writer(response)
-    writer.writerow(['Torneio', torneio.nome, '', '', '', 'Data', torneio.data.strftime('%d/%m/%Y')])
     writer.writerow([])
-    writer.writerow([])
+
+    torneio_info = [
+        f'TORNEIO: {torneio.nome}',
+        f'DATA: {torneio.data.strftime("%d/%m/%Y")}',
+    ]
+
+    torneio_info_index = 0  # Index para controlar qual informação do torneio mostrar
 
     # Write group games
     for i in range(1, 5):
         grupo_jogos = jogos.filter(fase=f'GRUPO {i}')
         if grupo_jogos.exists():
-            writer.writerow([f'GRUPO {i}'])
+            # Header row for group
+            torneio_col = torneio_info[torneio_info_index] if torneio_info_index < len(torneio_info) else ''
+            writer.writerow([torneio_col, '', '', '', '', '', f'GRUPO {i}'])
+            torneio_info_index += 1
+
             # Headers side by side
-            writer.writerow(['JOGOS', '', '', '', '', 'RANKING'])
-            writer.writerow(['Dupla 1', 'Placar', 'Dupla 2', 'Status', '', 'Posição', 'Dupla', 'Vitórias', 'Pontos', 'Saldo', 'Jogos'])
+            torneio_col = torneio_info[torneio_info_index] if torneio_info_index < len(torneio_info) else ''
+            writer.writerow([torneio_col, '', 'Status', 'Dupla 1', 'Placar', 'Dupla 2', '', '#', 'Dupla', 'Vitórias', 'Pontos', 'Saldo', 'Jogos'])
+            torneio_info_index += 1
 
             # Get all games and rankings for this group
             games_list = list(grupo_jogos)
@@ -277,10 +288,10 @@ def export_csv(request, torneio_id: str):
                 if row < len(games_list):
                     jogo = games_list[row]
                     game_data = [
+                        jogo.get_concluido_display(),
                         jogo.dupla1.__str__() if jogo.dupla1 else 'A definir',
-                        f'{jogo.placar_dupla1 or "-"} x {jogo.placar_dupla2 or "-"}',
+                        f'{jogo.placar_dupla1 or ""} x {jogo.placar_dupla2 or ""}',
                         jogo.dupla2.__str__() if jogo.dupla2 else 'A definir',
-                        'Concluído' if jogo.concluido == 'C' else 'Pendente'
                     ]
 
                 # Fill ranking data if available
@@ -295,26 +306,33 @@ def export_csv(request, torneio_id: str):
                         dupla['jogos']
                     ]
 
-                # Write both game and ranking data in the same row
-                writer.writerow([*game_data, '', *ranking_data])
+                # Tournament info for first column
+                torneio_col = torneio_info[torneio_info_index] if torneio_info_index < len(torneio_info) else ''
+                if row == 0 and torneio_info_index < len(torneio_info):
+                    torneio_info_index += 1
 
-            writer.writerow([])  # Empty row for spacing
-            writer.writerow([])  # Empty row for spacing
+                # Write tournament info, game and ranking data in the same row
+                writer.writerow([torneio_col, '', *game_data, '', *ranking_data])
+
+            writer.writerow([])  # Empty row
+            writer.writerow([])  # Empty row
 
     # Write playoff games
-    for fase in ['OITAVAS', 'QUARTAS', 'SEMIFINAIS', 'FINAL']:
+    for fase in ['OITAVAS', 'QUARTAS', 'SEMIFINAIS', 'TERCEIRO LUGAR', 'FINAL']:
         fase_jogos = jogos.filter(fase=fase)
         if fase_jogos.exists():
-            writer.writerow([fase])
-            writer.writerow(['Dupla 1', 'Placar', 'Dupla 2', 'Status'])
+            writer.writerow(['', '', '', '', '', '', fase])
+            writer.writerow(['', '', 'Status', 'Dupla 1', 'Placar', 'Dupla 2'])
             for jogo in fase_jogos:
                 writer.writerow([
+                    '',
+                    '',
+                    jogo.get_concluido_display(),
                     jogo.dupla1.__str__() if jogo.dupla1 else 'A definir',
-                    f'{jogo.placar_dupla1 or "-"} x {jogo.placar_dupla2 or "-"}',
+                    f'{jogo.placar_dupla1 or ""} x {jogo.placar_dupla2 or ""}',
                     jogo.dupla2.__str__() if jogo.dupla2 else 'A definir',
-                    'Concluído' if jogo.concluido == 'C' else 'Pendente'
                 ])
-            writer.writerow([])  # Empty row for spacing
-            writer.writerow([])  # Empty row for spacing
+            writer.writerow([])
+            writer.writerow([])
 
     return response

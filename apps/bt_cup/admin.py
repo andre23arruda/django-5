@@ -43,22 +43,41 @@ class JogoInline(admin.TabularInline):
     model = Jogo
     extra = 0
     fields = ('fase', 'dupla_1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla_2', 'concluido')
-    readonly_fields = ('fase', 'dupla_1', 'dupla_2', 'x')
     can_delete = False
+
+    def get_readonly_fields(self, request, obj=None):
+        fields = ['fase', 'dupla_1', 'dupla_2', 'x']
+        if not obj.ativo:
+            fields += ['placar_dupla1', 'placar_dupla2']
+        return fields
 
     def dupla_1(self, obj):
         if obj.dupla1 is not None:
             if obj.dupla1 == obj.winner:
-                trophy = '🏆' if obj.fase == 'FINAL' else ''
-                return format_html('<u style="color: #00a50b"><strong>{}</strong>{}</u>', obj.dupla1.render(), trophy)
+                trophy = format_html('<span class="mr-2">🏆</span>') if obj.fase == 'FINAL' else ''
+                return format_html('''
+                    <span style="display: inline-flex; align-items: center;">
+                        {}
+                        <u style="color: #00a50b"><strong>{}</strong></u>
+                    </span>''',
+                    trophy,
+                    obj.dupla2.render(),
+                )
         return obj.dupla1.render() or '-'
     dupla_1.short_description = 'Dupla 1'
 
     def dupla_2(self, obj):
         if obj.dupla2 is not None:
             if obj.dupla2 == obj.winner:
-                trophy = '🏆' if obj.fase == 'FINAL' else ''
-                return format_html('<u style="color: #00a50b"><strong>{}</strong></u>{}', obj.dupla2.render(), trophy)
+                trophy = format_html('<span class="ml-2">🏆</span>') if obj.fase == 'FINAL' else ''
+                return format_html('''
+                    <span style="display: inline-flex; align-items: center;">
+                        <u style="color: #00a50b"><strong>{}</strong></u>
+                        {}
+                    </span>''',
+                    obj.dupla2.render(),
+                    trophy
+                )
         return obj.dupla2.render() or '-'
     dupla_2.short_description = 'Dupla 2'
 
@@ -120,6 +139,12 @@ class DuplasInline(admin.TabularInline):
     fields = ('dupla',)
     can_delete = False
 
+    def get_readonly_fields(self, request, obj=None):
+        fields = []
+        if not obj.ativo:
+            fields += ['dupla']
+        return fields
+
     def get_queryset(self, request):
         return super().get_queryset(request).order_by('dupla__jogador1')
 
@@ -139,7 +164,7 @@ class TorneioAdmin(admin.ModelAdmin):
         ]
 
     fieldsets = [
-        ('Torneio', {'fields': ('nome', 'data', 'duplas', 'quantidade_grupos', 'playoffs', 'open', 'ativo')}),
+        ('Torneio', {'fields': ('nome', 'data', 'duplas', 'quantidade_grupos', 'playoffs', 'terceiro_lugar', 'open', 'ativo')}),
     ]
     change_form_template = 'admin/bt_cup/cup_change_form.html'
     list_display = ['nome', 'data', 'total_duplas', 'grupos', 'total_jogos', 'ativo']
@@ -164,7 +189,7 @@ class TorneioAdmin(admin.ModelAdmin):
 
     def get_fieldsets(self, request, obj):
         if request.user.is_superuser:
-            return [['Torneio', {'fields': ['nome', 'data', 'duplas', 'quantidade_grupos', 'playoffs', 'open', 'ativo', 'criado_por']}]]
+            return [['Torneio', {'fields': ['nome', 'data', 'duplas', 'quantidade_grupos', 'playoffs', 'terceiro_lugar', 'open', 'ativo', 'criado_por']}]]
         return super().get_fieldsets(request, obj)
 
     def get_list_display(self, request):

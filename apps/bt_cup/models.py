@@ -12,6 +12,7 @@ FASE_CHOICES = [
     ('QUARTAS', 'QF'),
     ('SEMIFINAIS', 'SF'),
     ('FINAL', 'F'),
+    ('TERCEIRO LUGAR', 'T'),
     ('CAMPEAO', 'C'),
 ]
 
@@ -128,6 +129,11 @@ class Torneio(models.Model):
         verbose_name='Playoffs',
         help_text='Ativar para criar jogos de playoffs (OITAVAS, QUARTAS, SEMIFINAIS e FINAL)'
     )
+    terceiro_lugar = models.BooleanField(
+        default=False,
+        verbose_name='Terceiro lugar',
+        help_text='É necessário 2 grupos ou mais.'
+    )
     open = models.BooleanField(
         default=False,
         verbose_name='Criar jogos manualmente',
@@ -236,6 +242,15 @@ class Torneio(models.Model):
                     )
                     jogos_criados['semifinais'].append(semi)
 
+                if self.terceiro_lugar :
+                    terceiro = Jogo.objects.create(
+                        torneio=self,
+                        dupla1=None,
+                        dupla2=None,
+                        fase='TERCEIRO LUGAR'
+                    )
+                    jogos_criados['terceiro'] = terceiro
+
             # Final sempre será criado
             final = Jogo.objects.create(
                 torneio=self,
@@ -257,7 +272,7 @@ class Torneio(models.Model):
             'FINAL': []
         }
 
-        # Recuperar todos os jogos do torneio
+        # Todos os jogos do torneio
         jogos = Jogo.objects.filter(torneio=self)
 
         # 1. Identificar os jogos de grupos
@@ -329,23 +344,35 @@ class Torneio(models.Model):
 
             # Preencher os vencedores nos jogos da próxima fase
             vencedores = []
+            terceiros = []
             for jogo in jogos_atuais:
                 # Adiciona o vencedor do jogo (se os placares estão definidos)
                 if jogo.placar_dupla1 > jogo.placar_dupla2:
                     vencedores.append(jogo.dupla1)
+                    if self.terceiro_lugar:
+                        terceiros.append(jogo.dupla2)
                 elif jogo.placar_dupla2 > jogo.placar_dupla1:
                     vencedores.append(jogo.dupla2)
+                    if self.terceiro_lugar:
+                        terceiros.append(jogo.dupla1)
 
             # Preencher os vencedores na próxima fase
             if len(vencedores) != len(jogos_proxima_fase) * 2:
                 return Exception(f'Erro: O número de vencedores ({len(vencedores)}) não corresponde ao esperado para a fase {proxima_fase}.')
 
-            for index, jogo in enumerate(jogos_proxima_fase):
+            for jogo in jogos_proxima_fase:
                 if jogo.dupla1 is None:
                     jogo.dupla1 = vencedores.pop(0)
                 if jogo.dupla2 is None:
                     jogo.dupla2 = vencedores.pop(0)
                 jogo.save()
+
+            if fase == 'SEMIFINAIS' and self.terceiro_lugar and len(terceiros) == 2:
+                jogo = Jogo.objects.filter(torneio=self, fase='TERCEIRO LUGAR').first()
+                if jogo:
+                    jogo.dupla1 = terceiros.pop(0)
+                    jogo.dupla2 = terceiros.pop(0)
+                    jogo.save()
 
         return True
 
