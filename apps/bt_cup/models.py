@@ -264,51 +264,10 @@ class Torneio(models.Model):
 
     def process_groups(self):
         '''Automatiza a classificação e distribuição dos times para a próximas fase'''
-        jogos_por_fase = {
-            'GRUPO': [],
-            'OITAVAS': [],
-            'QUARTAS': [],
-            'SEMIFINAIS': [],
-            'FINAL': []
-        }
-
-        # Todos os jogos do torneio
-        jogos = Jogo.objects.filter(torneio=self)
-
-        # 1. Identificar os jogos de grupos
-        for i in range(1, self.quantidade_grupos + 1):  # GRUPO 1, GRUPO 2, ..., GRUPO N
-            grupo_jogos = jogos.filter(fase=f'GRUPO {i}')
-            if grupo_jogos:
-                jogos_por_fase['GRUPO'].append(grupo_jogos)
-
-        # 2. Selecionar os dois melhores de cada grupo
         classificados = []
-        for grupo_jogos in jogos_por_fase['GRUPO']:
-            # Cria um ranking baseado no número de vitórias e pontuação
-            estatisticas = {}
-            for jogo in grupo_jogos:
-                if jogo.concluido:
-                    # Atualiza estatísticas para dupla 1
-                    if jogo.dupla1 not in estatisticas:
-                        estatisticas[jogo.dupla1] = {'vitorias': 0, 'pontos': 0}
-                    if jogo.dupla2 not in estatisticas:
-                        estatisticas[jogo.dupla2] = {'vitorias': 0, 'pontos': 0}
-
-                    # Vitória de dupla 1
-                    if jogo.placar_dupla1 > jogo.placar_dupla2:
-                        estatisticas[jogo.dupla1]['vitorias'] += 1
-                    elif jogo.placar_dupla1 < jogo.placar_dupla2:
-                        estatisticas[jogo.dupla2]['vitorias'] += 1
-                    estatisticas[jogo.dupla1]['pontos'] += jogo.placar_dupla1
-                    estatisticas[jogo.dupla2]['pontos'] += jogo.placar_dupla2
-
-            # Ordena as duplas primeiro por vitórias e depois por pontuação
-            classificados_grupo = sorted(
-                estatisticas.keys(),
-                key=lambda dupla: (estatisticas[dupla]['vitorias'], estatisticas[dupla]['pontos']),
-                reverse=True
-            )[:2]  # Seleciona os dois melhores
-            classificados.extend(classificados_grupo)
+        ranking = self.get_groups_ranking()
+        for group, duplas in ranking.items():
+            classificados += duplas[0:2]
         return classificados
 
     def next_stage(self):

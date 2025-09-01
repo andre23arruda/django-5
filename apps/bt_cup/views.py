@@ -9,11 +9,8 @@ from .models import Jogo, Torneio
 def distribute_classifieds(classifieds):
     '''Distribui classificados [1,2,3,4,5,6,7,8,9,10] -> [1,10,2,9,3,8,4,7,5,6]'''
     result = []
-    while classifieds:
-        if classifieds:
-            result.append(classifieds.pop(0))
-        if classifieds:
-            result.append(classifieds.pop(-1))
+    for i in range(0, len(classifieds), 2):
+        result.extend([classifieds[i], classifieds[-i-1]])
     return result
 
 
@@ -68,23 +65,23 @@ def next_stage(request, torneio_id: str):
             dupla1, dupla2 = classificados[i:i+2]
             if torneio.quantidade_grupos == 1:
                 final = jogos.get(fase='FINAL')
-                final.dupla1 = dupla1
-                final.dupla2 = dupla2
+                final.dupla1 = dupla1['dupla']
+                final.dupla2 = dupla2['dupla']
                 final.save()
             elif torneio.quantidade_grupos == 2:
                 semifinal = jogos.filter(fase='SEMIFINAIS')[i//2]
-                semifinal.dupla1 = dupla1
-                semifinal.dupla2 = dupla2
+                semifinal.dupla1 = dupla1['dupla']
+                semifinal.dupla2 = dupla2['dupla']
                 semifinal.save()
             elif torneio.quantidade_grupos == 4:
                 quartas = jogos.filter(fase='QUARTAS')[i//2]
-                quartas.dupla1 = dupla1
-                quartas.dupla2 = dupla2
+                quartas.dupla1 = dupla1['dupla']
+                quartas.dupla2 = dupla2['dupla']
                 quartas.save()
             elif torneio.quantidade_grupos == 8:
                 oitavas = jogos.filter(fase='OITAVAS')[i//2]
-                oitavas.dupla1 = dupla1
-                oitavas.dupla2 = dupla2
+                oitavas.dupla1 = dupla1['dupla']
+                oitavas.dupla2 = dupla2['dupla']
                 oitavas.save()
         messages.add_message(request, messages.INFO, 'Confrontos gerados com sucesso!')
 
@@ -161,11 +158,11 @@ def qrcode_tournament(request, torneio_id: str):
 def get_tournament_data(request, torneio_id: str):
     '''Returns tournament data as JSON for React frontend'''
     CARD_STYLE_DICT = {
-        'OITAVAS': 'md:w-1/4',
-        'QUARTAS': 'md:w-1/3',
-        'SEMIFINAIS': 'md:w-1/2',
-        'TERCEIRO LUGAR': 'md:w-1/2',
-        'FINAL': 'md:w-1/2',
+        'OITAVAS': '1/4',
+        'QUARTAS': '1/3',
+        'SEMIFINAIS': '1/2',
+        'TERCEIRO LUGAR': '1/2',
+        'FINAL': '1/2',
     }
     torneio = Torneio.objects.filter(pk=torneio_id).first()
     if not torneio:
