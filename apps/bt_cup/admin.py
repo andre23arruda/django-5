@@ -135,13 +135,12 @@ class DuplasInline(admin.TabularInline):
     model = Torneio.duplas.through
     extra = 0
     verbose_name = 'Dupla'
-    verbose_name_plural = 'Duplas'
     fields = ('dupla',)
     can_delete = False
 
     def get_readonly_fields(self, request, obj=None):
         fields = []
-        if not obj.ativo:
+        if not obj or not obj.ativo:
             fields += ['dupla']
         return fields
 
@@ -151,6 +150,16 @@ class DuplasInline(admin.TabularInline):
     def has_add_permission(self, request, obj=None):
         return False
 
+    @property
+    def verbose_name_plural(self):
+        if hasattr(self, 'parent_object') and self.parent_object:
+            total = self.parent_object.duplas.count()
+            return f'Duplas ({total})'
+        return 'Duplas'
+
+    def get_formset(self, request, obj=None, **kwargs):
+        self.parent_object = obj
+        return super().get_formset(request, obj, **kwargs)
 
 @admin.register(Torneio)
 class TorneioAdmin(admin.ModelAdmin):

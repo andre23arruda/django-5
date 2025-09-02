@@ -131,7 +131,6 @@ class JogadoresInline(admin.TabularInline):
     model = Torneio.jogadores.through
     extra = 0
     verbose_name = 'Jogador'
-    verbose_name_plural = 'Jogadores'
     fields = ('jogador',)
     can_delete = False
 
@@ -146,6 +145,17 @@ class JogadoresInline(admin.TabularInline):
 
     def has_add_permission(self, request, obj=None):
         return False
+
+    @property
+    def verbose_name_plural(self):
+        if hasattr(self, 'parent_object') and self.parent_object:
+            total = self.parent_object.jogadores.count()
+            return f'Jogadores ({total})'
+        return 'Jogadores'
+
+    def get_formset(self, request, obj=None, **kwargs):
+        self.parent_object = obj
+        return super().get_formset(request, obj, **kwargs)
 
 
 class TorneioAdminForm(forms.ModelForm):

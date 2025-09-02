@@ -116,16 +116,16 @@ class Torneio(models.Model):
     def __str__(self):
         return self.nome
 
-    def create_teams(self):
-        '''Gera todas as duplas possíveis entre os jogadores'''
-        todos_jogadores = list(self.jogadores.all())
-        duplas = list(combinations(todos_jogadores, 2))
-        return duplas
+    def shuffle_players(self):
+        SEED = 42
+        jogadores = list(self.jogadores.all())
+        random.seed(SEED)
+        random.shuffle(jogadores)
+        return jogadores
 
     def create_games(self):
         '''Gera jogos usando todas as duplas possíveis'''
-        jogadores = list(self.jogadores.all())
-        # random.shuffle(jogadores)
+        jogadores = self.shuffle_players()
         n_jogadores = len(jogadores)
         excess_playes = n_jogadores % 4
         if excess_playes:
@@ -173,8 +173,6 @@ class Torneio(models.Model):
                     )
                     jogos_gerados.append(jogo)
 
-        # if self.quadras == 1:
-        #     random.shuffle(jogos_gerados)
         Jogo.objects.bulk_create(jogos_gerados)
         return jogos_gerados
 

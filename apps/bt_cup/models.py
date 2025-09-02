@@ -149,6 +149,13 @@ class Torneio(models.Model):
     def __str__(self):
         return self.nome
 
+    def shuffle_teams(self):
+        SEED = 42
+        duplas = list(self.duplas.all())
+        random.seed(SEED)
+        random.shuffle(duplas)
+        return duplas
+
     def create_groups(self, duplas):
         '''Distribui duplas em grupos de forma aleatória'''
         if len(duplas) < self.quantidade_grupos:
@@ -177,20 +184,11 @@ class Torneio(models.Model):
         if self.jogo_set.exists():
             self.jogo_set.all().delete()
 
-        duplas = list(self.duplas.all())
-
-        random.shuffle(duplas)
+        duplas = self.shuffle_teams()
         grupos = self.create_groups(duplas)
+        jogos_criados = []
         if isinstance(grupos, Exception):
             return grupos
-
-        jogos_criados = {
-            'grupos': {},
-            'oitavas': [],
-            'quartas': [],
-            'semifinais': [],
-            'final': None
-        }
 
         # Criar jogos de grupos
         for i, grupo in enumerate(grupos, 1):
@@ -199,67 +197,66 @@ class Torneio(models.Model):
 
             for num_rodada, jogos_rodada in enumerate(rodadas, 1):
                 for dupla1, dupla2 in jogos_rodada:
-                    jogo = Jogo.objects.create(
+                    jogo = Jogo(
                         torneio=self,
                         dupla1=dupla1,
                         dupla2=dupla2,
                         fase=f'GRUPO {i}',
                     )
-                    grupo_jogos.append(jogo)
-
-            jogos_criados['grupos'][f'grupo {i}'] = grupo_jogos
+                    jogos_criados.append(jogo)
 
         # Próximas fases
         if self.playoffs:
             n_grupos = self.quantidade_grupos
             if n_grupos == 8:
                 for i in range(8): # Oitavas de final
-                    oitava = Jogo.objects.create(
+                    oitava = Jogo(
                         torneio=self,
                         dupla1=None,  # Será preenchido após grupos
                         dupla2=None,  # Será preenchido após grupos
                         fase='OITAVAS'
                     )
-                    jogos_criados['oitavas'].append(oitava)
+                    jogos_criados.append(oitava)
 
             if n_grupos >= 4:
                 for i in range(4): # Quartas de final
-                    quarta = Jogo.objects.create(
+                    quarta = Jogo(
                         torneio=self,
-                        dupla1=None,  # Será preenchido após oitavas
-                        dupla2=None,  # Será preenchido após oitavas
+                        dupla1=None,  # Será preenchido após grupos ou oitavas
+                        dupla2=None,  # Será preenchido após grupos ou oitavas
                         fase='QUARTAS'
                     )
-                    jogos_criados['quartas'].append(quarta)
+                    jogos_criados.append(quarta)
 
             if n_grupos >= 2:
                 for i in range(2): # Semifinais
-                    semi = Jogo.objects.create(
+                    semi = Jogo(
                         torneio=self,
-                        dupla1=None,  # Será preenchido após oitavas
-                        dupla2=None,  # Será preenchido após oitavas
+                        dupla1=None,  # Será preenchido após grupos ou quartas
+                        dupla2=None,  # Será preenchido após grupos ou quartas
                         fase='SEMIFINAIS'
                     )
-                    jogos_criados['semifinais'].append(semi)
+                    jogos_criados.append(semi)
 
                 if self.terceiro_lugar :
-                    terceiro = Jogo.objects.create(
+                    terceiro = Jogo(
                         torneio=self,
-                        dupla1=None,
-                        dupla2=None,
+                        dupla1=None,  # Será preenchido após semi
+                        dupla2=None,  # Será preenchido após semi
                         fase='TERCEIRO LUGAR'
                     )
-                    jogos_criados['terceiro'] = terceiro
+                    jogos_criados.append(terceiro)
 
             # Final sempre será criado
-            final = Jogo.objects.create(
+            final = Jogo(
                 torneio=self,
-                dupla1=None,
-                dupla2=None,
+                dupla1=None, # Será preenchido após grupos ou semi
+                dupla2=None, # Será preenchido após grupos ou semi
                 fase='FINAL'
             )
-            jogos_criados['final'] = final
+            jogos_criados.append(final)
 
+        Jogo.objects.bulk_create(jogos_criados)
         return jogos_criados
 
     def process_groups(self):
