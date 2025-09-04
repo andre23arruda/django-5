@@ -190,9 +190,9 @@ class TorneioAdmin(admin.ModelAdmin):
 
     def get_inlines(self, request, obj):
         if obj:
-            if obj.open:
+            if obj.open and obj.duplas.count() > 0:
                 return [JogoOpenInline, DuplasInline]
-            else:
+            elif obj.duplas.count() > 0:
                 return [JogoInline, DuplasInline]
         return super().get_inlines(request, obj)
 

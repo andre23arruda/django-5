@@ -13,10 +13,13 @@ document.addEventListener('DOMContentLoaded', function() {
         })
 
         const jogosTab = document.getElementById('jogos-tab');
-        gamesButton.style.maxWidth = '100px';
-        gamesButton.style.position = 'absolute';
-        gamesButton.style.top = '10px';
-        gamesButton.style.right = '20px';
-        jogosTab.appendChild(gamesButton);
+        if (jogosTab) {
+            gamesButton.style.maxWidth = '100px';
+            gamesButton.style.position = 'absolute';
+            gamesButton.style.top = '10px';
+            gamesButton.style.right = '20px';
+            gamesButton.classList.remove('hidden');
+            jogosTab.appendChild(gamesButton);
+        }
     }
 })
