@@ -48,7 +48,7 @@ class JogoInline(admin.TabularInline):
     def get_readonly_fields(self, request, obj=None):
         fields = ['fase', 'dupla_1', 'dupla_2', 'x']
         if not obj.ativo:
-            fields += ['placar_dupla1', 'placar_dupla2']
+            fields += ['placar_dupla1', 'placar_dupla2', 'concluido']
         return fields
 
     def dupla_1(self, obj):
