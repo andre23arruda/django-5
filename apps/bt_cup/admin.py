@@ -61,7 +61,7 @@ class JogoInline(admin.TabularInline):
                         <u style="color: #00a50b"><strong>{}</strong></u>
                     </span>''',
                     trophy,
-                    obj.dupla2.render(),
+                    obj.dupla1.render(),
                 )
         return obj.dupla1.render() or '-'
     dupla_1.short_description = 'Dupla 1'
