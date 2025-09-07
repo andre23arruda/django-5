@@ -70,6 +70,11 @@ td.field-dupla_2 p {
     margin-bottom: 0px !important;
 }
 
+td.field-placar_dupla1 p,
+td.field-placar_dupla2 p {
+    margin-top: 1rem !important;
+}
+
 th.column-dupla_1,
 td.field-dupla_1 p {
     text-align: right !important;
