@@ -1,8 +1,13 @@
-import base64, csv, io, os, qrcode, urllib
+import base64, io, os, qrcode, urllib
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from openpyxl import Workbook
+from openpyxl.drawing.image import Image
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+
 from .models import Ranking, Torneio
 
 
@@ -92,11 +97,58 @@ def qrcode_tournament(request, torneio_id: str):
 def export_csv(request, torneio_id: str):
     '''Gera um arquivo CSV com os dados dos jogadores'''
     torneio = get_object_or_404(Torneio, pk=torneio_id)
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = f'attachment; filename="{ torneio.nome }.csv"'
-    writer = csv.writer(response)
-    writer.writerow(['Posição', 'Jogador', 'Vitórias', 'Saldo', 'Pontos', 'Jogos'])
 
+    wb = Workbook()
+    ws = wb.active
+    ws.title = torneio.nome
+
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+
+    center_alignment = Alignment(horizontal='center', vertical='center')
+
+    # LINHA 1: Nome do torneio
+    ws.merge_cells('A1:F1')
+    ws['A1'] = torneio.nome
+    ws['A1'].font = Font(bold=True, size=16)
+    ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
+    ws['A1'].border = thin_border
+    ws['F1'].border = thin_border
+    rd = ws.row_dimensions[1]
+    rd.height = 45
+
+    image_path = settings.BASE_DIR / 'setup/static/images/trophy.png'
+    if os.path.exists(image_path):
+        try:
+            img = Image(image_path)
+            img.width = 60
+            img.height = 60
+            ws.add_image(img, 'A1')
+        except Exception as e:
+            print(f"Erro ao carregar imagem: {e}")
+
+    # LINHA 2: Data do torneio
+    ws.merge_cells('A2:F2')
+    ws['A2'] = f"Data: {torneio.data}"
+    ws['A2'].font = Font(size=12)
+    ws['A2'].alignment = Alignment(horizontal='center', vertical='center')
+    ws['A2'].border = thin_border
+    ws['F2'].border = thin_border
+
+    # LINHA 6: Headers da tabela
+    headers = ['Posição', 'Jogador', 'Vitórias', 'Saldo', 'Pontos', 'Jogos']
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=6, column=col, value=header)
+        cell.font = Font(bold=True, size=12)
+        cell.alignment = center_alignment
+        cell.fill = PatternFill(start_color='B8CCE4', end_color='77bc65', fill_type='solid')
+        cell.border = thin_border
+
+    # Preparar dados do ranking
     ranking = []
     for jogador in torneio.jogadores.all():
         vitorias, pontos, saldo, jogos = jogador.player_points(torneio)
@@ -109,8 +161,9 @@ def export_csv(request, torneio_id: str):
         })
 
     # Ordenar ranking por posição
-    # ranking = sorted(ranking, key=lambda x: (-x['vitorias'], -x['pontos'], -x['saldo']))
     ranking = sorted(ranking, key=lambda x: (-x['vitorias'], -x['saldo'], -x['pontos']))
+
+    # Calcular posições (considerando empates)
     ranking_result = []
     j_0 = {'pontos': 0, 'saldo': 0, 'vitorias': 0, 'posicao': 1}
     for i, j_1 in enumerate(ranking):
@@ -121,15 +174,43 @@ def export_csv(request, torneio_id: str):
             j_0 = j_1
         ranking_result.append(j_1)
 
-    for jogador in ranking_result:
-        writer.writerow([
-            jogador['posicao'],
-            jogador['jogador'].nome,
-            jogador['vitorias'],
-            jogador['saldo'],
-            jogador['pontos'],
-            jogador['jogos']
-        ])
+    # LINHA 7+: Adicionar dados dos jogadores
+    for row_idx, jogador in enumerate(ranking_result, 7):
+        ws.cell(row=row_idx, column=1, value=jogador['posicao'])
+        ws.cell(row=row_idx, column=2, value=jogador['jogador'].nome)
+        ws.cell(row=row_idx, column=3, value=jogador['vitorias'])
+        ws.cell(row=row_idx, column=4, value=jogador['saldo'])
+        ws.cell(row=row_idx, column=5, value=jogador['pontos'])
+        ws.cell(row=row_idx, column=6, value=jogador['jogos'])
+
+        for col in [1, 2, 3, 4, 5, 6]:
+            ws.cell(row=row_idx, column=col).alignment = center_alignment
+            ws.cell(row=row_idx, column=col).border = thin_border
+
+    column_widths = {
+        'A': 10,
+        'B': 10,
+        'C': 10,
+        'D': 10,
+        'E': 10,
+        'F': 10,
+    }
+
+    for col, width in column_widths.items():
+        ws.column_dimensions[col].width = width
+
+    # SALVAR EM MEMÓRIA
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    # CRIAR RESPONSE
+    response = HttpResponse(
+        output.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{torneio.nome}.xlsx"'
+
     return response
 
 
