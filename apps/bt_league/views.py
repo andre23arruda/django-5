@@ -97,6 +97,7 @@ def qrcode_tournament(request, torneio_id: str):
 def export_csv(request, torneio_id: str):
     '''Gera um arquivo CSV com os dados dos jogadores'''
     torneio = get_object_or_404(Torneio, pk=torneio_id)
+    torneio_jogos = torneio.jogo_set.all()
 
     wb = Workbook()
     ws = wb.active
@@ -112,12 +113,12 @@ def export_csv(request, torneio_id: str):
     center_alignment = Alignment(horizontal='center', vertical='center')
 
     # LINHA 1: Nome do torneio
-    ws.merge_cells('A1:F1')
+    ws.merge_cells('A1:N1')
     ws['A1'] = torneio.nome
     ws['A1'].font = Font(bold=True, size=16)
     ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
     ws['A1'].border = thin_border
-    ws['F1'].border = thin_border
+    ws['N1'].border = thin_border
     rd = ws.row_dimensions[1]
     rd.height = 45
 
@@ -132,12 +133,12 @@ def export_csv(request, torneio_id: str):
             print(f"Erro ao carregar imagem: {e}")
 
     # LINHA 2: Data do torneio
-    ws.merge_cells('A2:F2')
-    ws['A2'] = f"Data: {torneio.data}"
-    ws['A2'].font = Font(size=12)
+    ws.merge_cells('A2:N2')
+    ws['A2'] = f"Data: {torneio.data.strftime('%d/%m/%Y')}"
+    ws['A2'].font = Font(bold=True, size=12)
     ws['A2'].alignment = Alignment(horizontal='center', vertical='center')
     ws['A2'].border = thin_border
-    ws['F2'].border = thin_border
+    ws['N2'].border = thin_border
 
     # LINHA 6: Headers da tabela
     headers = ['Posição', 'Jogador', 'Vitórias', 'Saldo', 'Pontos', 'Jogos']
@@ -187,13 +188,54 @@ def export_csv(request, torneio_id: str):
             ws.cell(row=row_idx, column=col).alignment = center_alignment
             ws.cell(row=row_idx, column=col).border = thin_border
 
+    headers = ['', 'Dupla 1', 'Placar', '', '', 'Dupla 2']
+    for col, header in enumerate(headers, 9):
+        cell = ws.cell(row=6, column=col, value=header)
+        cell.font = Font(bold=True, size=12)
+        cell.alignment = center_alignment
+        cell.fill = PatternFill(start_color='B8CCE4', end_color='77bc65', fill_type='solid')
+        cell.border = thin_border
+
+    rd = ws.row_dimensions[6]
+    rd.height = 30
+
+    ws.merge_cells(
+        start_column=11,
+        start_row=6,
+        end_column=13,
+        end_row=6
+    )
+
+    for row_idx, jogo in enumerate(torneio_jogos, 7):
+        ws.cell(row=row_idx, column=9, value=jogo.get_concluido_display())
+        ws.cell(row=row_idx, column=10, value=jogo.render_dupla_1())
+        ws.cell(row=row_idx, column=11, value=jogo.placar_dupla1)
+        ws.cell(row=row_idx, column=12, value='x')
+        ws.cell(row=row_idx, column=13, value=jogo.placar_dupla2)
+        ws.cell(row=row_idx, column=14, value=jogo.render_dupla_2())
+
+        for col in [9, 10, 11, 12, 13, 14]:
+            ws.cell(row=row_idx, column=col).alignment = center_alignment
+            ws.cell(row=row_idx, column=col).border = thin_border
+
+        rd = ws.row_dimensions[row_idx]
+        rd.height = 30
+
     column_widths = {
         'A': 10,
-        'B': 10,
+        'B': 15,
         'C': 10,
         'D': 10,
         'E': 10,
         'F': 10,
+        'G': 5,
+        'H': 5,
+        'I': 5,
+        'J': 15,
+        'K': 5,
+        'L': 5,
+        'M': 5,
+        'N': 15
     }
 
     for col, width in column_widths.items():

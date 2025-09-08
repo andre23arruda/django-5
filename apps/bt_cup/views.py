@@ -259,6 +259,8 @@ def export_csv(request, torneio_id: str):
 
     header_fill = PatternFill(start_color='D3D3D3', end_color='D3D3D3', fill_type='solid')
     group_fill = PatternFill(start_color='B8CCE4', end_color='B8CCE4', fill_type='solid')
+    game_headers = ['', 'Dupla 1', 'Placar', '', '', 'Dupla 2']
+    ranking_headers = ['#', 'Dupla', 'Vitórias', 'Pontos', 'Saldo', 'Jogos']
 
     thin_border = Border(
         left=Side(style='thin'),
@@ -267,16 +269,16 @@ def export_csv(request, torneio_id: str):
         bottom=Side(style='thin')
     )
 
-    center_alignment = Alignment(horizontal='center', vertical='center')
+    center_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
     left_alignment = Alignment(horizontal='left', vertical='center')
 
     # LINHA 1: Nome do torneio
-    ws.merge_cells('A1:L1')
+    ws.merge_cells('A1:N1')
     ws['A1'] = torneio.nome
     ws['A1'].font = title_font
     ws['A1'].alignment = center_alignment
     ws['A1'].border = thin_border
-    ws['L1'].border = thin_border
+    ws['N1'].border = thin_border
     rd = ws.row_dimensions[1]
     rd.height = 45
 
@@ -291,44 +293,48 @@ def export_csv(request, torneio_id: str):
             print(f"Erro ao carregar imagem: {e}")
 
     # LINHA 2: Data do torneio
-    ws.merge_cells('A2:L2')
+    ws.merge_cells('A2:N2')
     ws['A2'] = f"Data: {torneio.data.strftime('%d/%m/%Y')}"
     ws['A2'].font = subtitle_font
     ws['A2'].alignment = center_alignment
     ws['A2'].border = thin_border
-    ws['L2'].border = thin_border
-
-    # LINHA 3 e 4: Em branco
-    current_row = 5  # Começar na linha 5
+    ws['N2'].border = thin_border
 
     # Processar grupos
+    current_row = 5
     for i in range(1, 5):
         grupo_jogos = jogos.filter(fase=f'GRUPO {i}')
         if grupo_jogos.exists():
-            # Header do grupo com merge (A:L)
-            ws.merge_cells(f'A{current_row}:L{current_row}')
+            # Header do grupo com merge (A:N)
+            ws.merge_cells(f'A{current_row}:N{current_row}')
             ws.cell(row=current_row, column=1, value=f'GRUPO {i}')
             ws.cell(row=current_row, column=1).font = group_font
             ws.cell(row=current_row, column=1).fill = group_fill
             ws.cell(row=current_row, column=1).alignment = center_alignment
             ws.cell(row=current_row, column=1).border = thin_border
-            ws.cell(row=current_row, column=12).border = thin_border
-
+            ws.cell(row=current_row, column=14).border = thin_border
+            rd = ws.row_dimensions[current_row]
+            rd.height = 30
             current_row += 1
 
             # Headers das colunas - Jogos e Ranking lado a lado
-            # Colunas A-D: Jogos | Colunas G-L: Ranking
-            game_headers = ['', 'Dupla 1', 'Placar', 'Dupla 2']
-            for col, header in enumerate(game_headers, 1):  # A, B, C, D
+            # Colunas A-F: Jogos | Colunas I-N: Ranking
+            for col, header in enumerate(game_headers, 1):  # A, B, C, D, E, F
                 cell = ws.cell(row=current_row, column=col, value=header)
                 cell.font = header_font
                 cell.fill = header_fill
                 cell.alignment = center_alignment
                 cell.border = thin_border
 
+            ws.merge_cells(
+                start_column=3,
+                start_row=current_row,
+                end_column=5,
+                end_row=current_row
+            )
+
             # Headers do ranking
-            ranking_headers = ['#', 'Dupla', 'Vitórias', 'Pontos', 'Saldo', 'Jogos']
-            for col, header in enumerate(ranking_headers, 7):  # G, H, I, J, K, L
+            for col, header in enumerate(ranking_headers, 9):  # I, J, K, L, M, N
                 cell = ws.cell(row=current_row, column=col, value=header)
                 cell.font = header_font
                 cell.fill = header_fill
@@ -343,35 +349,40 @@ def export_csv(request, torneio_id: str):
             max_rows = max(len(games_list), len(ranking_list))
 
             for row in range(max_rows):
-                # Dados do jogo (colunas A-D)
+                # Dados do jogo (colunas A-F)
                 if row < len(games_list):
                     jogo = games_list[row]
                     game_data = [
                         jogo.get_concluido_display(),
-                        jogo.dupla1.__str__() if jogo.dupla1 else 'A definir',
-                        f'{jogo.placar_dupla1 or ""} x {jogo.placar_dupla2 or ""}',
-                        jogo.dupla2.__str__() if jogo.dupla2 else 'A definir',
+                        jogo.dupla1.render_special() if jogo.dupla1 else 'A definir',
+                        f'{jogo.placar_dupla1 or ""}',
+                        'x',
+                        f'{jogo.placar_dupla2 or ""}',
+                        jogo.dupla2.render_special() if jogo.dupla2 else 'A definir',
                     ]
 
-                    for col, data in enumerate(game_data, 1):  # A, B, C, D
+                    for col, data in enumerate(game_data, 1):  # A, B, C, D, E, F
                         cell = ws.cell(row=current_row, column=col, value=data)
                         cell.font = normal_font
                         cell.border = thin_border
                         cell.alignment = center_alignment
 
-                # Dados do ranking (colunas G-L)
+                    rd = ws.row_dimensions[current_row]
+                    rd.height = 30
+
+                # Dados do ranking (colunas I-N)
                 if row < len(ranking_list):
                     dupla = ranking_list[row]
                     ranking_data = [
                         dupla['posicao'],
-                        dupla['dupla'].__str__(),
+                        dupla['dupla'].render_special(),
                         dupla['vitorias'],
                         dupla['pontos'],
                         dupla['saldo'],
                         dupla['jogos']
                     ]
 
-                    for col, data in enumerate(ranking_data, 7):  # G, H, I, J, K, L
+                    for col, data in enumerate(ranking_data, 9):  # I, J, K, L, M, N
                         cell = ws.cell(row=current_row, column=col, value=data)
                         cell.font = normal_font
                         cell.border = thin_border
@@ -386,19 +397,20 @@ def export_csv(request, torneio_id: str):
     for fase in ['OITAVAS', 'QUARTAS', 'SEMIFINAIS', 'TERCEIRO LUGAR', 'FINAL']:
         fase_jogos = jogos.filter(fase=fase)
         if fase_jogos.exists():
-            # Header da fase com merge (A:L)
-            ws.merge_cells(f'A{current_row}:L{current_row}')
+            # Header da fase com merge (A:N)
+            ws.merge_cells(f'A{current_row}:N{current_row}')
             ws.cell(row=current_row, column=1, value=fase)
             ws.cell(row=current_row, column=1).font = group_font
             ws.cell(row=current_row, column=1).fill = group_fill
             ws.cell(row=current_row, column=1).alignment = center_alignment
             ws.cell(row=current_row, column=1).border = thin_border
-            ws.cell(row=current_row, column=12).border = thin_border
-
+            ws.cell(row=current_row, column=14).border = thin_border
+            rd = ws.row_dimensions[current_row]
+            rd.height = 30
             current_row += 1
 
             # Headers das colunas (apenas jogos, centralizados)
-            playoff_headers = ['', 'Dupla 1', 'Placar', 'Dupla 2']
+            playoff_headers = ['', 'Dupla 1', 'Placar', '', '', 'Dupla 2']
             start_col = 1  # Centralizar as 4 colunas (D, E, F, G)
             for col, header in enumerate(playoff_headers, start_col):
                 cell = ws.cell(row=current_row, column=col, value=header)
@@ -407,15 +419,23 @@ def export_csv(request, torneio_id: str):
                 cell.alignment = center_alignment
                 cell.border = thin_border
 
+            ws.merge_cells(
+                start_column=3,
+                start_row=current_row,
+                end_column=5,
+                end_row=current_row
+            )
             current_row += 1
 
             # Dados dos jogos
             for jogo in fase_jogos:
                 game_data = [
                     jogo.get_concluido_display(),
-                    jogo.dupla1.__str__() if jogo.dupla1 else 'A definir',
-                    f'{jogo.placar_dupla1 or ""} x {jogo.placar_dupla2 or ""}',
-                    jogo.dupla2.__str__() if jogo.dupla2 else 'A definir',
+                    jogo.dupla1.render_special() if jogo.dupla1 else 'A definir',
+                    f'{jogo.placar_dupla1 or ""}',
+                    'x',
+                    f'{jogo.placar_dupla2 or ""}',
+                    jogo.dupla2.render_special() if jogo.dupla2 else 'A definir',
                 ]
 
                 for col, data in enumerate(game_data, start_col):
@@ -424,6 +444,8 @@ def export_csv(request, torneio_id: str):
                     cell.border = thin_border
                     cell.alignment = center_alignment
 
+                rd = ws.row_dimensions[current_row]
+                rd.height = 30
                 current_row += 1
 
             # Linhas em branco após cada fase
@@ -433,16 +455,18 @@ def export_csv(request, torneio_id: str):
     column_widths = {
         'A': 5,   # Status
         'B': 15,  # Dupla 1
-        'C': 7,   # Placar
-        'D': 15,  # Dupla 2
-        'E': 3,   # Espaço
-        'F': 3,   # Espaço
-        'G': 5,   # Posição ranking
-        'H': 15,  # Dupla ranking
-        'I': 10,  # Vitórias
-        'J': 10,  # Pontos
-        'K': 10,  # Saldo
-        'L': 10,  # Jogos
+        'C': 3,   # Placar 1,
+        'D': 3,   # x
+        'E': 3,   # Placar 2
+        'F': 15,  # Dupla 2
+        'G': 3,   #
+        'H': 3,   #
+        'I': 3,   # Posição ranking
+        'J': 15,  # Dupla ranking
+        'K': 10,  # Vitórias
+        'L': 10,  # Pontos
+        'M': 10,  # Saldo
+        'N': 10,  # Jogos
     }
 
     for col, width in column_widths.items():

@@ -205,6 +205,12 @@ class Jogo(models.Model):
     def dupla_2(self):
         return mark_safe(f'<span>{self.dupla2_jogador1.short_name()}<br/>{self.dupla2_jogador2.short_name()}</span>')
 
+    def render_dupla_1(self):
+        return f'{self.dupla1_jogador1}\n{self.dupla1_jogador2}'
+
+    def render_dupla_2(self):
+        return f'{self.dupla2_jogador1}\n{self.dupla2_jogador2}'
+
     def save(self, *args, **kwargs):
         finished = (
             self.placar_dupla1 is not None and
