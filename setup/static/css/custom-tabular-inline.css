@@ -121,3 +121,11 @@ td.field-dupla_2 p {
 .field-concluido span.select2.select2-container.select2-container--default {
     display: none !important;
 }
+
+@media (min-width: 992px) {
+    .col-lg-3 #jazzy-actions {
+        position: fixed !important;
+        width: -webkit-fill-available;
+        margin-right: 40px;
+    }
+}
