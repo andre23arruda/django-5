@@ -277,12 +277,12 @@ class Torneio(models.Model):
 
         for i, fase in enumerate(fases):
             # Buscar os jogos da fase atual
-            jogos_atuais = Jogo.objects.filter(torneio=self, fase=fase, concluido='C')
+            jogos_atuais = self.jogo_set.filter(torneio=self, fase=fase, concluido='C')
 
             # Verificar se todos os jogos da fase atual foram concluídos
             if len(jogos_atuais) == 0: # Nenhum jogo concluído, ignorar a fase
                 continue
-            elif jogos_atuais.count() != Jogo.objects.filter(torneio=self, fase=fase).count(): # jogos pendentes
+            elif jogos_atuais.count() != self.jogo_set.filter(torneio=self, fase=fase).count(): # jogos pendentes
                 return Exception(f'Aguardando conclusão de todos os jogos da fase {fase}.')
 
             # Checar se existe uma próxima fase
@@ -293,7 +293,7 @@ class Torneio(models.Model):
             proxima_fase = fases[i + 1]
 
             # Buscar os jogos da próxima fase
-            jogos_proxima_fase = Jogo.objects.filter(torneio=self, fase=proxima_fase)
+            jogos_proxima_fase = self.jogo_set.filter(torneio=self, fase=proxima_fase)
 
             # Garantir que os jogos da próxima fase foram criados, mas ainda não preenchidos
             if not jogos_proxima_fase.exists():
@@ -327,7 +327,7 @@ class Torneio(models.Model):
                 jogo.save()
 
             if fase == 'SEMIFINAIS' and self.terceiro_lugar and len(terceiros) == 2:
-                jogo = Jogo.objects.filter(torneio=self, fase='TERCEIRO LUGAR').first()
+                jogo = self.jogo_set.filter(torneio=self, fase='TERCEIRO LUGAR').first()
                 if jogo:
                     jogo.dupla1 = terceiros.pop(0)
                     jogo.dupla2 = terceiros.pop(0)
@@ -341,10 +341,13 @@ class Torneio(models.Model):
         self.save()
 
     def is_finished(self):
-        return Jogo.objects.filter(torneio=self, fase='FINAL', concluido='C').exists()
+        jogos = self.jogo_set.all().exclude(concluido='C').count()
+        if jogos > 0:
+            return False
+        return True
 
     def has_games(self):
-        return Jogo.objects.filter(torneio=self).exists()
+        return self.jogo_set.exists()
 
     def get_groups_ranking(self):
         '''Retorna a classificação de todas as duplas, organizadas por grupo, ordenadas por vitórias e pontos.'''
@@ -352,7 +355,7 @@ class Torneio(models.Model):
         classificacao = {}
 
         # Recuperar todos os jogos do torneio
-        jogos = Jogo.objects.filter(torneio=self, fase__startswith='GRUPO')
+        jogos = self.jogo_set.filter(torneio=self, fase__startswith='GRUPO')
 
         # Separar jogos por grupo
         grupos = {}

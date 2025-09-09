@@ -177,12 +177,18 @@ class Torneio(models.Model):
         return jogos_gerados
 
     def has_games(self):
-        return Jogo.objects.filter(torneio=self).exists()
+        return self.jogo_set.filter(torneio=self).exists()
 
     def finish(self):
         # self.jogadores.all().update(ativo=False)
         self.ativo = False
         self.save()
+
+    def is_finished(self):
+        jogos = self.jogo_set.all().exclude(concluido='C').count()
+        if jogos > 0:
+            return False
+        return True
 
 
 class Jogo(models.Model):
