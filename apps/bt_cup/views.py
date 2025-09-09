@@ -252,23 +252,19 @@ def export_csv(request, torneio_id: str):
 
     # Estilos de formatação
     title_font = Font(bold=True, size=16)
-    subtitle_font = Font(bold=True, size=12)
     header_font = Font(bold=True, size=12)
     group_font = Font(bold=True, size=13)
     normal_font = Font(size=10)
-
     header_fill = PatternFill(start_color='D3D3D3', end_color='D3D3D3', fill_type='solid')
-    group_fill = PatternFill(start_color='B8CCE4', end_color='B8CCE4', fill_type='solid')
+    orange_fill = PatternFill(start_color='FF972F', end_color='FF972F', fill_type='solid')
     game_headers = ['', 'Dupla 1', 'Placar', '', '', 'Dupla 2']
-    ranking_headers = ['#', 'Dupla', 'Vitórias', 'Pontos', 'Saldo', 'Jogos']
-
+    ranking_headers = ['#', 'Dupla', 'Vitórias', 'Saldo', 'Pontos', 'Jogos']
     thin_border = Border(
         left=Side(style='thin'),
         right=Side(style='thin'),
         top=Side(style='thin'),
         bottom=Side(style='thin')
     )
-
     center_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
     left_alignment = Alignment(horizontal='left', vertical='center')
 
@@ -276,6 +272,7 @@ def export_csv(request, torneio_id: str):
     ws.merge_cells('A1:N1')
     ws['A1'] = torneio.nome
     ws['A1'].font = title_font
+    ws['A1'].fill = orange_fill
     ws['A1'].alignment = center_alignment
     ws['A1'].border = thin_border
     ws['N1'].border = thin_border
@@ -293,11 +290,23 @@ def export_csv(request, torneio_id: str):
             print(f"Erro ao carregar imagem: {e}")
 
     # LINHA 2: Data do torneio
-    ws.merge_cells('A2:N2')
+    ws.merge_cells('A2:F2')
     ws['A2'] = f"Data: {torneio.data.strftime('%d/%m/%Y')}"
-    ws['A2'].font = subtitle_font
+    ws['A2'].font = header_font
+    ws['A2'].fill = orange_fill
     ws['A2'].alignment = center_alignment
     ws['A2'].border = thin_border
+    ws['F2'].border = thin_border
+
+    ws.merge_cells('G2:H2')
+    ws['G2'].fill = orange_fill
+
+    ws.merge_cells('I2:N2')
+    ws['I2'] = f"Jogos: {jogos.count()}"
+    ws['I2'].font = header_font
+    ws['I2'].fill = orange_fill
+    ws['I2'].alignment = center_alignment
+    ws['I2'].border = thin_border
     ws['N2'].border = thin_border
 
     # Processar grupos
@@ -309,7 +318,7 @@ def export_csv(request, torneio_id: str):
             ws.merge_cells(f'A{current_row}:N{current_row}')
             ws.cell(row=current_row, column=1, value=f'GRUPO {i}')
             ws.cell(row=current_row, column=1).font = group_font
-            ws.cell(row=current_row, column=1).fill = group_fill
+            ws.cell(row=current_row, column=1).fill = orange_fill
             ws.cell(row=current_row, column=1).alignment = center_alignment
             ws.cell(row=current_row, column=1).border = thin_border
             ws.cell(row=current_row, column=14).border = thin_border
@@ -377,8 +386,8 @@ def export_csv(request, torneio_id: str):
                         dupla['posicao'],
                         dupla['dupla'].render_special(),
                         dupla['vitorias'],
-                        dupla['pontos'],
                         dupla['saldo'],
+                        dupla['pontos'],
                         dupla['jogos']
                     ]
 
@@ -401,7 +410,7 @@ def export_csv(request, torneio_id: str):
             ws.merge_cells(f'A{current_row}:N{current_row}')
             ws.cell(row=current_row, column=1, value=fase)
             ws.cell(row=current_row, column=1).font = group_font
-            ws.cell(row=current_row, column=1).fill = group_fill
+            ws.cell(row=current_row, column=1).fill = orange_fill
             ws.cell(row=current_row, column=1).alignment = center_alignment
             ws.cell(row=current_row, column=1).border = thin_border
             ws.cell(row=current_row, column=14).border = thin_border
@@ -453,20 +462,20 @@ def export_csv(request, torneio_id: str):
 
     # Ajustar largura das colunas
     column_widths = {
-        'A': 5,   # Status
-        'B': 15,  # Dupla 1
-        'C': 3,   # Placar 1,
-        'D': 3,   # x
-        'E': 3,   # Placar 2
-        'F': 15,  # Dupla 2
-        'G': 3,   #
-        'H': 3,   #
-        'I': 3,   # Posição ranking
-        'J': 15,  # Dupla ranking
-        'K': 10,  # Vitórias
-        'L': 10,  # Pontos
-        'M': 10,  # Saldo
-        'N': 10,  # Jogos
+        'A': 5,  # Status
+        'B': 15, # Dupla 1
+        'C': 3,  # Placar 1,
+        'D': 3,  # x
+        'E': 3,  # Placar 2
+        'F': 15, # Dupla 2
+        'G': 3,  #
+        'H': 3,  #
+        'I': 3,  # Posição ranking
+        'J': 15, # Dupla ranking
+        'K': 8,  # Vitórias
+        'L': 8,  # Pontos
+        'M': 8,  # Saldo
+        'N': 8,  # Jogos
     }
 
     for col, width in column_widths.items():

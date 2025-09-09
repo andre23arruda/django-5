@@ -103,20 +103,28 @@ def export_csv(request, torneio_id: str):
     ws = wb.active
     ws.title = torneio.nome
 
+    # Estilos de formatação
+    title_font = Font(bold=True, size=16)
+    header_font = Font(bold=True, size=12)
+    normal_font = Font(size=10)
+    header_fill = PatternFill(start_color='D3D3D3', end_color='D3D3D3', fill_type='solid')
+    orange_fill = PatternFill(start_color='FF972F', end_color='FF972F', fill_type='solid')
+    game_headers = ['', 'Dupla 1', 'Placar', '', '', 'Dupla 2']
+    ranking_headers = ['#', 'Jogador', 'Vitórias', 'Saldo', 'Pontos', 'Jogos']
     thin_border = Border(
         left=Side(style='thin'),
         right=Side(style='thin'),
         top=Side(style='thin'),
         bottom=Side(style='thin')
     )
-
     center_alignment = Alignment(horizontal='center', vertical='center')
 
     # LINHA 1: Nome do torneio
     ws.merge_cells('A1:N1')
     ws['A1'] = torneio.nome
-    ws['A1'].font = Font(bold=True, size=16)
-    ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
+    ws['A1'].font = title_font
+    ws['A1'].fill = orange_fill
+    ws['A1'].alignment = center_alignment
     ws['A1'].border = thin_border
     ws['N1'].border = thin_border
     rd = ws.row_dimensions[1]
@@ -133,20 +141,31 @@ def export_csv(request, torneio_id: str):
             print(f"Erro ao carregar imagem: {e}")
 
     # LINHA 2: Data do torneio
-    ws.merge_cells('A2:N2')
+    ws.merge_cells('A2:F2')
     ws['A2'] = f"Data: {torneio.data.strftime('%d/%m/%Y')}"
-    ws['A2'].font = Font(bold=True, size=12)
-    ws['A2'].alignment = Alignment(horizontal='center', vertical='center')
+    ws['A2'].font = header_font
+    ws['A2'].fill = orange_fill
+    ws['A2'].alignment = center_alignment
     ws['A2'].border = thin_border
+    ws['F2'].border = thin_border
+
+    ws.merge_cells('G2:H2')
+    ws['G2'].fill = orange_fill
+
+    ws.merge_cells('I2:N2')
+    ws['I2'] = f"Jogos: {torneio_jogos.count()}"
+    ws['I2'].font = header_font
+    ws['I2'].fill = orange_fill
+    ws['I2'].alignment = center_alignment
+    ws['I2'].border = thin_border
     ws['N2'].border = thin_border
 
     # LINHA 6: Headers da tabela
-    headers = ['Posição', 'Jogador', 'Vitórias', 'Saldo', 'Pontos', 'Jogos']
-    for col, header in enumerate(headers, 1):
-        cell = ws.cell(row=6, column=col, value=header)
-        cell.font = Font(bold=True, size=12)
+    for col, header in enumerate(ranking_headers, 1):
+        cell = ws.cell(row=5, column=col, value=header)
+        cell.font = header_font
         cell.alignment = center_alignment
-        cell.fill = PatternFill(start_color='B8CCE4', end_color='77bc65', fill_type='solid')
+        cell.fill = header_fill
         cell.border = thin_border
 
     # Preparar dados do ranking
@@ -176,7 +195,7 @@ def export_csv(request, torneio_id: str):
         ranking_result.append(j_1)
 
     # LINHA 7+: Adicionar dados dos jogadores
-    for row_idx, jogador in enumerate(ranking_result, 7):
+    for row_idx, jogador in enumerate(ranking_result, 6):
         ws.cell(row=row_idx, column=1, value=jogador['posicao'])
         ws.cell(row=row_idx, column=2, value=jogador['jogador'].nome)
         ws.cell(row=row_idx, column=3, value=jogador['vitorias'])
@@ -187,13 +206,13 @@ def export_csv(request, torneio_id: str):
         for col in [1, 2, 3, 4, 5, 6]:
             ws.cell(row=row_idx, column=col).alignment = center_alignment
             ws.cell(row=row_idx, column=col).border = thin_border
+            ws.cell(row=row_idx, column=col).font = normal_font
 
-    headers = ['', 'Dupla 1', 'Placar', '', '', 'Dupla 2']
-    for col, header in enumerate(headers, 9):
-        cell = ws.cell(row=6, column=col, value=header)
-        cell.font = Font(bold=True, size=12)
+    for col, header in enumerate(game_headers, 9):
+        cell = ws.cell(row=5, column=col, value=header)
+        cell.font = header_font
         cell.alignment = center_alignment
-        cell.fill = PatternFill(start_color='B8CCE4', end_color='77bc65', fill_type='solid')
+        cell.fill = header_fill
         cell.border = thin_border
 
     rd = ws.row_dimensions[6]
@@ -201,12 +220,12 @@ def export_csv(request, torneio_id: str):
 
     ws.merge_cells(
         start_column=11,
-        start_row=6,
+        start_row=5,
         end_column=13,
-        end_row=6
+        end_row=5
     )
 
-    for row_idx, jogo in enumerate(torneio_jogos, 7):
+    for row_idx, jogo in enumerate(torneio_jogos, 6):
         ws.cell(row=row_idx, column=9, value=jogo.get_concluido_display())
         ws.cell(row=row_idx, column=10, value=jogo.render_dupla_1())
         ws.cell(row=row_idx, column=11, value=jogo.placar_dupla1)
@@ -217,24 +236,25 @@ def export_csv(request, torneio_id: str):
         for col in [9, 10, 11, 12, 13, 14]:
             ws.cell(row=row_idx, column=col).alignment = center_alignment
             ws.cell(row=row_idx, column=col).border = thin_border
+            ws.cell(row=row_idx, column=col).font = normal_font
 
         rd = ws.row_dimensions[row_idx]
         rd.height = 30
 
     column_widths = {
-        'A': 10,
+        'A': 3,
         'B': 15,
-        'C': 10,
-        'D': 10,
-        'E': 10,
-        'F': 10,
+        'C': 8,
+        'D': 8,
+        'E': 8,
+        'F': 8,
         'G': 5,
         'H': 5,
         'I': 5,
         'J': 15,
-        'K': 5,
-        'L': 5,
-        'M': 5,
+        'K': 3,
+        'L': 3,
+        'M': 3,
         'N': 15
     }
 
