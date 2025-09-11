@@ -75,6 +75,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
+AUTHENTICATION_BACKENDS = ['setup.config.auth.UsernameOrEmailBackend']
 
 # Internationalization
 LANGUAGE_CODE = 'pt-br'
