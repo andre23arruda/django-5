@@ -145,9 +145,7 @@ def see_tournament(request, torneio_id: str):
 def qrcode_tournament(request, torneio_id: str):
     '''Cria QR Code do torneio'''
     torneio = get_object_or_404(Torneio, pk=torneio_id)
-    site_url = os.getenv('HOST_ADDRESS')
-    # img = qrcode.make(f'{ site_url }/torneio/{ torneio_id }')
-    img = qrcode.make(f'{ os.getenv("APP_LINK") }/torneio/{ torneio_id }')
+    img = qrcode.make(f'{ os.getenv("APP_LINK") }/torneio/{ torneio.slug }')
     buf = io.BytesIO()
     img.save(buf, 'PNG')
     buf.seek(0)
@@ -169,7 +167,7 @@ def get_tournament_data(request, torneio_id: str):
         'TERCEIRO LUGAR': '1/2',
         'FINAL': '1/2',
     }
-    torneio = Torneio.objects.filter(pk=torneio_id).first()
+    torneio = Torneio.objects.filter(slug=torneio_id).first()
     if not torneio:
         return JsonResponse({'error': 'Torneio não encontrado'}, status=404)
     jogos = Jogo.objects.filter(torneio=torneio)

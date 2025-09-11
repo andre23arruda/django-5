@@ -1,5 +1,6 @@
 import random
 from django.db import models
+from django.template.defaultfilters import slugify
 from django.utils.html import format_html
 from shortuuid.django_fields import ShortUUIDField
 
@@ -143,6 +144,7 @@ class Torneio(models.Model):
         help_text='Ativar para criar jogos manualmente (Apenas um grupo, sem playoffs)'
     )
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
+    slug = models.SlugField(null=False, unique=True)
 
     class Meta:
         verbose_name = 'Torneio'
@@ -495,6 +497,11 @@ class Torneio(models.Model):
             duplas_rotacao = [duplas_rotacao[-1]] + duplas_rotacao[:-1]
 
         return rodadas
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = f'{slugify(self.nome)}_{self.id}'
+        return super().save(*args, **kwargs)
 
 class Jogo(models.Model):
     torneio = models.ForeignKey(Torneio, on_delete=models.CASCADE)

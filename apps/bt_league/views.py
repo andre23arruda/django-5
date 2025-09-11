@@ -79,9 +79,7 @@ def see_tournament(request, torneio_id: str):
 def qrcode_tournament(request, torneio_id: str):
     '''Cria QR Code do torneio'''
     torneio = get_object_or_404(Torneio, pk=torneio_id)
-    site_url = os.getenv('HOST_ADDRESS')
-    # img = qrcode.make(f'{ site_url }/rei-rainha/{ torneio_id }')
-    img = qrcode.make(f'{ os.getenv("APP_LINK") }/rei-rainha/{ torneio_id }')
+    img = qrcode.make(f'{ os.getenv("APP_LINK") }/rei-rainha/{ torneio.slug }')
     buf = io.BytesIO()
     img.save(buf, 'PNG')
     buf.seek(0)
@@ -319,7 +317,7 @@ def see_ranking(request, ranking_id: str):
 
 def get_tournament_data(request, torneio_id: str):
     '''Returns tournament data as JSON for React frontend'''
-    torneio = Torneio.objects.filter(pk=torneio_id).first()
+    torneio = Torneio.objects.filter(slug=torneio_id).first()
     if not torneio:
         return JsonResponse({'error': 'Torneio não encontrado'}, status=404)
     jogos = torneio.jogo_set.all()

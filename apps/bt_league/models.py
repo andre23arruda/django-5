@@ -1,7 +1,7 @@
 import math, random
 from django.db import models
+from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
-from itertools import combinations
 from shortuuid.django_fields import ShortUUIDField
 
 GAME_STATUS = (
@@ -107,6 +107,7 @@ class Torneio(models.Model):
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
     quadras = models.IntegerField(default=1, help_text='Quantidade de quadras para jogos simultâneos')
     ranking = models.ForeignKey(Ranking, on_delete=models.SET_NULL, blank=True, null=True)
+    slug = models.SlugField(null=False, unique=True)
 
     class Meta:
         verbose_name = 'Campeonato'
@@ -189,6 +190,11 @@ class Torneio(models.Model):
         if jogos > 0:
             return False
         return True
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = f'{slugify(self.nome)}_{self.id}'
+        return super().save(*args, **kwargs)
 
 
 class Jogo(models.Model):
