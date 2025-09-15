@@ -1,8 +1,9 @@
-import os
+import os, re
 from django.contrib import admin, messages
-from django.db.models import Case, When
+from django.db.models import Case, IntegerField, When
 from django.shortcuts import redirect
 from django.utils.html import format_html
+from itertools import zip_longest
 from .models import Dupla, Torneio, Jogo
 
 
@@ -45,6 +46,46 @@ class JogoInline(admin.TabularInline):
     fields = ('fase', 'dupla_1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla_2', 'concluido')
     can_delete = False
 
+    def get_queryset(self, request):
+        if '/change/' in request.path:
+            torneio_id = re.search(r'/([^/]+)/change/', request.path).group(1)
+            torneio = Torneio.objects.get(pk=torneio_id)
+            queryset = super().get_queryset(request).filter(torneio_id=torneio_id)
+
+            if torneio.quantidade_grupos > 1:
+                jogos_grupos = queryset.filter(fase__startswith='GRUPO').values_list('id', 'fase')
+                grupos = {'GRUPO 1': [], 'GRUPO 2': [], 'GRUPO 3': [], 'GRUPO 4': []}
+                for jogo_id, fase in jogos_grupos:
+                    if fase in grupos:
+                        grupos[fase].append(jogo_id)
+
+                alternada = []
+                for elementos in zip_longest(*grupos.values(), fillvalue=None):
+                    alternada.extend([id_jogo for id_jogo in elementos if id_jogo is not None])
+
+                ids_playoff = list(queryset.exclude(fase__startswith='GRUPO').annotate(
+                    fase_order=Case(
+                        When(fase='OITAVAS', then=1),
+                        When(fase='QUARTAS', then=2),
+                        When(fase='SEMIFINAIS', then=3),
+                        When(fase='TERCEIRO LUGAR', then=4),
+                        When(fase='FINAL', then=5),
+                        When(fase='CAMPEAO', then=6),
+                        default=99,
+                        output_field=IntegerField()
+                    )
+                ).order_by('fase_order', 'id').values_list('id', flat=True))
+                alternada.extend(ids_playoff)
+
+                return queryset.filter(id__in=alternada).annotate(
+                    custom_order=Case(
+                        *[When(id=id_val, then=pos) for pos, id_val in enumerate(alternada)],
+                        output_field=IntegerField()
+                    )
+                ).order_by('custom_order')
+
+        return super().get_queryset(request)
+
     def get_readonly_fields(self, request, obj=None):
         fields = ['fase', 'dupla_1', 'dupla_2', 'x']
         if not obj.ativo:
@@ -63,7 +104,9 @@ class JogoInline(admin.TabularInline):
                     trophy,
                     obj.dupla1.render(),
                 )
-        return obj.dupla1.render() or '-'
+            else:
+                return obj.dupla1.render()
+        return format_html('<span class="text-muted">A definir</span>')
     dupla_1.short_description = 'Dupla 1'
 
     def dupla_2(self, obj):
@@ -78,7 +121,9 @@ class JogoInline(admin.TabularInline):
                     obj.dupla2.render(),
                     trophy
                 )
-        return obj.dupla2.render() or '-'
+            else:
+                return obj.dupla2.render()
+        return format_html('<span class="text-muted">A definir</span>')
     dupla_2.short_description = 'Dupla 2'
 
     def has_add_permission(self, request, obj=None):
