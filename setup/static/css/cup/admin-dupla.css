@@ -1,0 +1,16 @@
+#jazzy-actions a.btn.btn-outline-danger.form-control,
+#change_id_criado_por,
+#change_id_jogador1,
+#change_id_jogador2,
+#change_id_torneio,
+#add_id_criado_por,
+#add_id_jogador1,
+#add_id_jogador2,
+#add_id_torneio,
+#delete_id_criado_por,
+#view_id_criado_por,
+#view_id_jogador1,
+#view_id_jogador2,
+#view_id_torneio {
+    display: none !important;
+}

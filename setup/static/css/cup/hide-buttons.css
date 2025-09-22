@@ -1,0 +1,4 @@
+#jazzy-actions input[name="_addanother"],
+#jazzy-actions input[name="_continue"] {
+    display: none !important;
+}

@@ -1,0 +1,122 @@
+th.column-pontos_dupla1,
+th.column-pontos_dupla2 {
+    width: 0;
+    opacity: 0;
+    padding: 0;
+}
+
+th.column-dupla_1,
+th.column-dupla_2,
+td.field-dupla_1,
+td.field-dupla_2,
+td.field-pontos_dupla1,
+td.field-pontos_dupla2 {
+    text-align: center !important;
+    padding-right: 2px !important;
+    padding-left: 2px !important;
+}
+
+td.field-pontos_dupla1 input.vIntegerField,
+td.field-pontos_dupla2 input.vIntegerField {
+    max-width: 70px !important;
+}
+
+td.field-x,
+td.field-dupla_1,
+td.field-dupla_2 {
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 0px !important;
+}
+
+td.field-x p,
+td.field-dupla_1 p,
+td.field-dupla_2 p,
+td.field-concluido p {
+    margin-bottom: 0px !important;
+}
+
+td.field-pontos_dupla1 p,
+td.field-pontos_dupla2 p {
+    margin-top: 1rem !important;
+}
+
+th.column-dupla_1,
+td.field-dupla_1 p {
+    text-align: right !important;
+    padding-right: 5px !important;
+}
+
+th.column-dupla_2,
+td.field-dupla_2 p {
+    text-align: left !important;
+    padding-left: 5px !important;
+}
+
+#jogos-tab table .original,
+#jogos-tab table.hide-phase .column-fase,
+#jogos-tab table.hide-phase .field-fase {
+    display: none !important;
+}
+
+.field-concluido {
+    vertical-align: middle !important;
+}
+.field-fase select.select2-hidden-accessible,
+.field-concluido select.select2-hidden-accessible {
+    width: 40px !important;
+    height: 25px !important;
+    clip: auto !important;
+    clip-path: none !important;
+    position: relative !important;
+    border-radius: 4px;
+    background-color: transparent;
+}
+.field-fase span.select2.select2-container.select2-container--default,
+.field-concluido span.select2.select2-container.select2-container--default {
+    display: none !important;
+}
+
+.column-dupla1 {
+    text-align: right;
+}
+
+.field-dupla1 {
+    display: flex;
+    justify-content: end;
+    text-align: right;
+}
+
+.field-dupla1 .related-widget-wrapper-link,
+.field-dupla2 .related-widget-wrapper-link,
+.field-ranking a.related-widget-wrapper-link.change-related,
+.field-ranking a.related-widget-wrapper-link.delete-related,
+.field-ranking a.related-widget-wrapper-link.view-related,
+tr.form-row.dynamic-duplas .related-widget-wrapper-link.change-related,
+tr.form-row.dynamic-duplas .related-widget-wrapper-link.view-related {
+    display: none !important;
+}
+
+.field-obs textarea {
+    width: 150px !important;
+    height: 40px;
+}
+
+@media (max-width: 500px) {
+    td.field-pontos_dupla1 input.vIntegerField,
+    td.field-pontos_dupla2 input.vIntegerField {
+        max-width: 40px !important;
+    }
+
+    .content-wrapper>.content {
+        padding: .5rem !important;
+    }
+}
+
+@media (min-width: 992px) {
+    .col-lg-3 #jazzy-actions {
+        position: fixed !important;
+        width: -webkit-fill-available;
+        margin-right: 40px;
+    }
+}
