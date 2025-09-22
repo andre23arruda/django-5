@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'bookstore',
     'bt_league',
     'bt_cup',
+    'cup',
     'escala_de_plantao',
     'payments',
     'corsheaders',
