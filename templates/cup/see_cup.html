@@ -1,0 +1,477 @@
+{% extends '../base.html' %}
+
+{% load static %}
+
+{% block favicon %}
+    <link rel="shortcut icon" href="{% static 'images/trophy.ico' %}" />
+{% endblock %}
+
+{% block title %}{{ torneio.nome }} ({{ torneio.data }}){% endblock %}
+
+{% block style %}
+    <style>
+        body {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+        }
+
+        .group {
+            row-gap: 5px;
+        }
+
+        .bracket {
+            display: flex;
+            margin: 0px;
+            row-gap: 50px;
+            justify-content: center;
+        }
+
+        .round {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .match {
+            position: relative;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .team {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .team:last-child {
+            border-bottom: none;
+        }
+
+        .score {
+            float: right;
+            font-weight: bold;
+        }
+
+        td.winner, span.winner {
+            font-weight: bold;
+            color: #00a50b !important;
+        }
+
+        td.loser, span.loser {
+            color: #ff2323 !important;
+        }
+
+        .bg-classified {
+            background-color: #c9ffc7 !important;
+            font-weight: bold;
+        }
+
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        body.dark-mode .card {
+            background-color: #484848;
+            color: #ffffff;
+        }
+
+        body.dark-mode .card-header {
+            background-color: #3b3b3b;
+            color: #ffffff;
+        }
+
+        body.dark-mode .table-striped tr:nth-of-type(odd) *,
+        body.dark-mode .table-striped tr:nth-of-type(even) * {
+            background-color: #3b3b3b !important;
+            color: #ffffff;
+        }
+
+        body.dark-mode .table-striped tr:nth-of-type(odd) .bg-classified,
+        body.dark-mode .table-striped tr:nth-of-type(even) .bg-classified {
+            background-color: #00a50b !important;
+        }
+
+        body.dark-mode .table-striped th {
+            background-color: #333333 !important;
+            color: #ffffff;
+        }
+
+        body.dark-mode .text-muted,
+        body.dark-mode input::placeholder {
+            color: #999999 !important;
+        }
+
+        .admin-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            opacity: 0.7;
+        }
+
+        .theme-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .theme-switch button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            line-height: normal;
+            opacity: 0.7;
+        }
+
+        #reload {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            opacity: 0.7;
+            z-index: 1000;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="theme-switch">
+    <button id="themeToggle" class="btn btn-secondary" title="Alternar modo escuro">🌙</button>
+</div>
+
+{% if can_edit %}
+    <div class="admin-button">
+        {% url 'admin:cup_torneio_change' torneio.id as admin_url %}
+        <a href="{{ admin_url }}#jogos-tab" class="btn btn-secondary" title="Editar torneio">✏️</a>
+    </div>
+{% endif %}
+
+<div class="container h-100 d-flex flex-column justify-content-between">
+    <div class="pt-5">
+        {% if torneio.ativo %}
+            <h1 class="text-center mb-4">{{ torneio.nome }} ({{ torneio.data }})</h1>
+
+            <button
+                class="btn btn-primary btn-sm"
+                id="reload"
+                title="Recarregar"
+                onclick="location.reload();"
+            >
+                <svg viewBox="0 0 118.04 122.88" fill="white">
+                    <path d="M16.08,59.26A8,8,0,0,1,0,59.26a59,59,0,0,1,97.13-45V8a8,8,0,1,1,16.08,0V33.35a8,8,0,0,1-8,8L80.82,43.62a8,8,0,1,1-1.44-15.95l8-.73A43,43,0,0,0,16.08,59.26Zm22.77,19.6a8,8,0,0,1,1.44,16l-10.08.91A42.95,42.95,0,0,0,102,63.86a8,8,0,0,1,16.08,0A59,59,0,0,1,22.3,110v4.18a8,8,0,0,1-16.08,0V89.14h0a8,8,0,0,1,7.29-8l25.31-2.3Z"/>
+                </svg>
+            </button>
+        {% else %}
+            <h1 class="text-center"><s>{{ torneio.nome }} ({{ torneio.data }})</s></h1>
+            <h2 class="text-center mb-2"><s>FINALIZADO</s></h2>
+        {% endif %}
+
+        <div class="row">
+            <!-- Grupos -->
+            <div class="col">
+                {% if torneio.playoffs %}
+                    <h3 class="text-center">Grupos e Classificação</h3>
+                {% endif %}
+
+                {% for grupo, jogos in grupos.items %}
+                    <div class="group row mb-4">
+                        <!-- Jogos do Grupo -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <h5 class="card-header text-center">
+                                    {% if torneio.playoffs %}
+                                        {{ grupo }} - Jogos
+                                    {% else %}
+                                        Jogos
+                                    {% endif %}
+                                </h5>
+
+                                <div class="card-body table-responsive">
+                                    <table class="table table-bordered table-striped text-center">
+                                        <thead>
+                                            <tr>
+                                                <th>Dupla 1</th>
+                                                <th>Placar</th>
+                                                <th>Dupla 2</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody style="vertical-align: middle;">
+                                            {% for jogo in jogos.jogos %}
+                                                <tr>
+                                                    <td class="{% if jogo.concluido == 'C' and jogo.placar_dupla1 > jogo.placar_dupla2 %}winner{% elif jogo.concluido == 'C' and jogo.placar_dupla1 < jogo.placar_dupla2 %}loser{% endif %}">
+                                                        {{ jogo.dupla1.render }}
+                                                    </td>
+
+                                                    <td>
+                                                        {{ jogo.placar_dupla1|default_if_none:'' }} X {{ jogo.placar_dupla2|default_if_none:'' }}
+                                                    </td>
+
+                                                    <td class="{% if jogo.concluido == 'C' and jogo.placar_dupla2 > jogo.placar_dupla1 %}winner{% elif jogo.concluido == 'C' and jogo.placar_dupla2 < jogo.placar_dupla1 %}loser{% endif %}">
+                                                        {{ jogo.dupla2.render }}
+                                                    </td>
+
+                                                    <td>
+                                                        {% if jogo.concluido == 'C' %}
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#00a50b" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                                                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                                            </svg>
+                                                        {% else %}
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle" viewBox="0 0 16 16">
+                                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                                            </svg>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Classificação do Grupo -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <h5 class="card-header text-center">
+                                    {% if torneio.playoffs %}
+                                        {{ grupo }} - Classificação
+                                    {% else %}
+                                        Classificação
+                                    {% endif %}
+                                </h5>
+
+                                <div class="card-body table-responsive">
+                                    <table class="table table-bordered table-striped text-center">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Dupla</th>
+                                                <th>V</th>
+                                                <th>S</th>
+                                                <th>P</th>
+                                                <th>J</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody style="vertical-align: middle;">
+                                            {% for dupla in jogos.classificacao %}
+                                                <tr>
+                                                    <td class="{% if groups_finished and forloop.counter < 3 %}bg-classified{% endif %}">{{ dupla.posicao }}</td>
+                                                    <td class="{% if groups_finished and forloop.counter < 3 %}bg-classified{% endif %}">{{ dupla.dupla.render }}</td>
+                                                    <td class="{% if groups_finished and forloop.counter < 3 %}bg-classified{% endif %}">{{ dupla.vitorias }}</td>
+                                                    <td class="{% if groups_finished and forloop.counter < 3 %}bg-classified{% endif %}">{{ dupla.saldo }}</td>
+                                                    <td class="{% if groups_finished and forloop.counter < 3 %}bg-classified{% endif %}">{{ dupla.pontos }}</td>
+                                                    <td class="{% if groups_finished and forloop.counter < 3 %}bg-classified{% endif %}">{{ dupla.jogos }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Playoffs -->
+        {% if torneio.playoffs %}
+            <hr/>
+
+            <div class="row">
+                <div class="col p-0">
+                    <h3 class="text-center">Playoffs</h3>
+
+                    <div class="row bracket">
+                        <!-- Oitavas -->
+                        {% if 'OITAVAS' in fases_finais %}
+                        <div class="round col-6 {{ playoff_card_style }}">
+                            <h5 class="text-center m-0">Oitavas de Final</h5>
+                            {% for jogo in fases_finais.OITAVAS %}
+                            <div class="match">
+                                <div class="card p-2">
+                                    <div class="team">
+                                        {% if jogo.dupla1 %}
+                                            <span class="{% if jogo.concluido == 'C' and jogo.placar_dupla1 > jogo.placar_dupla2 %}winner{% elif jogo.concluido == 'C' and jogo.placar_dupla1 < jogo.placar_dupla2 %}loser{% endif %}">
+                                                {{ jogo.dupla1.render }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">A definir</span>
+                                        {% endif %}
+                                        <span class="score">{{ jogo.placar_dupla1|default_if_none:'-' }}</span>
+                                    </div>
+
+                                    <div class="team">
+                                        {% if jogo.dupla2 %}
+                                            <span class="{% if jogo.concluido == 'C' and jogo.placar_dupla2 > jogo.placar_dupla1 %}winner{% elif jogo.concluido == 'C' and jogo.placar_dupla2 < jogo.placar_dupla1 %}loser{% endif %}">
+                                                {{ jogo.dupla2.render }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">A definir</span>
+                                        {% endif %}
+                                        <span class="score">{{ jogo.placar_dupla2|default_if_none:'-' }}</span>
+                                    </div>
+                                </div>
+                                <div class="connector"></div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Quartas -->
+                        {% if 'QUARTAS' in fases_finais %}
+                        <div class="round col-6 {{ playoff_card_style }}">
+                            <h5 class="text-center m-0">Quartas de Final</h5>
+                            {% for jogo in fases_finais.QUARTAS %}
+                            <div class="match">
+                                <div class="card p-2">
+                                    <div class="team">
+                                        {% if jogo.dupla1 %}
+                                            <span class="{% if jogo.concluido == 'C' and jogo.placar_dupla1 > jogo.placar_dupla2 %}winner{% elif jogo.concluido == 'C' and jogo.placar_dupla1 < jogo.placar_dupla2 %}loser{% endif %}">
+                                                {{ jogo.dupla1.render }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">A definir</span>
+                                        {% endif %}
+                                        <span class="score">{{ jogo.placar_dupla1|default_if_none:'-' }}</span>
+                                    </div>
+
+                                    <div class="team">
+                                        {% if jogo.dupla2 %}
+                                            <span class="{% if jogo.concluido == 'C' and jogo.placar_dupla2 > jogo.placar_dupla1 %}winner{% elif jogo.concluido == 'C' and jogo.placar_dupla2 < jogo.placar_dupla1 %}loser{% endif %}">
+                                                {{ jogo.dupla2.render }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">A definir</span>
+                                        {% endif %}
+                                        <span class="score">{{ jogo.placar_dupla2|default_if_none:'-' }}</span>
+                                    </div>
+                                </div>
+                                <div class="connector"></div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Semifinais -->
+                        {% if 'SEMIFINAIS' in fases_finais %}
+                        <div class="round col-6 {{ playoff_card_style }}">
+                            <h5 class="text-center m-0">Semifinal</h5>
+                            {% for jogo in fases_finais.SEMIFINAIS %}
+                            <div class="match">
+                                <div class="card p-2">
+                                    <div class="team">
+                                        {% if jogo.dupla1 %}
+                                            <span class="{% if jogo.concluido == 'C' and jogo.placar_dupla1 > jogo.placar_dupla2 %}winner{% elif jogo.concluido == 'C' and jogo.placar_dupla1 < jogo.placar_dupla2 %}loser{% endif %}">
+                                                {{ jogo.dupla1.render }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">A definir</span>
+                                        {% endif %}
+                                        <span class="score">{{ jogo.placar_dupla1|default_if_none:'-' }}</span>
+                                    </div>
+
+                                    <div class="team">
+                                        {% if jogo.dupla2 %}
+                                            <span class="{% if jogo.concluido == 'C' and jogo.placar_dupla2 > jogo.placar_dupla1 %}winner{% elif jogo.concluido == 'C' and jogo.placar_dupla2 < jogo.placar_dupla1 %}loser{% endif %}">
+                                                {{ jogo.dupla2.render }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">A definir</span>
+                                        {% endif %}
+                                        <span class="score">{{ jogo.placar_dupla2|default_if_none:'-' }}</span>
+                                    </div>
+                                </div>
+                                <div class="connector"></div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Final -->
+                        {% if 'FINAL' in fases_finais %}
+                        <div class="round {{ playoff_card_style }}">
+                            <h5 class="text-center m-0">Final</h5>
+                            {% for jogo in fases_finais.FINAL %}
+                            <div class="match">
+                                <div class="card p-2">
+                                    <div class="team">
+                                        {% if jogo.dupla1 %}
+                                            <span class="{% if jogo.concluido == 'C' and jogo.placar_dupla1 > jogo.placar_dupla2 %}winner{% elif jogo.concluido == 'C' and jogo.placar_dupla1 < jogo.placar_dupla2 %}loser{% endif %}">
+                                                {{ jogo.dupla1.render }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">A definir</span>
+                                        {% endif %}
+                                        <span class="score">{{ jogo.placar_dupla1|default_if_none:'-' }}</span>
+                                    </div>
+
+                                    <div class="team">
+                                        {% if jogo.dupla2 %}
+                                            <span class="{% if jogo.concluido == 'C' and jogo.placar_dupla2 > jogo.placar_dupla1 %}winner{% elif jogo.concluido == 'C' and jogo.placar_dupla2 < jogo.placar_dupla1 %}loser{% endif %}">
+                                                {{ jogo.dupla2.render }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">A definir</span>
+                                        {% endif %}
+                                        <span class="score">{{ jogo.placar_dupla2|default_if_none:'-' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <footer class="w-100 p-5 text-center">
+        <span class="text-muted">
+            Feito por <a href="https://andrearruda-links.vercel.app/" target="_blank">ALCA Inovações Tecnológicas</a>
+        </span>
+    </footer>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const darkMode = localStorage.getItem('darkMode') === 'true';
+
+        if (darkMode) {
+            body.classList.add('dark-mode');
+            updateThemeIcon(true);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            updateThemeIcon(isDark);
+        });
+
+        function updateThemeIcon(isDark) {
+            themeToggle.innerHTML = isDark ? '☀️' : '🌙';
+        }
+    })
+</script>
+{% endblock %}

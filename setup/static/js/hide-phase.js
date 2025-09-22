@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const hidePhase = document.getElementById('hidePhase');
-    if (hidePhase) {
+    const hidePhaseColumn = document.getElementById('hidePhaseColumn');
+    if (hidePhaseColumn) {
         const table = document.querySelector('#jogos-tab table');
         if (table) {
             table.classList.add('hide-phase');
