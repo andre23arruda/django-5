@@ -17,15 +17,15 @@ english.DATETIME_FORMAT = 'H:i d/m/Y'
 
 @admin.register(Jogador)
 class JogadorAdmin(admin.ModelAdmin):
-    list_display = ['nome', 'telefone', 'ativo']
-    list_editable = ['ativo']
+    fields = ['nome', 'telefone', 'email']
+    list_display = ['nome', 'telefone']
     list_filter = ['ativo']
-    search_fields = ['nome',]
+    search_fields = ['nome']
 
-    def get_exclude(self, request, obj):
+    def get_fields(self, request, obj):
         if request.user.is_superuser:
-            return super().get_exclude(request, obj)
-        return ['criado_por', 'id', 'grupo_criador']
+            return self.fields + ['criado_por', 'grupo_criador', 'ativo']
+        return super().get_fields(request, obj)
 
     def get_list_display(self, request):
         list_display = self.list_display
@@ -131,7 +131,7 @@ class JogadoresInline(admin.TabularInline):
     model = Torneio.jogadores.through
     extra = 0
     verbose_name = 'Jogador'
-    fields = ('jogador',)
+    fields = ['jogador']
     can_delete = False
 
     def get_readonly_fields(self, request, obj=None):
@@ -140,8 +140,13 @@ class JogadoresInline(admin.TabularInline):
             fields += ['jogador']
         return fields
 
-    def get_queryset(self, request):
-        return super().get_queryset(request).order_by('jogador__nome')
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name in ['jogador']:
+            if request.user.is_superuser:
+                kwargs['queryset'] = Jogador.objects.all().order_by('nome')
+            else:
+                kwargs['queryset'] = Jogador.objects.filter(criado_por=request.user).order_by('nome')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -173,14 +178,15 @@ class TorneioAdminForm(forms.ModelForm):
 @admin.register(Torneio)
 class TorneioAdmin(admin.ModelAdmin):
     class Media:
-        css = {'all': ('css/custom-tabular-inline.css', 'css/hide-related-widgets.css')}
+        css = {'all': ('css/league/admin-torneio.css',)}
         js = [
             'js/create-games-modal.js',
-            'js/finish-tournament-modal.js'
+            'js/finish-tournament-modal.js',
+            'js/hide-phase.js',
         ]
 
     fieldsets = [
-        ['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ativo']}],
+        ['Torneio', {'fields': ['nome', 'data', 'ranking', 'quadras', 'jogadores', 'ativo']}],
     ]
     change_form_template = 'admin/bt_league/league_change_form.html'
     list_display = ['nome', 'data', 'total_jogadores', 'total_jogos', 'ativo']
@@ -196,17 +202,24 @@ class TorneioAdmin(admin.ModelAdmin):
             request, object_id, form_url, extra_context=extra_context,
         )
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name in ['ranking']:
+            if request.user.is_superuser:
+                kwargs['queryset'] = Ranking.objects.all().order_by('nome')
+            else:
+                kwargs['queryset'] = Ranking.objects.filter(criado_por=request.user).order_by('nome')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def get_inlines(self, request, obj):
         if not obj:
             return []
-        # if obj.jogadores.count() > 0 and obj.jogo_set.count() > 0:
         if obj.jogadores.count() > 0:
             return [JogoInline, JogadoresInline]
         return super().get_inlines(request, obj)
 
     def get_fieldsets(self, request, obj):
         if request.user.is_superuser:
-            return [['Torneio', {'fields': ['nome', 'data', 'quadras', 'jogadores', 'ranking', 'ativo', 'criado_por', 'grupo_criador']}]]
+            return [['Torneio', {'fields': ['nome', 'data', 'ranking', 'quadras', 'jogadores', 'ativo', 'criado_por', 'grupo_criador']}]]
         return super().get_fieldsets(request, obj)
 
     def get_list_display(self, request):
@@ -262,17 +275,17 @@ class TorneioAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 
-# @admin.register(Ranking)
+@admin.register(Ranking)
 class RankingAdmin(admin.ModelAdmin):
     change_form_template = 'admin/bt_league/ranking_change_form.html'
+    fields = ['nome']
     list_display = ['nome', 'ativo']
-    list_filter = ['ativo']
-    search_fields = ['nome',]
+    search_fields = ['nome']
 
-    def get_exclude(self, request, obj):
+    def get_fields(self, request, obj):
         if request.user.is_superuser:
-            return super().get_exclude(request, obj)
-        return ['criado_por', 'id', 'grupo_criador']
+            return self.fields + ['criado_por', 'grupo_criador', 'ativo']
+        return super().get_fields(request, obj)
 
     def get_list_display(self, request):
         list_display = self.list_display

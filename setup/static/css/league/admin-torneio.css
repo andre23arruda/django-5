@@ -1,27 +1,32 @@
-th.column-pontos_dupla1,
-th.column-pontos_dupla2 {
-    width: 0px;
-    max-width: 50px;
+#jazzy-actions input[name="_addanother"],
+#jazzy-actions input[name="_continue"] {
+    display: none !important;
+}
+
+th.column-quadra,
+th.column-placar_dupla1,
+th.column-placar_dupla2 {
     opacity: 0;
-    padding: 0;
+    max-width: 10px !important;
 }
 
 th.column-dupla_1,
 th.column-dupla_2,
 td.field-dupla_1,
 td.field-dupla_2,
-td.field-pontos_dupla1,
-td.field-pontos_dupla2 {
+td.field-placar_dupla1,
+td.field-placar_dupla2 {
     text-align: center !important;
     padding-right: 2px !important;
     padding-left: 2px !important;
 }
 
-td.field-pontos_dupla1 input.vIntegerField,
-td.field-pontos_dupla2 input.vIntegerField {
+td.field-placar_dupla1 input.vIntegerField,
+td.field-placar_dupla2 input.vIntegerField {
     max-width: 70px !important;
 }
 
+td.field-quadra,
 td.field-x,
 td.field-dupla_1,
 td.field-dupla_2 {
@@ -30,17 +35,16 @@ td.field-dupla_2 {
     padding: 0px !important;
 }
 
+td.field-quadra p,
 td.field-x p,
-td.field-jogadores p,
 td.field-dupla_1 p,
 td.field-dupla_2 p,
-td.field-concluido p,
-td.field-fase p {
+td.field-jogador p {
     margin-bottom: 0px !important;
 }
 
-td.field-pontos_dupla1 p,
-td.field-pontos_dupla2 p {
+td.field-placar_dupla1 p,
+td.field-placar_dupla2 p {
     margin-top: 1rem !important;
 }
 
@@ -57,17 +61,15 @@ td.field-dupla_2 p {
 }
 
 #jogos-tab table .original,
-#jogos-tab table.hide-phase .column-fase,
-#jogos-tab table.hide-phase .field-fase {
+#jogos-tab table.hide-phase .column-quadra,
+#jogos-tab table.hide-phase .field-quadra {
     display: none !important;
 }
 
-td.field-fase,
-td.field-concluido {
+.field-concluido {
     vertical-align: middle !important;
 }
-td.field-fase select.select2-hidden-accessible,
-td.field-concluido select.select2-hidden-accessible {
+.field-concluido select.select2-hidden-accessible {
     width: 40px !important;
     height: 25px !important;
     clip: auto !important;
@@ -76,8 +78,7 @@ td.field-concluido select.select2-hidden-accessible {
     border-radius: 4px;
     background-color: transparent;
 }
-td.field-fase span.select2.select2-container.select2-container--default,
-td.field-concluido span.select2.select2-container.select2-container--default {
+.field-concluido span.select2.select2-container.select2-container--default {
     display: none !important;
 }
 
@@ -96,8 +97,10 @@ td.field-concluido span.select2.select2-container.select2-container--default {
 .field-ranking a.related-widget-wrapper-link.change-related,
 .field-ranking a.related-widget-wrapper-link.delete-related,
 .field-ranking a.related-widget-wrapper-link.view-related,
-tr.form-row.dynamic-duplas .related-widget-wrapper-link.change-related,
-tr.form-row.dynamic-duplas .related-widget-wrapper-link.view-related {
+tr.form-row.has_original.dynamic-Torneio_jogadores .related-widget-wrapper-link.add-related,
+tr.form-row.has_original.dynamic-Torneio_jogadores .related-widget-wrapper-link.view-related,
+tr.form-row.has_original.dynamic-Torneio_duplas .related-widget-wrapper-link.add-related,
+tr.form-row.has_original.dynamic-Torneio_duplas .related-widget-wrapper-link.view-related {
     display: none !important;
 }
 
@@ -107,8 +110,8 @@ tr.form-row.dynamic-duplas .related-widget-wrapper-link.view-related {
 }
 
 @media (max-width: 500px) {
-    td.field-pontos_dupla1 input.vIntegerField,
-    td.field-pontos_dupla2 input.vIntegerField {
+    td.field-placar_dupla1 input.vIntegerField,
+    td.field-placar_dupla2 input.vIntegerField {
         max-width: 40px !important;
     }
 

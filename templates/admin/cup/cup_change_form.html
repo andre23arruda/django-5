@@ -8,40 +8,7 @@
             <span id="hidePhaseColumn"/>
         {% endif %}
 
-        {% if original.ativo and not original.open %}
-            <button
-                id="create-games"
-                type="button"
-                class="btn btn-block btn-primary btn-sm mt-2 hidden"
-            >
-                Gerar Jogos
-            </button>
-
-            <dialog id="games-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
-                <section>
-                    <h4>Atenção!</h4>
-                    {% if original.has_games %}
-                        <h5>Já existem jogos criados para este torneio. Deseja recriá-los? <br/><br/>A ação não pode ser desfeita!</h5>
-                    {% else %}
-                        <h5>Tem certeza que deseja criar os jogos? <br/><br/>A ação não pode ser desfeita!</h5>
-                    {% endif %}
-                </section>
-
-                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                    <button
-                        type="button"
-                        id="games-cancel"
-                        class="btn btn-secondary btn-sm"
-                    >
-                        Cancelar
-                    </button>
-
-                    <a class="btn btn-primary btn-sm" href="{% url 'cup:create_games' original.pk %}">
-                        Sim, criar
-                    </a>
-                </div>
-            </dialog>
-
+        {% if original.ativo %}
             {% if original.has_games %}
                 <button
                     type="button"
@@ -82,6 +49,41 @@
                 >
                     QR Code
                 </a>
+            {% endif %}
+
+            {% if not original.open %}
+                <button
+                    id="create-games"
+                    type="button"
+                    class="btn btn-block btn-primary btn-sm mt-2 hidden"
+                >
+                    Gerar Jogos
+                </button>
+
+                <dialog id="games-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
+                    <section>
+                        <h4>Atenção!</h4>
+                        {% if original.has_games %}
+                            <h5>Já existem jogos criados para este torneio. Deseja recriá-los? <br/><br/>A ação não pode ser desfeita!</h5>
+                        {% else %}
+                            <h5>Tem certeza que deseja criar os jogos? <br/><br/>A ação não pode ser desfeita!</h5>
+                        {% endif %}
+                    </section>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                        <button
+                            type="button"
+                            id="games-cancel"
+                            class="btn btn-secondary btn-sm"
+                        >
+                            Cancelar
+                        </button>
+
+                        <a class="btn btn-primary btn-sm" href="{% url 'cup:create_games' original.pk %}">
+                            Sim, criar
+                        </a>
+                    </div>
+                </dialog>
             {% endif %}
         {% else %}
             <a

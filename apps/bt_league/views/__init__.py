@@ -1,0 +1,9 @@
+from .views_league import (
+    create_games,
+    export_csv,
+    finish_tournament,
+    qrcode_tournament,
+    see_tournament,
+    get_tournament_data
+)
+from .views_ranking import see_ranking

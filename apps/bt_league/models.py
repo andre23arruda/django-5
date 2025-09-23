@@ -5,8 +5,8 @@ from django.utils.safestring import mark_safe
 from shortuuid.django_fields import ShortUUIDField
 
 GAME_STATUS = (
-    ('P', '❌'),
-    ('A', '⌛'),
+    ('P', '🚫'),
+    ('A', '🎾'),
     ('C', '✅'),
 )
 
@@ -106,7 +106,7 @@ class Torneio(models.Model):
     grupo_criador = models.ForeignKey('auth.Group', on_delete=models.SET_NULL, null=True, blank=True)
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
     quadras = models.IntegerField(default=1, help_text='Quantidade de quadras para jogos simultâneos')
-    ranking = models.ForeignKey(Ranking, on_delete=models.SET_NULL, blank=True, null=True)
+    ranking = models.ForeignKey(Ranking, on_delete=models.SET_NULL, blank=True, null=True, help_text='Agrupar torneio em um ranking')
     slug = models.SlugField(null=False, unique=True)
 
     class Meta:
@@ -204,8 +204,8 @@ class Jogo(models.Model):
     dupla1_jogador2 = models.ForeignKey(Jogador, related_name='dupla1_jogador2', on_delete=models.CASCADE)
     dupla2_jogador1 = models.ForeignKey(Jogador, related_name='dupla2_jogador1', on_delete=models.CASCADE)
     dupla2_jogador2 = models.ForeignKey(Jogador, related_name='dupla2_jogador2', on_delete=models.CASCADE)
-    placar_dupla1 = models.IntegerField(null=True, blank=True, verbose_name='')
-    placar_dupla2 = models.IntegerField(null=True, blank=True, verbose_name='')
+    placar_dupla1 = models.IntegerField(null=True, blank=True, verbose_name='Pontos dupla 1')
+    placar_dupla2 = models.IntegerField(null=True, blank=True, verbose_name='Pontos dupla 2')
     concluido = models.CharField(max_length=2, default='P', choices=GAME_STATUS, verbose_name='Status')
 
     def __str__(self):

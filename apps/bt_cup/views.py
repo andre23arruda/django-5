@@ -12,7 +12,7 @@ from .models import Jogo, Torneio
 
 
 def distribute_classifieds(classifieds):
-    '''Distribui classificados [1,2,3,4,5,6,7,8,9,10] -> [1,10,2,9,3,8,4,7,5,6]'''
+    '''Distribui classificados [1,2,3,4,5,6,7,8] -> [1,8,3,6,5,4,7,2]'''
     result = []
     for i in range(0, len(classifieds), 2):
         result.extend([classifieds[i], classifieds[-i-1]])

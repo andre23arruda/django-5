@@ -31,7 +31,7 @@ JAZZMIN_SETTINGS = {
         'bt_cup.Torneio': 'fas fa-trophy',
         'cup.Dupla': 'fas fa-user-friends',
         'cup.Torneio': 'fas fa-trophy',
-        'cup.Jogador': 'fas fa-user',
+        'cup.Jogador': 'fas fa-users',
         'cup.Jogo': 'fas fa-table-tennis-paddle-ball',
         'cup.Ranking': 'fas fa-ranking-star',
         'escala_de_plantao.Escala': 'fas fa-sitemap',

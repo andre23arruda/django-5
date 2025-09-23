@@ -35,7 +35,14 @@
     display: none !important;
 } */
 
-th.column-quadra {
+#jazzy-actions input[name="_addanother"],
+#jazzy-actions input[name="_continue"] {
+    display: none !important;
+}
+
+th.column-quadra,
+th.column-placar_dupla1,
+th.column-placar_dupla2 {
     opacity: 0;
     max-width: 10px !important;
 }
@@ -65,8 +72,11 @@ td.field-dupla_2 {
 }
 
 td.field-x p,
+td.field-dupla p,
 td.field-dupla_1 p,
-td.field-dupla_2 p {
+td.field-dupla_2 p,
+td.field-jogador p,
+td.field-fase p {
     margin-bottom: 0px !important;
 }
 
@@ -93,6 +103,25 @@ td.field-dupla_2 p {
     display: none !important;
 }
 
+td.field-fase,
+td.field-concluido {
+    vertical-align: middle !important;
+}
+td.field-fase select.select2-hidden-accessible,
+td.field-concluido select.select2-hidden-accessible {
+    width: 40px !important;
+    height: 25px !important;
+    clip: auto !important;
+    clip-path: none !important;
+    position: relative !important;
+    border-radius: 4px;
+    background-color: transparent;
+}
+td.field-fase span.select2.select2-container.select2-container--default,
+td.field-concluido span.select2.select2-container.select2-container--default {
+    display: none !important;
+}
+
 @media (max-width: 500px) {
     td.field-placar_dupla1 input.vIntegerField,
     td.field-placar_dupla2 input.vIntegerField {
@@ -102,24 +131,6 @@ td.field-dupla_2 p {
     .content-wrapper>.content {
         padding: .5rem !important;
     }
-}
-
-#jazzy-actions input[name="_addanother"],
-#jazzy-actions input[name="_continue"] {
-    display: none !important;
-}
-
-.field-fase select.select2-hidden-accessible,
-.field-concluido select.select2-hidden-accessible {
-    width: 40px !important;
-    height: 20px !important;
-    clip: auto !important;
-    clip-path: none !important;
-    position: relative !important;
-}
-.field-fase span.select2.select2-container.select2-container--default,
-.field-concluido span.select2.select2-container.select2-container--default {
-    display: none !important;
 }
 
 @media (min-width: 992px) {

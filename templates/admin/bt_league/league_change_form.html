@@ -41,45 +41,47 @@
                 </div>
             </dialog>
 
-            <button
-                type="button"
-                id="finish-tournament"
-                class="btn btn-block btn-danger btn-sm mt-2"
-            >
-                Encerrar
-            </button>
+            {% if original.has_games %}
+                <button
+                    type="button"
+                    id="finish-tournament"
+                    class="btn btn-block btn-danger btn-sm mt-2"
+                >
+                    Encerrar
+                </button>
 
-            <dialog id="tournament-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
-                <section>
-                    <h4>Atenção!</h4>
-                    <h5>Tem certeza que deseja encerrar o torneio? <br/><br/>A ação não pode ser desfeita!</h5>
-                </section>
+                <dialog id="tournament-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
+                    <section>
+                        <h4>Atenção!</h4>
+                        <h5>Tem certeza que deseja encerrar o torneio? <br/><br/>A ação não pode ser desfeita!</h5>
+                    </section>
 
-                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                    <button
-                        type="button"
-                        id="tournament-cancel"
-                        class="btn btn-secondary btn-sm"
-                    >
-                        Cancelar
-                    </button>
+                    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                        <button
+                            type="button"
+                            id="tournament-cancel"
+                            class="btn btn-secondary btn-sm"
+                        >
+                            Cancelar
+                        </button>
 
-                    <a
-                        class="btn btn-primary btn-sm"
-                        href="{% url 'bt_league:finish_tournament' original.pk %}"
-                    >
-                        Sim, encerrar
-                    </a>
-                </div>
-            </dialog>
+                        <a
+                            class="btn btn-primary btn-sm"
+                            href="{% url 'bt_league:finish_tournament' original.pk %}"
+                        >
+                            Sim, encerrar
+                        </a>
+                    </div>
+                </dialog>
 
-            <a
-                class="btn btn-block btn-secondary btn-sm mt-2"
-                href="{% url 'bt_league:qrcode_tournament' original.pk %}"
-                target="_blank"
-            >
-                QR Code
-            </a>
+                <a
+                    class="btn btn-block btn-secondary btn-sm mt-2"
+                    href="{% url 'bt_league:qrcode_tournament' original.pk %}"
+                    target="_blank"
+                >
+                    QR Code
+                </a>
+            {% endif %}
         {% else %}
             <a
                 class="btn btn-block btn-secondary btn-sm mt-2"
@@ -88,23 +90,27 @@
             >
                 Planilha
             </a>
+
+            <span id="hidePhaseColumn"/>
         {% endif %}
 
-        {% comment %}
+        {% if original.has_games %}
+            {% comment %}
+                <a
+                    class="btn btn-block btn-secondary btn-sm mt-2"
+                    href="{% url 'bt_league:see_tournament' original.pk %}"
+                >
+                    Ver Torneio
+                </a>
+            {% endcomment %}
+
             <a
                 class="btn btn-block btn-secondary btn-sm mt-2"
-                href="{% url 'bt_league:see_tournament' original.pk %}"
+                href="{{ APP_LINK }}/rei-rainha/{{original.slug}}"
+                target="_blank"
             >
                 Ver Torneio
             </a>
-        {% endcomment %}
-
-        <a
-            class="btn btn-block btn-secondary btn-sm mt-2"
-            href="{{ APP_LINK }}/rei-rainha/{{original.slug}}"
-            target="_blank"
-        >
-            Ver Torneio
-        </a>
+        {% endif %}
     {% endif %}
 {% endblock %}

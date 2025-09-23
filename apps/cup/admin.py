@@ -24,7 +24,7 @@ class TorneioListFilter(admin.SimpleListFilter):
 
 
 @admin.register(Dupla)
-class DuplaModelAdmin(admin.ModelAdmin):
+class DuplaAdmin(admin.ModelAdmin):
     class Media:
         css = {'all': ('css/cup/admin-dupla.css', 'css/cup/hide-buttons.css')}
 
@@ -107,12 +107,18 @@ class JogoAdmin(admin.ModelAdmin):
 
 
 @admin.register(Ranking)
-class RankingModelAdmin(admin.ModelAdmin):
+class RankingAdmin(admin.ModelAdmin):
     class Media:
         css = {'all': ('css/cup/hide-buttons.css',)}
 
-    fields = ['nome', 'ativo']
+    fields = ['nome']
     list_display = ['nome', 'ativo']
+    search_fields = ['nome']
+
+    def get_fields(self, request, obj):
+        if request.user.is_superuser:
+            return self.fields + ['criado_por', 'ativo']
+        return super().get_fields(request, obj)
 
     def get_list_display(self, request):
         list_display = self.list_display
@@ -137,7 +143,6 @@ class JogosInline(admin.TabularInline):
     extra = 0
     fields = ['fase', 'dupla_1', 'pontos_dupla1', 'x', 'pontos_dupla2', 'dupla_2', 'concluido']
     can_delete = False
-    readonly_fields = ['fase', 'dupla_1', 'dupla_2', 'x']
 
     def get_queryset(self, request):
         if '/change/' in request.path:
@@ -149,10 +154,10 @@ class JogosInline(admin.TabularInline):
         return super().get_queryset(request)
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = self.readonly_fields
+        fields = ['fase', 'dupla_1', 'dupla_2', 'x']
         if not obj.ativo:
-            readonly_fields += ['pontos_dupla1', 'pontos_dupla2', 'concluido']
-        return readonly_fields
+            fields += ['pontos_dupla1', 'pontos_dupla2', 'concluido']
+        return fields
 
     def dupla_1(self, obj):
         if obj.dupla1 is not None:
@@ -304,7 +309,7 @@ class TorneioAdmin(admin.ModelAdmin):
         ]
 
     change_form_template = 'admin/cup/cup_change_form.html'
-    list_display = ['nome', 'data', 'ativo']
+    list_display = ['nome', 'data', 'total_duplas', 'grupos', 'total_jogos', 'ativo']
     list_filter = ['ativo']
     search_fields = ['nome']
     fieldsets = [
@@ -315,6 +320,18 @@ class TorneioAdmin(admin.ModelAdmin):
             'open', 'ativo'
         ]}),
     ]
+
+    def total_duplas(self, obj):
+        return obj.duplas.count()
+    total_duplas.short_description = 'Duplas'
+
+    def grupos(self, obj):
+        return obj.quantidade_grupos
+    grupos.short_description = 'Grupos'
+
+    def total_jogos(self, obj):
+        return obj.jogo_set.count()
+    total_jogos.short_description = 'Jogos'
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         extra_context = extra_context or {}
@@ -333,7 +350,7 @@ class TorneioAdmin(admin.ModelAdmin):
 
     def get_inlines(self, request, obj):
         if obj:
-            if obj.open and obj.duplas.count() > 0:
+            if obj.open and obj.duplas.count() > 0 and obj.ativo:
                 return [DuplasInline, JogosOpenInline]
             elif obj.duplas.count() > 0:
                 return [DuplasInline, JogosInline]

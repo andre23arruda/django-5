@@ -9,10 +9,8 @@ from .models import Dupla, Torneio, Jogo
 
 @admin.register(Dupla)
 class DuplaAdmin(admin.ModelAdmin):
-    exclude = ('id', 'criado_por')
-    list_display = ['__str__', 'telefone', 'ativo']
-    list_editable = ('ativo',)
-    list_filter = ['ativo']
+    fields = ['jogador1', 'jogador2', 'telefone']
+    list_display = ['__str__', 'telefone']
     search_fields = ('jogador1', 'jogador2')
 
     def get_list_display(self, request):
@@ -43,7 +41,7 @@ class DuplaAdmin(admin.ModelAdmin):
 class JogoInline(admin.TabularInline):
     model = Jogo
     extra = 0
-    fields = ('fase', 'dupla_1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla_2', 'concluido')
+    fields = ['fase', 'dupla_1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla_2', 'concluido']
     can_delete = False
 
     def get_queryset(self, request):
@@ -137,9 +135,9 @@ class JogoInline(admin.TabularInline):
 class JogoOpenInline(admin.TabularInline):
     model = Jogo
     extra = 0
-    fields = ('dupla1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla2', 'obs', 'concluido')
+    fields = ['dupla1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla2', 'obs', 'concluido']
     # raw_id_fields = ('dupla1', 'dupla2')
-    readonly_fields = ('x',)
+    readonly_fields = ['x']
     can_delete = True
 
     def __init__(self, *args, **kwargs):
@@ -147,19 +145,14 @@ class JogoOpenInline(admin.TabularInline):
         self.parent_obj = None
 
     def get_fields(self, request, obj):
+        fields = self.fields
         if request.user.is_superuser:
-            return ('fase', 'dupla1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla2', 'obs', 'concluido')
+            return ['fase'] + fields
         return super().get_fields(request, obj)
 
     def get_formset(self, request, obj=None, **kwargs):
         self.parent_obj = obj
         return super().get_formset(request, obj, **kwargs)
-
-    # def get_formset(self, request, obj=None, **kwargs):
-    #     self.parent_obj = obj
-    #     formset = super().get_formset(request, obj, **kwargs)
-    #     formset.form.base_fields['fase'].initial = 'GRUPO 1'
-    #     return formset
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name in ['dupla1', 'dupla2'] and self.parent_obj:
@@ -180,8 +173,16 @@ class DuplasInline(admin.TabularInline):
     model = Torneio.duplas.through
     extra = 0
     verbose_name = 'Dupla'
-    fields = ('dupla',)
+    fields = ['dupla']
     can_delete = False
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name in ['dupla']:
+            if request.user.is_superuser:
+                kwargs['queryset'] = Dupla.objects.all().order_by('jogador1')
+            else:
+                kwargs['queryset'] = Dupla.objects.filter(criado_por=request.user).order_by('jogador1')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_readonly_fields(self, request, obj=None):
         fields = []
@@ -235,7 +236,7 @@ class TorneioAdmin(admin.ModelAdmin):
 
     def get_inlines(self, request, obj):
         if obj:
-            if obj.open and obj.duplas.count() > 0:
+            if obj.open and obj.duplas.count() > 0 and obj.ativo:
                 return [JogoOpenInline, DuplasInline]
             elif obj.duplas.count() > 0:
                 return [JogoInline, DuplasInline]
@@ -299,4 +300,9 @@ class TorneioAdmin(admin.ModelAdmin):
 
 # @admin.register(Jogo)
 # class JogoAdmin(admin.ModelAdmin):
-#     list_display = ('torneio', 'fase', 'dupla1', 'dupla2', 'concluido')
+#     list_display = ['dupla1', 'dupla2', 'concluido', 'fase', 'torneio']
+#     list_filter = ['fase', 'torneio']
+#     ordering = ['-torneio__data']
+
+#     def has_module_permission(self, request):
+#         return request.user.is_superuser

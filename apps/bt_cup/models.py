@@ -25,8 +25,8 @@ QUANTIDADE_GRUPOS_CHOICES = [
 ]
 
 GAME_STATUS = (
-    ('P', '❌'),
-    ('A', '⌛'),
+    ('P', '🚫'),
+    ('A', '🎾'),
     ('C', '✅'),
 )
 
@@ -507,8 +507,8 @@ class Jogo(models.Model):
     torneio = models.ForeignKey(Torneio, on_delete=models.CASCADE)
     dupla1 = models.ForeignKey(Dupla, related_name='dupla1', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Dupla 1')
     dupla2 = models.ForeignKey(Dupla, related_name='dupla2', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Dupla 2')
-    placar_dupla1 = models.IntegerField(null=True, blank=True, verbose_name='')
-    placar_dupla2 = models.IntegerField(null=True, blank=True, verbose_name='')
+    placar_dupla1 = models.IntegerField(null=True, blank=True, verbose_name='Pontos dupla 1')
+    placar_dupla2 = models.IntegerField(null=True, blank=True, verbose_name='Pontos dupla 2')
     fase = models.CharField(choices=FASE_CHOICES, default='GRUPO 1', max_length=100, null=True, blank=True)
     concluido = models.CharField(max_length=2, default='P', choices=GAME_STATUS, verbose_name='Status')
     obs = models.TextField(null=True, blank=True, help_text='Alguma observação sobre o jogo. Ex: "Dupla 1 WO"')
