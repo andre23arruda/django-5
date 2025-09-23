@@ -3,12 +3,24 @@
 {% block submit_buttons_bottom %}
     {{ block.super }}
     {% if original.pk %}
-        <a
-            href="{% url 'bt_league:see_ranking' original.pk %}"
-            class="btn btn-block btn-primary btn-sm mt-2"
-            target="_blank"
-        >
-            Ver Ranking
-        </a>
+        {% if original.ativo %}
+            {% comment %}
+                <a
+                    href="{% url 'bt_league:ranking_data' original.pk %}"
+                    class="btn btn-block btn-primary btn-sm mt-2"
+                    target="_blank"
+                >
+                    Ver Ranking
+                </a>
+            {% endcomment %}
+
+            <a
+                class="btn btn-block btn-secondary btn-sm mt-2"
+                href="{{ APP_LINK }}/rei-rainha/{{original.pk}}/ranking"
+                target="_blank"
+            >
+                Ver Ranking
+            </a>
+        {% endif %}
     {% endif %}
 {% endblock %}

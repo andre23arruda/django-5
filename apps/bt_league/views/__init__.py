@@ -6,4 +6,7 @@ from .views_league import (
     see_tournament,
     get_tournament_data
 )
-from .views_ranking import see_ranking
+from .views_ranking import (
+    get_ranking_data,
+    see_ranking
+)

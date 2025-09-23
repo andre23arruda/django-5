@@ -278,13 +278,20 @@ class TorneioAdmin(admin.ModelAdmin):
 @admin.register(Ranking)
 class RankingAdmin(admin.ModelAdmin):
     change_form_template = 'admin/bt_league/ranking_change_form.html'
-    fields = ['nome']
+    fields = ['nome', 'ativo']
     list_display = ['nome', 'ativo']
     search_fields = ['nome']
 
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['APP_LINK'] = os.getenv('APP_LINK')
+        return super().change_view(
+            request, object_id, form_url, extra_context=extra_context,
+        )
+
     def get_fields(self, request, obj):
         if request.user.is_superuser:
-            return self.fields + ['criado_por', 'grupo_criador', 'ativo']
+            return self.fields + ['criado_por', 'grupo_criador']
         return super().get_fields(request, obj)
 
     def get_list_display(self, request):
