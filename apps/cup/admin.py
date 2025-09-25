@@ -111,9 +111,17 @@ class RankingAdmin(admin.ModelAdmin):
     class Media:
         css = {'all': ('css/cup/hide-buttons.css',)}
 
+    change_form_template = 'admin/cup/ranking_change_form.html'
     fields = ['nome']
     list_display = ['nome', 'ativo']
     search_fields = ['nome']
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['APP_LINK'] = os.getenv('APP_LINK')
+        return super().change_view(
+            request, object_id, form_url, extra_context=extra_context,
+        )
 
     def get_fields(self, request, obj):
         if request.user.is_superuser:
@@ -347,6 +355,18 @@ class TorneioAdmin(admin.ModelAdmin):
             else:
                 kwargs['queryset'] = Ranking.objects.filter(criado_por=request.user).order_by('nome')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def get_fieldsets(self, request, obj):
+        if request.user.is_superuser:
+            return [
+                ('Torneio', {'fields': [
+                    'nome', 'data', 'ranking',
+                    'quantidade_grupos', 'tipo',
+                    'playoffs', 'terceiro_lugar',
+                    'open', 'ativo', 'criado_por'
+                ]}),
+            ]
+        return super().get_fieldsets(request, obj)
 
     def get_inlines(self, request, obj):
         if obj:

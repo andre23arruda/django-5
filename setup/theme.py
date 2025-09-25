@@ -28,6 +28,7 @@ JAZZMIN_SETTINGS = {
         'bt_league.Ranking': 'fas fa-ranking-star',
         'bt_league.Torneio': 'fas fa-medal',
         'bt_cup.Dupla': 'fas fa-user-friends',
+        'bt_cup.Jogo': 'fas fa-table-tennis-paddle-ball',
         'bt_cup.Torneio': 'fas fa-trophy',
         'cup.Dupla': 'fas fa-user-friends',
         'cup.Torneio': 'fas fa-trophy',
