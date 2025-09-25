@@ -142,6 +142,8 @@ def get_ranking_data(request, ranking_id):
                 {
                     'id': t.id,
                     'nome': t.nome,
+                    'jogos': t.jogo_set.all().count(),
+                    'jogadores': t.jogadores.count(),
                     'data': t.data.isoformat(),
                     'finalizado': t.is_finished()
                 } for t in torneios
