@@ -8,7 +8,7 @@ from openpyxl import Workbook
 from openpyxl.drawing.image import Image
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 
-from .models import Jogo, Torneio
+from ..models import Jogo, Torneio
 
 
 def distribute_classifieds(classifieds):
@@ -228,6 +228,8 @@ def get_tournament_data(request, torneio_id: str):
             'data': torneio.data,
             'tipo': torneio.tipo,
             'ativo': torneio.ativo,
+            'duplas': torneio.duplas.count(),
+            'jogos': jogos.count(),
         },
         'grupos': grupos,
         'fases_finais': fases_finais,
