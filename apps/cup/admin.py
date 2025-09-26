@@ -100,6 +100,7 @@ class JogoAdmin(admin.ModelAdmin):
 
     list_display = ['dupla1', 'placar', 'dupla2', 'concluido', 'fase', 'torneio']
     list_filter = ['fase', 'torneio']
+    list_per_page = 15
     ordering = ['-torneio__data']
 
     def has_module_permission(self, request):
@@ -313,7 +314,7 @@ class TorneioAdmin(admin.ModelAdmin):
             'js/finish-tournament-modal.js',
             'js/hide-phase.js',
             'js/next-stage-modal.js',
-            # 'js/teams-inline-text.js'
+            'js/games-counter.js'
         ]
 
     change_form_template = 'admin/cup/cup_change_form.html'

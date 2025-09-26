@@ -10,8 +10,13 @@ from .models import Dupla, Torneio, Jogo
 @admin.register(Dupla)
 class DuplaAdmin(admin.ModelAdmin):
     fields = ['jogador1', 'jogador2', 'telefone']
-    list_display = ['__str__', 'telefone']
-    search_fields = ('jogador1', 'jogador2')
+    list_display = ['__str__', 'telefone', 'get_torneios']
+    search_fields = ['jogador1', 'jogador2']
+
+    def get_torneios(self, obj):
+        '''Retorna os torneios em que a dupla participa'''
+        return obj.torneio_set.filter(ativo=True).count()
+    get_torneios.short_description = 'Torneios'
 
     def get_list_display(self, request):
         list_display = self.list_display
@@ -173,8 +178,10 @@ class DuplasInline(admin.TabularInline):
     model = Torneio.duplas.through
     extra = 0
     verbose_name = 'Dupla'
-    fields = ['dupla']
-    can_delete = False
+
+    def dupla_nome(self, obj):
+        return obj.dupla
+    dupla_nome.short_description = 'Dupla'
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name in ['dupla']:
@@ -184,17 +191,25 @@ class DuplasInline(admin.TabularInline):
                 kwargs['queryset'] = Dupla.objects.filter(criado_por=request.user).order_by('jogador1')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+    def get_fields(self, request, obj):
+        if obj.ativo:
+            return ['dupla']
+        else:
+            return ['dupla_nome']
+
     def get_readonly_fields(self, request, obj=None):
-        fields = []
-        if not obj or not obj.ativo:
-            fields += ['dupla']
-        return fields
+        if obj.ativo:
+            return []
+        return ['dupla_nome']
 
     def get_queryset(self, request):
         return super().get_queryset(request).order_by('dupla__jogador1')
 
     def has_add_permission(self, request, obj=None):
-        return False
+        return obj.ativo
+
+    def has_delete_permission(self, request, obj=None):
+        return obj.ativo
 
     @property
     def verbose_name_plural(self):
@@ -210,21 +225,29 @@ class DuplasInline(admin.TabularInline):
 @admin.register(Torneio)
 class TorneioAdmin(admin.ModelAdmin):
     class Media:
-        css = {'all': ('css/custom-tabular-inline.css', 'css/hide-related-widgets.css')}
+        css = {'all': [
+            'css/custom-tabular-inline.css',
+            'css/hide-related-widgets.css'
+        ]}
         js = [
             'js/create-games-modal.js',
             'js/finish-tournament-modal.js',
             'js/hide-phase.js',
-            'js/next-stage-modal.js'
+            'js/next-stage-modal.js',
+            'js/games-counter.js'
         ]
 
     fieldsets = [
-        ('Torneio', {'fields': ('nome', 'data', 'duplas', 'quantidade_grupos', 'playoffs', 'terceiro_lugar', 'open', 'ativo')}),
+        ('Torneio', {'fields': [
+            'nome', 'data', 'quantidade_grupos',
+            'playoffs', 'terceiro_lugar', 'open',
+            'ativo'
+        ]}),
     ]
     change_form_template = 'admin/bt_cup/cup_change_form.html'
     list_display = ['nome', 'data', 'total_duplas', 'grupos', 'total_jogos', 'ativo']
     autocomplete_fields = ['duplas']
-    list_filter = ('ativo',)
+    list_filter = ['ativo',]
     search_fields = ['nome']
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
@@ -237,14 +260,22 @@ class TorneioAdmin(admin.ModelAdmin):
     def get_inlines(self, request, obj):
         if obj:
             if obj.open and obj.duplas.count() > 0 and obj.ativo:
-                return [JogoOpenInline, DuplasInline]
+                return [DuplasInline, JogoOpenInline]
             elif obj.duplas.count() > 0:
-                return [JogoInline, DuplasInline]
+                return [DuplasInline, JogoInline]
+            else:
+                return [DuplasInline]
         return super().get_inlines(request, obj)
 
     def get_fieldsets(self, request, obj):
         if request.user.is_superuser:
-            return [['Torneio', {'fields': ['nome', 'data', 'duplas', 'quantidade_grupos', 'playoffs', 'terceiro_lugar', 'open', 'ativo', 'criado_por']}]]
+            return [[
+                'Torneio', {'fields': [
+                    'nome', 'data', 'quantidade_grupos',
+                    'playoffs', 'terceiro_lugar', 'open',
+                    'ativo', 'criado_por'
+                ]}
+            ]]
         return super().get_fieldsets(request, obj)
 
     def get_list_display(self, request):
@@ -253,12 +284,12 @@ class TorneioAdmin(admin.ModelAdmin):
             return list_display + ['criado_por', 'criado_em']
         return list_display
 
-    def get_form(self, request, obj=None, **kwargs):
-        if request.user.is_superuser:
-            return super().get_form(request, obj, **kwargs)
-        form = super().get_form(request, obj, **kwargs)
-        form.base_fields['duplas'].queryset = Dupla.objects.filter(criado_por=request.user).order_by('criado_em')
-        return form
+    # def get_form(self, request, obj=None, **kwargs):
+    #     if request.user.is_superuser:
+    #         return super().get_form(request, obj, **kwargs)
+    #     form = super().get_form(request, obj, **kwargs)
+    #     form.base_fields['duplas'].queryset = Dupla.objects.filter(criado_por=request.user).order_by('criado_em')
+    #     return form
 
     def get_queryset(self, request):
         if request.user.is_superuser:
@@ -278,9 +309,9 @@ class TorneioAdmin(admin.ModelAdmin):
     total_jogos.short_description = 'Jogos'
 
     def response_add(self, request, obj, post_url_continue=None):
-        messages.add_message(request, messages.INFO, 'Informações salvas com sucesso.')
+        messages.add_message(request, messages.INFO, 'Torneio criado! Agora adicione as duplas')
         response = redirect('admin:bt_cup_torneio_change', obj.id)
-        response['location'] += '#jogos-tab'
+        response['location'] += '#duplas-0-tab'
         return response
 
     def response_change(self, request, obj):
@@ -298,11 +329,15 @@ class TorneioAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 
-# @admin.register(Jogo)
-# class JogoAdmin(admin.ModelAdmin):
-#     list_display = ['dupla1', 'dupla2', 'concluido', 'fase', 'torneio']
-#     list_filter = ['fase', 'torneio']
-#     ordering = ['-torneio__data']
+@admin.register(Jogo)
+class JogoAdmin(admin.ModelAdmin):
+    class Media:
+        css = {'all': ['css/custom-tabular-inline.css']}
 
-#     def has_module_permission(self, request):
-#         return request.user.is_superuser
+    list_display = ['dupla1', 'placar', 'dupla2', 'concluido', 'fase', 'torneio']
+    list_filter = ['fase', 'torneio']
+    list_per_page = 15
+    ordering = ['-torneio__data']
+
+    def has_module_permission(self, request):
+        return request.user.is_superuser

@@ -131,14 +131,21 @@ class JogadoresInline(admin.TabularInline):
     model = Torneio.jogadores.through
     extra = 0
     verbose_name = 'Jogador'
-    fields = ['jogador']
-    can_delete = False
+
+    def jogador_nome(self, obj):
+        return obj.jogador.nome
+    jogador_nome.short_description = 'Jogador'
+
+    def get_fields(self, request, obj):
+        if obj.ativo:
+            return ['jogador']
+        else:
+            return ['jogador_nome']
 
     def get_readonly_fields(self, request, obj=None):
-        fields = []
-        if not obj.ativo:
-            fields += ['jogador']
-        return fields
+        if obj.ativo:
+            return []
+        return ['jogador_nome']
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name in ['jogador']:
@@ -149,7 +156,10 @@ class JogadoresInline(admin.TabularInline):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def has_add_permission(self, request, obj=None):
-        return False
+        return obj.ativo
+
+    def has_delete_permission(self, request, obj=None):
+        return obj.ativo
 
     @property
     def verbose_name_plural(self):
@@ -183,14 +193,15 @@ class TorneioAdmin(admin.ModelAdmin):
             'js/create-games-modal.js',
             'js/finish-tournament-modal.js',
             'js/hide-phase.js',
+            'js/games-counter.js'
         ]
 
     fieldsets = [
-        ['Torneio', {'fields': ['nome', 'data', 'ranking', 'quadras', 'jogadores', 'ativo']}],
+        ['Torneio', {'fields': ['nome', 'data', 'ranking', 'quadras', 'ativo']}],
     ]
     change_form_template = 'admin/bt_league/league_change_form.html'
     list_display = ['nome', 'data', 'total_jogadores', 'total_jogos', 'ativo']
-    autocomplete_fields = ['jogadores']
+    # autocomplete_fields = ['jogadores']
     list_filter = ['ativo']
     search_fields = ['nome']
     form = TorneioAdminForm
@@ -211,15 +222,16 @@ class TorneioAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_inlines(self, request, obj):
-        if not obj:
-            return []
-        if obj.jogadores.count() > 0:
-            return [JogoInline, JogadoresInline]
+        if obj:
+            if obj.jogadores.count() > 0:
+                return [JogadoresInline, JogoInline]
+            else:
+                return [JogadoresInline]
         return super().get_inlines(request, obj)
 
     def get_fieldsets(self, request, obj):
         if request.user.is_superuser:
-            return [['Torneio', {'fields': ['nome', 'data', 'ranking', 'quadras', 'jogadores', 'ativo', 'criado_por', 'grupo_criador']}]]
+            return [['Torneio', {'fields': ['nome', 'data', 'ranking', 'quadras', 'ativo', 'criado_por', 'grupo_criador']}]]
         return super().get_fieldsets(request, obj)
 
     def get_list_display(self, request):
@@ -228,16 +240,16 @@ class TorneioAdmin(admin.ModelAdmin):
             return list_display + ['criado_por', 'criado_em', 'grupo_criador']
         return list_display
 
-    def get_form(self, request, obj=None, **kwargs):
-        if request.user.is_superuser:
-            return super().get_form(request, obj, **kwargs)
-        form = super().get_form(request, obj, **kwargs)
-        user_group = request.user.groups.first()
-        if user_group:
-            form.base_fields['jogadores'].queryset = Jogador.objects.filter(Q(criado_por=request.user) | Q(grupo_criador=user_group)).order_by('nome')
-        else:
-            form.base_fields['jogadores'].queryset = Jogador.objects.filter(criado_por=request.user).order_by('nome')
-        return form
+    # def get_form(self, request, obj=None, **kwargs):
+    #     if request.user.is_superuser:
+    #         return super().get_form(request, obj, **kwargs)
+    #     form = super().get_form(request, obj, **kwargs)
+    #     user_group = request.user.groups.first()
+    #     if user_group:
+    #         form.base_fields['jogadores'].queryset = Jogador.objects.filter(Q(criado_por=request.user) | Q(grupo_criador=user_group)).order_by('nome')
+    #     else:
+    #         form.base_fields['jogadores'].queryset = Jogador.objects.filter(criado_por=request.user).order_by('nome')
+    #     return form
 
     def get_queryset(self, request):
         if request.user.is_superuser:
@@ -256,9 +268,9 @@ class TorneioAdmin(admin.ModelAdmin):
     total_jogos.short_description = 'Jogos'
 
     def response_add(self, request, obj, post_url_continue=None):
-        messages.add_message(request, messages.INFO, 'Informações salvas com sucesso.')
+        messages.add_message(request, messages.INFO, 'Torneio criado! Agora adicione as duplas')
         response = redirect('admin:bt_league_torneio_change', obj.id)
-        response['location'] += '#jogos-tab'
+        response['location'] += '#jogadores-0-tab'
         return response
 
     def response_change(self, request, obj):
@@ -278,7 +290,7 @@ class TorneioAdmin(admin.ModelAdmin):
 @admin.register(Ranking)
 class RankingAdmin(admin.ModelAdmin):
     change_form_template = 'admin/bt_league/ranking_change_form.html'
-    fields = ['nome', 'ativo']
+    fields = ['nome']
     list_display = ['nome', 'ativo']
     search_fields = ['nome']
 
@@ -321,3 +333,29 @@ class RankingAdmin(admin.ModelAdmin):
             obj.criado_por = request.user
             obj.grupo_criador = request.user.groups.first()
         super().save_model(request, obj, form, change)
+
+
+@admin.register(Jogo)
+class JogoAdmin(admin.ModelAdmin):
+    class Media:
+        css = {'all': ['css/custom-tabular-inline.css']}
+
+    fields = [
+        'torneio',
+        'quadra',
+        'dupla1_jogador1',
+        'dupla1_jogador2',
+        'placar_dupla1',
+        'dupla2_jogador1',
+        'dupla2_jogador2',
+        'placar_dupla2',
+        'concluido',
+    ]
+
+    list_display = ['__str__', 'torneio', 'concluido']
+    list_filter = ['torneio']
+    list_per_page = 15
+    ordering = ['-torneio__data']
+
+    def has_module_permission(self, request):
+        return request.user.is_superuser

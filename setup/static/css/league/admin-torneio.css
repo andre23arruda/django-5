@@ -40,7 +40,8 @@ td.field-concluido p,
 td.field-x p,
 td.field-dupla_1 p,
 td.field-dupla_2 p,
-td.field-jogador p {
+td.field-jogador p,
+td.field-jogador_nome p {
     margin-bottom: 0px !important;
 }
 
@@ -99,9 +100,7 @@ td.field-dupla_2 p {
 .field-ranking a.related-widget-wrapper-link.delete-related,
 .field-ranking a.related-widget-wrapper-link.view-related,
 tr.form-row.has_original.dynamic-Torneio_jogadores .related-widget-wrapper-link.add-related,
-tr.form-row.has_original.dynamic-Torneio_jogadores .related-widget-wrapper-link.view-related,
-tr.form-row.has_original.dynamic-Torneio_duplas .related-widget-wrapper-link.add-related,
-tr.form-row.has_original.dynamic-Torneio_duplas .related-widget-wrapper-link.view-related {
+tr.form-row.dynamic-Torneio_jogadores .related-widget-wrapper-link.view-related {
     display: none !important;
 }
 

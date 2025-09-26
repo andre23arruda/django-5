@@ -77,6 +77,7 @@ td.field-dupla p,
 td.field-dupla_1 p,
 td.field-dupla_2 p,
 td.field-jogador p,
+td.field-dupla_nome p,
 td.field-fase p {
     margin-bottom: 0px !important;
 }
@@ -121,6 +122,10 @@ td.field-concluido select.select2-hidden-accessible {
 td.field-fase span.select2.select2-container.select2-container--default,
 td.field-concluido span.select2.select2-container.select2-container--default {
     display: none !important;
+}
+
+div.field-torneio .related-widget-wrapper .select2.select2-container.select2-container--default {
+    width: auto !important;
 }
 
 @media (max-width: 500px) {

@@ -543,3 +543,8 @@ class Jogo(models.Model):
             elif self.placar_dupla2 > self.placar_dupla1:
                 return self.dupla2
         return None
+
+    def placar(self) -> str:
+        if self.placar_dupla1 is None and self.placar_dupla2 is None:
+            return ''
+        return f'{self.placar_dupla1} X {self.placar_dupla2}'
