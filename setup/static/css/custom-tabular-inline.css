@@ -43,8 +43,10 @@
 th.column-quadra,
 th.column-placar_dupla1,
 th.column-placar_dupla2 {
+    width: 0px;
+    max-width: 50px;
     opacity: 0;
-    max-width: 10px !important;
+    padding: 0;
 }
 
 th.column-dupla_1,

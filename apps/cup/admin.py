@@ -115,6 +115,7 @@ class RankingAdmin(admin.ModelAdmin):
     change_form_template = 'admin/cup/ranking_change_form.html'
     fields = ['nome']
     list_display = ['nome', 'ativo']
+    list_filter = ['ativo']
     search_fields = ['nome']
 
     def change_view(self, request, object_id, form_url='', extra_context=None):

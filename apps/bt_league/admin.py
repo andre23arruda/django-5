@@ -19,7 +19,6 @@ english.DATETIME_FORMAT = 'H:i d/m/Y'
 class JogadorAdmin(admin.ModelAdmin):
     fields = ['nome', 'telefone', 'email']
     list_display = ['nome', 'telefone']
-    list_filter = ['ativo']
     search_fields = ['nome']
 
     def get_fields(self, request, obj):
@@ -292,6 +291,7 @@ class RankingAdmin(admin.ModelAdmin):
     change_form_template = 'admin/bt_league/ranking_change_form.html'
     fields = ['nome']
     list_display = ['nome', 'ativo']
+    list_filter = ['ativo']
     search_fields = ['nome']
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
