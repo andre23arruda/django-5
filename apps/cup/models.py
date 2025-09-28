@@ -682,6 +682,7 @@ class Ranking(models.Model):
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
     criado_por = models.ForeignKey('auth.User', related_name='rankings_criados', on_delete=models.SET_NULL, null=True)
     criado_em = models.DateTimeField(auto_now_add=True)
+    slug = models.SlugField(null=False, unique=True)
 
     class Meta:
         verbose_name = 'Ranking'
@@ -690,3 +691,8 @@ class Ranking(models.Model):
 
     def __str__(self):
         return self.nome
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = f'{slugify(self.nome)}_{self.id}'
+        return super().save(*args, **kwargs)

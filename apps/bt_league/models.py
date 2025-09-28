@@ -17,6 +17,7 @@ class Ranking(models.Model):
     grupo_criador = models.ForeignKey('auth.Group', on_delete=models.SET_NULL, null=True, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
+    slug = models.SlugField(null=False, unique=True)
 
     class Meta:
         verbose_name = 'Ranking'
@@ -25,6 +26,11 @@ class Ranking(models.Model):
 
     def __str__(self):
         return self.nome
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = f'{slugify(self.nome)}_{self.id}'
+        return super().save(*args, **kwargs)
 
 
 class Jogador(models.Model):

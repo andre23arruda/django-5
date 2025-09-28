@@ -48,7 +48,7 @@ def see_ranking(request, ranking_id: str):
 
 def get_ranking_data(request, ranking_id):
     '''informações detalhadas de um Ranking'''
-    ranking = get_object_or_404(Ranking, id=ranking_id, ativo=True)
+    ranking = get_object_or_404(Ranking, slug=ranking_id, ativo=True)
     torneios = Torneio.objects.filter(ranking=ranking, ativo=False)
     num_torneios = torneios.count()
 
