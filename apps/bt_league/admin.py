@@ -196,7 +196,7 @@ class TorneioAdmin(admin.ModelAdmin):
         ]
 
     fieldsets = [
-        ['Torneio', {'fields': ['nome', 'data', 'ranking', 'quadras', 'ativo']}],
+        ['Torneio', {'fields': ['nome', 'data', 'quadras', 'ativo']}],
     ]
     change_form_template = 'admin/bt_league/league_change_form.html'
     list_display = ['nome', 'data', 'total_jogadores', 'total_jogos', 'ativo']
@@ -229,9 +229,14 @@ class TorneioAdmin(admin.ModelAdmin):
         return super().get_inlines(request, obj)
 
     def get_fieldsets(self, request, obj):
+        has_ranking_view_perm = request.user.has_perm('bt_league.view_ranking')
+        has_ranking_add_perm = request.user.has_perm('bt_league.add_ranking')
+        base_fields = ['nome', 'data', 'quadras', 'ativo']
+        if has_ranking_view_perm and has_ranking_add_perm:
+            base_fields.insert(2, 'ranking')
         if request.user.is_superuser:
-            return [['Torneio', {'fields': ['nome', 'data', 'ranking', 'quadras', 'ativo', 'criado_por', 'grupo_criador']}]]
-        return super().get_fieldsets(request, obj)
+            base_fields.extend(['criado_por', 'grupo_criador'])
+        return [['Torneio', {'fields': base_fields}]]
 
     def get_list_display(self, request):
         list_display = self.list_display

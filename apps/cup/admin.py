@@ -324,7 +324,7 @@ class TorneioAdmin(admin.ModelAdmin):
     search_fields = ['nome']
     fieldsets = [
         ('Torneio', {'fields': [
-            'nome', 'data', 'ranking',
+            'nome', 'data',
             'quantidade_grupos', 'tipo',
             'playoffs', 'terceiro_lugar',
             'open', 'ativo'
@@ -359,16 +359,18 @@ class TorneioAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_fieldsets(self, request, obj):
+        has_ranking_view_perm = request.user.has_perm('cup.view_ranking')
+        has_ranking_add_perm = request.user.has_perm('cup.add_ranking')
+        base_fields = [
+            'nome', 'data', 'quantidade_grupos',
+            'tipo', 'playoffs', 'terceiro_lugar',
+            'ativo'
+        ]
+        if has_ranking_view_perm and has_ranking_add_perm:
+            base_fields.insert(2, 'ranking')
         if request.user.is_superuser:
-            return [
-                ('Torneio', {'fields': [
-                    'nome', 'data', 'ranking',
-                    'quantidade_grupos', 'tipo',
-                    'playoffs', 'terceiro_lugar',
-                    'open', 'ativo', 'criado_por'
-                ]}),
-            ]
-        return super().get_fieldsets(request, obj)
+            base_fields.extend(['open', 'criado_por'])
+        return [['Torneio', {'fields': base_fields}]]
 
     def get_inlines(self, request, obj):
         if obj:
