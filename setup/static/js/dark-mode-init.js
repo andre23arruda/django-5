@@ -1,6 +1,6 @@
 const darkModeIcons = {
-    true: '🌙',
-    false: '☀️'
+    true: '<i class="fa-solid fa-moon"></i>',
+    false: '<i class="fa-solid fa-sun"></i>'
 }
 
 function getDarkMode() {

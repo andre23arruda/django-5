@@ -136,7 +136,18 @@ input:not([type=submit]), textarea {
     color: white;
 }
 
+/* group select */
+.dark-mode p.selector-filter input {
+    color: black !important;
+}
+
 /* buttons */
+.dark-mode .btn-success {
+    background-color: #00bc8c !important;
+}
+.dark-mode .btn-success:hover {
+    background-color: #009670 !important;
+}
 .dark-mode .btn-outline-success {
     border-color: #00bc8c !important;
 }
@@ -148,6 +159,12 @@ input:not([type=submit]), textarea {
 }
 .dark-mode .btn-outline-info:hover {
     background-color: #3498db !important;
+}
+.dark-mode .btn-danger {
+    background-color: #e74c3c !important;
+}
+.dark-mode .btn-danger:hover {
+    background-color: #e12e1c !important;
 }
 .dark-mode .btn-outline-danger {
     border-color: #e74c3c !important;

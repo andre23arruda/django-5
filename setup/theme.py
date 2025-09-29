@@ -44,6 +44,7 @@ JAZZMIN_SETTINGS = {
     },
     'default_icon_parents': 'fas fa-chevron-circle-right',
     'default_icon_children': 'fas fa-circle',
+    # 'show_ui_builder': True
 }
 
 JAZZMIN_UI_TWEAKS = {
@@ -51,15 +52,15 @@ JAZZMIN_UI_TWEAKS = {
     'footer_small_text': False,
     'body_small_text': False,
     'brand_small_text': False,
-    'brand_colour': False,
-    'accent': 'accent-lightblue',
-    'navbar': 'navbar-dark',
+    'brand_colour': 'navbar-gray',
+    'accent': 'accent-orange',
+    'navbar': 'navbar-orange navbar-light',
     'no_navbar_border': True,
     'navbar_fixed': True,
     'layout_boxed': False,
     'footer_fixed': False,
     'sidebar_fixed': True,
-    'sidebar': 'sidebar-dark-primary',
+    'sidebar': 'sidebar-dark-orange',
     'sidebar_nav_small_text': False,
     'sidebar_disable_expand': False,
     'sidebar_nav_child_indent': False,
@@ -69,11 +70,11 @@ JAZZMIN_UI_TWEAKS = {
     'theme': 'default',
     'dark_mode_theme': None,
     'button_classes': {
-        'primary': 'btn-outline-primary',
-        'secondary': 'btn-outline-secondary',
-        'info': 'btn-outline-info',
-        'warning': 'btn-outline-warning',
-        'danger': 'btn-outline-danger',
-        'success': 'btn-outline-success'
+        'primary': 'btn-primary',
+        'secondary': 'btn-secondary',
+        'info': 'btn-info',
+        'warning': 'btn-warning',
+        'danger': 'btn-danger',
+        'success': 'btn-success'
     }
 }
