@@ -240,7 +240,7 @@ class TorneioAdmin(admin.ModelAdmin):
     fieldsets = [
         ('Torneio', {'fields': [
             'nome', 'data', 'quantidade_grupos',
-            'playoffs', 'terceiro_lugar', 'open',
+            'playoffs', 'terceiro_lugar',
             'ativo'
         ]}),
     ]
