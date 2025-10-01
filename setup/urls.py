@@ -12,6 +12,6 @@ urlpatterns = [
     path('escala-plantao/', include('escala_de_plantao.urls')),
 ]
 
-admin.site.index_title = 'Painel de Gestão'
-admin.site.site_header = 'Painel de Gestão'
-admin.site.site_title  = 'Painel de Gestão'
+admin.site.index_title = 'Dashboard'
+admin.site.site_header = 'Dashboard'
+admin.site.site_title  = 'Dashboard'
