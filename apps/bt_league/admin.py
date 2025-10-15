@@ -17,9 +17,17 @@ english.DATETIME_FORMAT = 'H:i d/m/Y'
 
 @admin.register(Jogador)
 class JogadorAdmin(admin.ModelAdmin):
+    class Media:
+        css = {'all': ['css/cup/hide-buttons.css']}
+
     fields = ['nome', 'telefone', 'email']
     list_display = ['nome', 'telefone']
     search_fields = ['nome']
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
+        return False
 
     def get_fields(self, request, obj):
         if request.user.is_superuser:
@@ -187,12 +195,13 @@ class TorneioAdminForm(forms.ModelForm):
 @admin.register(Torneio)
 class TorneioAdmin(admin.ModelAdmin):
     class Media:
-        css = {'all': ('css/league/admin-torneio.css',)}
+        css = {'all': ['css/league/admin-torneio.css']}
         js = [
             'js/create-games-modal.js',
             'js/finish-tournament-modal.js',
             'js/hide-phase.js',
-            'js/games-counter.js'
+            'js/games-counter.js',
+            'js/players-inline-text.js',
         ]
 
     fieldsets = [
@@ -211,6 +220,11 @@ class TorneioAdmin(admin.ModelAdmin):
         return super().change_view(
             request, object_id, form_url, extra_context=extra_context,
         )
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
+        return False
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name in ['ranking']:

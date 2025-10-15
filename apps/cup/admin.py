@@ -26,13 +26,35 @@ class TorneioListFilter(admin.SimpleListFilter):
 @admin.register(Dupla)
 class DuplaAdmin(admin.ModelAdmin):
     class Media:
-        css = {'all': ('css/cup/admin-dupla.css', 'css/cup/hide-buttons.css')}
+        css = {'all': ['css/cup/admin-dupla.css', 'css/cup/hide-buttons.css']}
 
-    fields = ['jogador1', 'jogador2', 'torneio']
+    fields = ['torneio', 'jogador1', 'jogador2']
     list_display = ['__str__', 'torneio']
     list_filter = [TorneioListFilter]
     list_per_page = 15
+    readonly_fields = ['torneio']
     search_fields = ['jogador1', 'jogador2']
+
+    def has_module_permission(self, request):
+        return request.user.is_superuser
+
+    def has_add_permission(self, request):
+        if request.user.is_superuser:
+            return True
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
+        return False
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name in ['jogador1', 'jogador2']:
+            if request.user.is_superuser:
+                kwargs['queryset'] = Jogador.objects.all().order_by('nome')
+            else:
+                kwargs['queryset'] = Jogador.objects.filter(criado_por=request.user).order_by('nome')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_fields(self, request, obj):
         if request.user.is_superuser:
@@ -50,9 +72,6 @@ class DuplaAdmin(admin.ModelAdmin):
             return super().get_queryset(request)
         return super().get_queryset(request).filter(criado_por=request.user)
 
-    # def has_module_permission(self, request):
-    #     return request.user.is_superuser
-
     def save_model(self, request, obj, form, change):
         created = not change
         if created:
@@ -69,6 +88,11 @@ class JogadorAdmin(admin.ModelAdmin):
     list_display = ['__str__', 'telefone']
     list_per_page = 15
     search_fields = ['nome']
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
+        return False
 
     def get_fields(self, request, obj):
         if request.user.is_superuser:
@@ -124,6 +148,11 @@ class RankingAdmin(admin.ModelAdmin):
         return super().change_view(
             request, object_id, form_url, extra_context=extra_context,
         )
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
+        return False
 
     def get_fields(self, request, obj):
         if request.user.is_superuser:
@@ -315,7 +344,8 @@ class TorneioAdmin(admin.ModelAdmin):
             'js/finish-tournament-modal.js',
             'js/hide-phase.js',
             'js/next-stage-modal.js',
-            'js/games-counter.js'
+            'js/games-counter.js',
+            'js/teams-inline-text.js',
         ]
 
     change_form_template = 'admin/cup/cup_change_form.html'
@@ -349,6 +379,11 @@ class TorneioAdmin(admin.ModelAdmin):
         return super().change_view(
             request, object_id, form_url, extra_context=extra_context,
         )
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
+        return False
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name in ['ranking']:

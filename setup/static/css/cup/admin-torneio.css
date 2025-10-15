@@ -95,8 +95,8 @@ td.field-concluido span.select2.select2-container.select2-container--default {
 .field-dupla2 .related-widget-wrapper-link,
 .field-ranking a.related-widget-wrapper-link.change-related,
 .field-ranking a.related-widget-wrapper-link.delete-related,
-.field-ranking a.related-widget-wrapper-link.view-related,
-tr.form-row.dynamic-duplas .related-widget-wrapper-link.change-related,
+/* .field-ranking a.related-widget-wrapper-link.view-related, */
+tr.form-row.dynamic-duplas.has_original .related-widget-wrapper-link.add-related,
 tr.form-row.dynamic-duplas .related-widget-wrapper-link.view-related {
     display: none !important;
 }

@@ -9,6 +9,9 @@ from .models import Dupla, Torneio, Jogo
 
 @admin.register(Dupla)
 class DuplaAdmin(admin.ModelAdmin):
+    class Media:
+        css = {'all': ['css/cup/hide-buttons.css']}
+
     fields = ['jogador1', 'jogador2', 'telefone']
     list_display = ['__str__', 'telefone', 'get_torneios']
     search_fields = ['jogador1', 'jogador2']
