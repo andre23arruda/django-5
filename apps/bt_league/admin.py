@@ -1,4 +1,4 @@
-import os
+import os, re
 from django import forms
 from django.contrib import admin, messages
 from django.db.models import Case, Q, When
@@ -28,6 +28,43 @@ class JogadorAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return True
         return False
+
+    def get_deleted_objects(self, objs, request):
+        deleted_objects, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
+        through_model = Torneio.jogadores.through
+        jogador_ids = [obj.id for obj in objs]
+        relacoes = through_model.objects.filter(
+            jogador_id__in=jogador_ids
+        ).select_related('torneio')
+        relacoes_dict = {rel.id: str(rel.torneio) for rel in relacoes}
+
+        def process_items(items):
+            processed = []
+            for item in items:
+                if isinstance(item, list):
+                    processed.append(process_items(item))
+                else:
+                    item_str = str(item)
+                    if 'Torneio_jogadores object' in item_str:
+                        match = re.search(r'Torneio_jogadores object \((\d+)\)', item_str)
+                        if match:
+                            relacao_id = int(match.group(1))
+                            torneio_nome = relacoes_dict.get(relacao_id, 'Torneio')
+                            item_str = item_str.replace(
+                                f'Relacionamento torneio-jogador: Torneio_jogadores object ({relacao_id})',
+                                f'Inscrição no torneio: {torneio_nome}'
+                            )
+                    processed.append(item_str)
+            return processed
+
+        deleted_objects_modified = process_items(deleted_objects)
+        model_count_modified = {}
+        for key, value in model_count.items():
+            if 'torneio-jogador' in key.lower() or 'torneio_jogadores' in key.lower():
+                model_count_modified['Incrições'] = value
+            else:
+                model_count_modified[key] = value
+        return deleted_objects_modified, model_count_modified, perms_needed, protected
 
     def get_fields(self, request, obj):
         if request.user.is_superuser:
@@ -221,6 +258,43 @@ class TorneioAdmin(admin.ModelAdmin):
             request, object_id, form_url, extra_context=extra_context,
         )
 
+    def get_deleted_objects(self, objs, request):
+        deleted_objects, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
+        through_model = Torneio.jogadores.through
+        torneio_ids = [obj.id for obj in objs]
+        relacoes = through_model.objects.filter(
+            torneio_id__in=torneio_ids
+        ).select_related('jogador')
+        relacoes_dict = {rel.id: str(rel.jogador) for rel in relacoes}
+
+        def process_items(items):
+            processed = []
+            for item in items:
+                if isinstance(item, list):
+                    processed.append(process_items(item))
+                else:
+                    item_str = str(item)
+                    if 'Torneio_jogadores object' in item_str:
+                        match = re.search(r'Torneio_jogadores object \((\d+)\)', item_str)
+                        if match:
+                            relacao_id = int(match.group(1))
+                            jogador_nome = relacoes_dict.get(relacao_id, 'Jogador')
+                            item_str = item_str.replace(
+                                f'Relacionamento torneio-jogador: Torneio_jogadores object ({relacao_id})',
+                                f'Incrição jogador: {jogador_nome}'
+                            )
+                    processed.append(item_str)
+            return processed
+
+        deleted_objects_modified = process_items(deleted_objects)
+        model_count_modified = {}
+        for key, value in model_count.items():
+            if 'torneio-jogador' in key.lower() or 'torneio_jogadores' in key.lower():
+                model_count_modified['Incrições'] = value
+            else:
+                model_count_modified[key] = value
+        return deleted_objects_modified, model_count_modified, perms_needed, protected
+
     def has_delete_permission(self, request, obj=None):
         if request.user.is_superuser:
             return True
@@ -286,7 +360,7 @@ class TorneioAdmin(admin.ModelAdmin):
     total_jogos.short_description = 'Jogos'
 
     def response_add(self, request, obj, post_url_continue=None):
-        messages.add_message(request, messages.INFO, 'Torneio criado! Agora adicione as duplas')
+        messages.add_message(request, messages.INFO, 'Torneio criado! Agora adicione os jogadores')
         response = redirect('admin:bt_league_torneio_change', obj.id)
         response['location'] += '#jogadores-0-tab'
         return response

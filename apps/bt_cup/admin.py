@@ -16,6 +16,43 @@ class DuplaAdmin(admin.ModelAdmin):
     list_display = ['__str__', 'telefone', 'get_torneios']
     search_fields = ['jogador1', 'jogador2']
 
+    def get_deleted_objects(self, objs, request):
+        deleted_objects, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
+        through_model = Torneio.duplas.through
+        dupla_ids = [obj.id for obj in objs]
+        relacoes = through_model.objects.filter(
+            dupla_id__in=dupla_ids
+        ).select_related('torneio')
+        relacoes_dict = {rel.id: str(rel.torneio) for rel in relacoes}
+
+        def process_items(items):
+            processed = []
+            for item in items:
+                if isinstance(item, list):
+                    processed.append(process_items(item))
+                else:
+                    item_str = str(item)
+                    if 'Torneio_duplas object' in item_str:
+                        match = re.search(r'Torneio_duplas object \((\d+)\)', item_str)
+                        if match:
+                            relacao_id = int(match.group(1))
+                            torneio_nome = relacoes_dict.get(relacao_id, 'Torneio')
+                            item_str = item_str.replace(
+                                f'Relacionamento torneio-dupla: Torneio_duplas object ({relacao_id})',
+                                f'Inscrição no torneio: {torneio_nome}'
+                            )
+                    processed.append(item_str)
+            return processed
+
+        deleted_objects_modified = process_items(deleted_objects)
+        model_count_modified = {}
+        for key, value in model_count.items():
+            if 'torneio-dupla' in key.lower() or 'torneio_duplas' in key.lower():
+                model_count_modified['Incrições'] = value
+            else:
+                model_count_modified[key] = value
+        return deleted_objects_modified, model_count_modified, perms_needed, protected
+
     def get_torneios(self, obj):
         '''Retorna os torneios em que a dupla participa'''
         return obj.torneio_set.filter(ativo=True).count()
@@ -259,6 +296,48 @@ class TorneioAdmin(admin.ModelAdmin):
         return super().change_view(
             request, object_id, form_url, extra_context=extra_context,
         )
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
+        return False
+
+    def get_deleted_objects(self, objs, request):
+        deleted_objects, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
+        through_model = Torneio.duplas.through
+        torneio_ids = [obj.id for obj in objs]
+        relacoes = through_model.objects.filter(
+            torneio_id__in=torneio_ids
+        ).select_related('dupla')
+        relacoes_dict = {rel.id: str(rel.dupla) for rel in relacoes}
+
+        def process_items(items):
+            processed = []
+            for item in items:
+                if isinstance(item, list):
+                    processed.append(process_items(item))
+                else:
+                    item_str = str(item)
+                    if 'Torneio_duplas object' in item_str:
+                        match = re.search(r'Torneio_duplas object \((\d+)\)', item_str)
+                        if match:
+                            relacao_id = int(match.group(1))
+                            dupla_nome = relacoes_dict.get(relacao_id, 'Dupla')
+                            item_str = item_str.replace(
+                                f'Relacionamento torneio-dupla: Torneio_duplas object ({relacao_id})',
+                                f'Incrição dupla: {dupla_nome}'
+                            )
+                    processed.append(item_str)
+            return processed
+
+        deleted_objects_modified = process_items(deleted_objects)
+        model_count_modified = {}
+        for key, value in model_count.items():
+            if 'torneio-dupla' in key.lower() or 'torneio_duplas' in key.lower():
+                model_count_modified['Duplas'] = value
+            else:
+                model_count_modified[key] = value
+        return deleted_objects_modified, model_count_modified, perms_needed, protected
 
     def get_inlines(self, request, obj):
         if obj:
