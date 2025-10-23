@@ -278,7 +278,7 @@ def get_tournament_data(request, torneio_id: str):
     '''Returns tournament data as JSON for React frontend'''
     torneio = Torneio.objects.filter(slug=torneio_id).first()
     if not torneio:
-        return JsonResponse({'error': 'Torneio não encontrado'}, status=404)
+        return JsonResponse({'error': 'Torneio não encontrado'}, status=404)
     jogos = torneio.jogo_set.all()
 
     # Calculate ranking
@@ -328,7 +328,7 @@ def get_tournament_data(request, torneio_id: str):
             'jogos_restantes': jogos.exclude(concluido='C').count(),
         },
         'ranking': ranking_result,
-        'can_edit': request.user.is_superuser or torneio.criado_por == request.user,
+        'can_edit': torneio.ativo and (request.user.is_superuser or torneio.criado_por == request.user),
     }
 
     return JsonResponse(data)

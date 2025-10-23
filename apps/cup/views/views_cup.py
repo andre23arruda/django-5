@@ -169,7 +169,7 @@ def get_tournament_data(request, torneio_id: str):
     }
     torneio = Torneio.objects.filter(slug=torneio_id).first()
     if not torneio:
-        return JsonResponse({'error': 'Torneio não encontrado'}, status=404)
+        return JsonResponse({'error': 'Torneio não encontrado'}, status=404)
     jogos = Jogo.objects.filter(torneio=torneio)
     classificacao = torneio.get_groups_ranking()
     playoff_card_style = ''
@@ -234,7 +234,7 @@ def get_tournament_data(request, torneio_id: str):
         'grupos': grupos,
         'fases_finais': fases_finais,
         'groups_finished': groups_finished,
-        'can_edit': request.user.is_superuser or torneio.criado_por == request.user,
+        'can_edit': torneio.ativo and (request.user.is_superuser or torneio.criado_por == request.user),
         'card_style': playoff_card_style,
     }
 

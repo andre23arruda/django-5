@@ -234,7 +234,7 @@ def get_tournament_data(request, torneio_id: str):
         'grupos': grupos,
         'fases_finais': fases_finais,
         'groups_finished': groups_finished,
-        'can_edit': request.user.is_superuser or torneio.criado_por == request.user,
+        'can_edit': torneio.ativo and (request.user.is_superuser or torneio.criado_por == request.user),
         'card_style': playoff_card_style,
     }
 
