@@ -1,17 +1,13 @@
-import json
-import os
+import json, os
 from datetime import date
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.urls import reverse
-from django.http import HttpResponse
 from django.contrib.messages import get_messages
-from openpyxl import load_workbook
-import io
 
 from ..models import Jogador, Dupla, Torneio, Jogo, Ranking
-from ..views import distribute_classifieds
+from ..views.views_cup import distribute_classifieds
 
 
 class ViewsTestCase(TestCase):
@@ -50,7 +46,7 @@ class ViewsTestCase(TestCase):
 
         # Jogadores
         self.jogadores = []
-        for i in range(4):
+        for i in range(8):
             jogador = Jogador.objects.create(
                 nome=f'Jogador {i+1}',
                 criado_por=self.user
@@ -59,7 +55,7 @@ class ViewsTestCase(TestCase):
 
         # Duplas
         self.duplas = []
-        for i in range(0, 4, 2):
+        for i in range(0, 8, 2):
             dupla = Dupla.objects.create(
                 jogador1=self.jogadores[i],
                 jogador2=self.jogadores[i+1] if i+1 < len(self.jogadores) else None,
@@ -108,7 +104,6 @@ class CreateGamesViewTest(ViewsTestCase):
         '''Testa criação de jogos com sucesso'''
         self.client.login(username='testuser', password='testpass123')
         url = reverse('cup:create_games', args=[self.torneio.id])
-
         response = self.client.get(url)
 
         # Verifica redirecionamento
@@ -133,10 +128,8 @@ class CreateGamesViewTest(ViewsTestCase):
             quantidade_grupos=8,  # Muitos grupos para poucas duplas
             criado_por=self.user
         )
-
         self.client.login(username='testuser', password='testpass123')
         url = reverse('cup:create_games', args=[torneio_problematico.id])
-
         response = self.client.get(url)
 
         # Verifica mensagem de erro
@@ -147,7 +140,6 @@ class CreateGamesViewTest(ViewsTestCase):
         '''Testa com torneio inexistente'''
         self.client.login(username='testuser', password='testpass123')
         url = reverse('cup:create_games', args=['inexistente'])
-
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
 
@@ -162,7 +154,6 @@ class FinishTournamentViewTest(ViewsTestCase):
 
         # Verifica que o torneio está ativo inicialmente
         self.assertTrue(self.torneio.ativo)
-
         response = self.client.get(url)
 
         # Verifica redirecionamento
@@ -189,18 +180,10 @@ class NextStageViewTest(ViewsTestCase):
 
     def test_next_stage_groups_not_finished(self):
         '''Testa com jogos de grupo não finalizados'''
-        # Cria alguns jogos de grupo não finalizados
-        Jogo.objects.create(
-            torneio=self.torneio,
-            dupla1=self.duplas[0],
-            dupla2=self.duplas[1],
-            fase='GRUPO 1',
-            concluido='P'  # Pendente
-        )
-
+        # Cria jogos do torneio
+        self.torneio.create_games()
         self.client.login(username='testuser', password='testpass123')
         url = reverse('cup:next_stage', args=[self.torneio.id])
-
         response = self.client.get(url)
 
         # Verifica mensagem de erro
@@ -210,44 +193,17 @@ class NextStageViewTest(ViewsTestCase):
     def test_next_stage_process_groups(self):
         '''Testa processamento de grupos'''
         # Cria jogos de grupo finalizados
-        jogo1 = Jogo.objects.create(
-            torneio=self.torneio,
-            dupla1=self.duplas[0],
-            dupla2=self.duplas[1],
-            fase='GRUPO 1',
-            pontos_dupla1=15,
-            pontos_dupla2=10,
-            concluido='C'
-        )
+        self.torneio.create_games()
+        jogos = Jogo.objects.filter(torneio=self.torneio, fase__startswith='GRUPO')
+        for jogo in jogos:
+            jogo.pontos_dupla1 = 6
+            jogo.pontos_dupla2 = 3
+            jogo.save()
 
-        jogo2 = Jogo.objects.create(
-            torneio=self.torneio,
-            dupla1=self.duplas[0],
-            dupla2=self.duplas[1],
-            fase='GRUPO 2',
-            pontos_dupla1=12,
-            pontos_dupla2=8,
-            concluido='C'
-        )
-
-        # Cria jogos de semifinal vazios
-        Jogo.objects.create(
-            torneio=self.torneio,
-            fase='SEMIFINAIS'
-        )
-        Jogo.objects.create(
-            torneio=self.torneio,
-            fase='SEMIFINAIS'
-        )
-        Jogo.objects.create(
-            torneio=self.torneio,
-            fase='FINAL'
-        )
-
+        # Processa grupos
         self.client.login(username='testuser', password='testpass123')
         url = reverse('cup:next_stage', args=[self.torneio.id])
-
-        response = self.client.get(url)
+        self.client.get(url)
 
         # Verifica se semifinais foram preenchidas
         semifinais = Jogo.objects.filter(torneio=self.torneio, fase='SEMIFINAIS')
@@ -287,7 +243,6 @@ class SeeTournamentViewTest(ViewsTestCase):
         self.client.login(username='testuser', password='testpass123')
         url = reverse('cup:see_tournament', args=[self.torneio.id])
         response = self.client.get(url)
-
         self.assertTrue(response.context['can_edit'])
 
         # Testa com superusuário
@@ -377,11 +332,10 @@ class GetTournamentDataViewTest(ViewsTestCase):
         '''Testa com torneio inexistente'''
         url = reverse('cup:tournament_data', args=['slug-inexistente'])
         response = self.client.get(url)
-
         self.assertEqual(response.status_code, 404)
-
         data = json.loads(response.content)
         self.assertIn('error', data)
+        self.assertEqual(data['error'], 'Torneio não encontrado')
 
     def test_get_tournament_data_permissions(self):
         '''Testa permissões no JSON'''

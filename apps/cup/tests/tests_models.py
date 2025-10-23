@@ -239,11 +239,12 @@ class TorneioModelTest(TestCase):
         )
 
         # Cria duplas
-        jogadores = [Jogador.objects.create(nome=f'Jogador {i}') for i in range(4)]
-        duplas = [
-            Dupla.objects.create(jogador1=jogadores[i], torneio=torneio)
-            for i in range(4)
-        ]
+        jogadores = [Jogador.objects.create(nome=f'Jogador {i}') for i in range(8)]
+        for i in range(0, 8, 2):
+            Dupla.objects.create(
+                jogador1=jogadores[i],
+                jogador2=jogadores[i+1],
+                torneio=torneio)
 
         shuffled = torneio.shuffle_teams()
         self.assertEqual(len(shuffled), 4)
@@ -260,10 +261,10 @@ class TorneioModelTest(TestCase):
         )
 
         # Cria 6 duplas
-        jogadores = [Jogador.objects.create(nome=f'Jogador {i}') for i in range(6)]
+        jogadores = [Jogador.objects.create(nome=f'Jogador {i}') for i in range(12)]
         duplas = [
-            Dupla.objects.create(jogador1=jogadores[i], torneio=torneio)
-            for i in range(6)
+            Dupla.objects.create(jogador1=jogadores[i], jogador2=jogadores[i+1], torneio=torneio)
+            for i in range(0, 12, 2)
         ]
 
         grupos = torneio.create_groups(duplas)
@@ -272,7 +273,7 @@ class TorneioModelTest(TestCase):
         self.assertEqual(len(grupos[0]), 3)
         self.assertEqual(len(grupos[1]), 3)
 
-    def test_create_groups_insufficient_teams(self):
+    def test_create_groups_with_fewer_teams_than_groups(self):
         '''Testa criação de grupos com duplas insuficientes'''
         torneio = Torneio.objects.create(
             nome='Teste',
@@ -288,7 +289,29 @@ class TorneioModelTest(TestCase):
         ]
 
         result = torneio.create_groups(duplas)
+        error_msg = str(result)
         self.assertIsInstance(result, Exception)
+        self.assertEqual('Número de duplas é menor que número de grupos', error_msg)
+
+    def test_create_groups_with_insuficient_teams(self):
+        '''Testa criação de grupos com duplas insuficientes'''
+        torneio = Torneio.objects.create(
+            nome='Teste 2',
+            data=date.today(),
+            quantidade_grupos=2
+        )
+
+        # Apenas 2 duplas para 4 grupos
+        jogadores = [Jogador.objects.create(nome=f'Jogador {i}') for i in range(2)]
+        duplas = [
+            Dupla.objects.create(jogador1=jogadores[i], torneio=torneio)
+            for i in range(2)
+        ]
+
+        result = torneio.create_groups(duplas)
+        error_msg = str(result)
+        self.assertIsInstance(result, Exception)
+        self.assertEqual(f'Número de duplas insuficientes para {torneio.quantidade_grupos} grupos', error_msg)
 
     def test_create_games_basic(self):
         '''Testa criação básica de jogos'''
@@ -445,6 +468,32 @@ class TorneioModelTest(TestCase):
         jogo.pontos_dupla2 = 8
         jogo.save()
         self.assertTrue(torneio.is_finished())
+
+    def test_create_games_deletes_existing(self):
+        '''Testa que criar jogos deleta os jogos existentes'''
+        torneio = Torneio.objects.create(
+            nome='Teste',
+            data=date.today()
+        )
+
+        # Cria duplas
+        jogadores = [Jogador.objects.create(nome=f'Jogador {i}') for i in range(8)]
+        for i in range(0, 8, 2):
+            Dupla.objects.create(
+                jogador1=jogadores[i],
+                jogador2=jogadores[i+1],
+                torneio=torneio)
+
+        torneio.create_games()
+        count_initial = Jogo.objects.filter(torneio=torneio).count()
+        id_jogo_1 = Jogo.objects.filter(torneio=torneio).first().id
+
+        torneio.create_games()
+        count_after = Jogo.objects.filter(torneio=torneio).count()
+        id_jogo_2 = Jogo.objects.filter(torneio=torneio).first().id
+
+        self.assertEqual(count_initial, count_after)
+        self.assertNotEqual(id_jogo_1, id_jogo_2)
 
 
 class JogoModelTest(TestCase):

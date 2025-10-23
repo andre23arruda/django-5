@@ -245,7 +245,9 @@ class Torneio(models.Model):
     def create_groups(self, duplas) -> list | Exception:
         '''Distribui duplas em grupos de forma aleatória'''
         if len(duplas) < self.quantidade_grupos:
-            return Exception(f'Número de duplas {len(duplas)} menor que número de grupos {self.quantidade_grupos}')
+            return Exception(f'Número de duplas é menor que número de grupos')
+        elif (len(duplas) // self.quantidade_grupos) < 2:
+            return Exception(f'Número de duplas insuficientes para {self.quantidade_grupos} grupos')
 
         # Tamanho base de cada grupo e duplas extras
         tamanho_base = len(duplas) // self.quantidade_grupos
@@ -267,14 +269,14 @@ class Torneio(models.Model):
 
     def create_games(self) -> list | Exception:
         '''Cria jogos de um torneio automaticamente, com todos jogando contra todos no grupo'''
-        if self.jogo_set.exists():
-            self.jogo_set.all().delete()
-
         duplas = self.shuffle_teams()
         grupos = self.create_groups(duplas)
         jogos_criados = []
         if isinstance(grupos, Exception):
             return grupos
+
+        if self.jogo_set.exists():
+            self.jogo_set.all().delete()
 
         # Criar jogos de grupos
         for i, grupo in enumerate(grupos, 1):

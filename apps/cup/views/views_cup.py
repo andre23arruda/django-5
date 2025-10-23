@@ -145,7 +145,7 @@ def see_tournament(request, torneio_id: str):
 def qrcode_tournament(request, torneio_id: str):
     '''Cria QR Code do torneio'''
     torneio = get_object_or_404(Torneio, pk=torneio_id)
-    img = qrcode.make(f'{ os.getenv("APP_LINK") }/torneio/{ torneio.slug }')
+    img = qrcode.make(f'{ os.getenv("APP_LINK") }/torneio-v2/{ torneio.slug }')
     buf = io.BytesIO()
     img.save(buf, 'PNG')
     buf.seek(0)
