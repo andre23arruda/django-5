@@ -252,6 +252,24 @@ class TorneioModelTest(TestCase):
         shuffled2 = torneio.shuffle_teams()
         self.assertEqual(shuffled, shuffled2)
 
+    def test_draw_pairs(self):
+        torneio = Torneio.objects.create(
+            nome='Teste',
+            data=date.today(),
+            quantidade_grupos=1,
+            draw_pairs=1,
+        )
+        # Cria 6 duplas
+        jogadores = [Jogador.objects.create(nome=f'Jogador {i}') for i in range(12)]
+        duplas = [
+            Dupla.objects.create(jogador1=jogadores[i], jogador2=jogadores[i+1], torneio=torneio)
+            for i in range(0, 12, 2)
+        ]
+        dupla_1 = torneio.duplas.first().__str__()
+        torneio.shuffle_teams()
+        dupla_1_new = torneio.duplas.first().__str__()
+        self.assertNotEqual(dupla_1, dupla_1_new)
+
     def test_create_groups(self):
         '''Testa criação de grupos'''
         torneio = Torneio.objects.create(
