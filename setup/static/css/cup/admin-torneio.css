@@ -24,7 +24,9 @@ td.field-pontos_dupla2 input.vIntegerField {
 
 td.field-x,
 td.field-dupla_1,
-td.field-dupla_2 {
+td.field-dupla_2,
+th.column-obs_icon,
+td.field-obs_icon {
     text-align: center !important;
     vertical-align: middle !important;
     padding: 0px !important;
@@ -35,6 +37,7 @@ td.field-jogadores p,
 td.field-dupla_1 p,
 td.field-dupla_2 p,
 td.field-concluido p,
+td.field-obs_icon p,
 td.field-fase p {
     margin-bottom: 0px !important;
 }
