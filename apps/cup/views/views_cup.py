@@ -189,6 +189,7 @@ def get_tournament_data(request, torneio_id: str):
                         'pontos_dupla1': jogo.pontos_dupla1,
                         'pontos_dupla2': jogo.pontos_dupla2,
                         'concluido': jogo.concluido,
+                        'obs': jogo.obs,
                     } for jogo in grupo_jogos
                 ],
                 'classificacao': [
@@ -217,6 +218,7 @@ def get_tournament_data(request, torneio_id: str):
                     'pontos_dupla1': jogo.pontos_dupla1,
                     'pontos_dupla2': jogo.pontos_dupla2,
                     'concluido': jogo.concluido,
+                    'obs': jogo.obs
                 } for jogo in fase_jogos
             ]
             playoff_card_style = CARD_STYLE_DICT[fase]

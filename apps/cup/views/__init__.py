@@ -7,4 +7,5 @@ from .views_cup import (
     see_tournament,
     get_tournament_data
 )
+from .views_game import save_jogo_obs
 from .views_ranking import get_ranking_data
