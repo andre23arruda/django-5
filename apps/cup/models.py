@@ -225,6 +225,11 @@ class Torneio(models.Model):
         on_delete=models.SET_NULL,
         null=True
     )
+    draw_pairs = models.BooleanField(
+        default=False,
+        verbose_name='Sortear duplas',
+        help_text='Ativar para sortear duplas com jogadores cadastrados'
+    )
     criado_em = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -236,8 +241,20 @@ class Torneio(models.Model):
         return self.nome
 
     def shuffle_teams(self) -> list:
+        if self.draw_pairs and self.tipo == 'D':
+            jogadores = [jogador for dupla in self.duplas.all() for jogador in [dupla.jogador1, dupla.jogador2] if jogador]
+            random.shuffle(jogadores)
+            duplas = []
+            self.duplas.all().delete()
+            for i in range(0, len(jogadores), 2):
+                duplas.append(Dupla.objects.create(
+                    jogador1=jogadores[i],
+                    jogador2=jogadores[i + 1],
+                    torneio=self)
+                )
+        else:
+            duplas = list(self.duplas.all())
         SEED = 42
-        duplas = list(self.duplas.all())
         random.seed(SEED)
         random.shuffle(duplas)
         return duplas

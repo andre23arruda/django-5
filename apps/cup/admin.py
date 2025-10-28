@@ -192,8 +192,13 @@ class JogosInline(admin.TabularInline):
             return sorted_games
         return super().get_queryset(request)
 
+    def get_fields(self, request, obj):
+        if obj.ativo:
+            return self.fields + ['obs_icon']
+        return super().get_fields(request, obj)
+
     def get_readonly_fields(self, request, obj=None):
-        fields = ['fase', 'dupla_1', 'dupla_2', 'x']
+        fields = ['fase', 'dupla_1', 'dupla_2', 'x', 'obs_icon']
         if not obj.ativo:
             fields += ['pontos_dupla1', 'pontos_dupla2', 'concluido']
         return fields
@@ -231,6 +236,29 @@ class JogosInline(admin.TabularInline):
                 return obj.dupla2.render()
         return format_html('<span class="text-muted">A definir</span>')
     dupla_2.short_description = 'Dupla 2'
+
+    def obs_icon(self, obj):
+        '''Campo com ícone para abrir modal de observações'''
+        if obj.pk:
+            has_obs = 'has-obs' if obj.obs else ''
+            obs_text = obj.obs or ''
+            return format_html('''
+                <button
+                    type="button"
+                    class="btn obs-modal-btn {} text-white"
+                    data-jogo-id="{}"
+                    data-obs="{}"
+                    title="{}"
+                >
+                    🖉
+                </button>''',
+                has_obs,
+                obj.pk,
+                obs_text.replace('"', '&quot;'),
+                obj.obs or 'Adicionar observação'
+            )
+        return '-'
+    obs_icon.short_description = 'Obs'
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -338,7 +366,11 @@ class DuplasInline(admin.TabularInline):
 @admin.register(Torneio)
 class TorneioAdmin(admin.ModelAdmin):
     class Media:
-        css = {'all': ('css/cup/admin-torneio.css', 'css/cup/hide-buttons.css')}
+        css = {'all': [
+            'css/cup/admin-torneio.css',
+            'css/cup/hide-buttons.css',
+            'css/obs-modal.css',
+        ]}
         js = [
             'js/create-games-modal.js',
             'js/finish-tournament-modal.js',
@@ -346,18 +378,18 @@ class TorneioAdmin(admin.ModelAdmin):
             'js/next-stage-modal.js',
             'js/games-counter.js',
             'js/teams-inline-text.js',
+            'js/obs-modal.js',
         ]
 
     change_form_template = 'admin/cup/cup_change_form.html'
-    list_display = ['nome', 'data', 'total_duplas', 'grupos', 'total_jogos', 'ativo']
+    list_display = ['nome', 'data', 'tipo', 'total_duplas', 'grupos', 'total_jogos', 'ativo']
     list_filter = ['ativo']
     search_fields = ['nome']
     fieldsets = [
         ('Torneio', {'fields': [
-            'nome', 'data',
-            'quantidade_grupos', 'tipo',
-            'playoffs', 'terceiro_lugar',
-            'open', 'ativo'
+            'nome', 'data', 'quantidade_grupos',
+            'tipo', 'draw_pairs', 'playoffs',
+            'terceiro_lugar', 'ativo'
         ]}),
     ]
 
@@ -398,8 +430,8 @@ class TorneioAdmin(admin.ModelAdmin):
         has_ranking_add_perm = request.user.has_perm('cup.add_ranking')
         base_fields = [
             'nome', 'data', 'quantidade_grupos',
-            'tipo', 'playoffs', 'terceiro_lugar',
-            'ativo'
+            'tipo', 'draw_pairs', 'playoffs',
+            'terceiro_lugar', 'ativo'
         ]
         if has_ranking_view_perm and has_ranking_add_perm:
             base_fields.insert(2, 'ranking')
