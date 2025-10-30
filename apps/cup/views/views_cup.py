@@ -232,6 +232,7 @@ def get_tournament_data(request, torneio_id: str):
             'ativo': torneio.ativo,
             'duplas': torneio.duplas.count(),
             'jogos': jogos.count(),
+            'jogos_restantes': jogos.exclude(concluido='C').count(),
         },
         'grupos': grupos,
         'fases_finais': fases_finais,
