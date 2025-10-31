@@ -7,7 +7,7 @@ from django.db.models import Case, Q, When
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.html import format_html
-from utils.send_email import send_email_html
+from utils.send_email import send_telegram_msg
 from .models import Jogador, Jogo, Ranking, Torneio
 
 portuguese.DATE_FORMAT = 'd/m/Y'
@@ -379,18 +379,19 @@ class TorneioAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         if created:
             url = f'{os.getenv("HOST_ADDRESS")}{reverse("admin:bt_league_torneio_change", args=[obj.id])}'
-            send_email_html(
-                title='Torneio criado com sucesso',
-                msg_html=f'''
-                    <h2>O torneio <u>"{obj.nome}"</u> foi pelo usuário <u>{obj.criado_por}</u>!</h2>
-                    <br>
-                    <h3>Data de criação: {obj.criado_em.strftime('%H:%M - %d/%m/%Y')}</h3>
-                    <br>
-                    <h3>Acesse através <a href="{url}">desse link</a></h3>
-                    <br>
-                    <p>Att, Pódio Digital</p>
-                '''
-            )
+            send_telegram_msg(obj, url)
+            # send_email_html(
+            #     title='Torneio criado com sucesso',
+            #     msg_html=f'''
+            #         <h2>O torneio <u>"{obj.nome}"</u> foi pelo usuário <u>{obj.criado_por}</u>!</h2>
+            #         <br>
+            #         <h3>Data de criação: {obj.criado_em.strftime('%H:%M - %d/%m/%Y')}</h3>
+            #         <br>
+            #         <h3>Acesse através <a href="{url}">desse link</a></h3>
+            #         <br>
+            #         <p>Att, Pódio Digital</p>
+            #     '''
+            # )
 
 
 @admin.register(Ranking)
