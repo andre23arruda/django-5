@@ -50,7 +50,8 @@ def send_telegram_msg(torneio: object, link: str):
 
 👤 *Criado por:* {torneio.criado_por}
 
-_Acesse o link para mais detalhes!_: {link}'''
+_Acesse o link para mais detalhes!_: [{link}]({link})
+'''
             bot = Bot(token=os.getenv('TELEGRAM_BOT_TOKEN'))
             destino = os.getenv('TELEGRAM_CHAT_ID')
             bot.send_message(
