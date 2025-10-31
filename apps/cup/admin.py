@@ -502,13 +502,11 @@ class TorneioAdmin(admin.ModelAdmin):
             send_email_html(
                 title='Torneio criado com sucesso',
                 msg_html=f'''
-                    <h2>Olá, {request.user.username}!</h2>
+                    <h2>O torneio <u>"{obj.nome}"</u> foi pelo usuário <u>{obj.criado_por}</u>!</h2>
                     <br>
-                    <p>O torneio <b>"{obj.nome}"</b> foi pelo usuário <u>{obj.criado_por}</u>!</p>
+                    <h3>Data de criação: {obj.criado_em.strftime('%H:%M - %d/%m/%Y')}</h3>
                     <br>
-                    <p>Data de criação: {obj.criado_em.strftime('%H:%M - %d/%m/%Y')}</p>
-                    <br>
-                    <p>Acesse através <a href="{url}">desse link</a></p>
+                    <h3>Acesse através <a href="{url}">desse link</a></h3>
                     <br>
                     <p>Att, Pódio Digital</p>
                 '''

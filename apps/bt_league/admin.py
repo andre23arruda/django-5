@@ -1,13 +1,14 @@
 import os, re
 from django import forms
+from django.conf.locale.pt_BR import formats as portuguese
+from django.conf.locale.en import formats as english
 from django.contrib import admin, messages
 from django.db.models import Case, Q, When
 from django.shortcuts import redirect
+from django.urls import reverse
 from django.utils.html import format_html
+from utils.send_email import send_email_html
 from .models import Jogador, Jogo, Ranking, Torneio
-
-from django.conf.locale.pt_BR import formats as portuguese
-from django.conf.locale.en import formats as english
 
 portuguese.DATE_FORMAT = 'd/m/Y'
 portuguese.DATETIME_FORMAT = 'H:i d/m/Y'
@@ -375,8 +376,21 @@ class TorneioAdmin(admin.ModelAdmin):
         created = not change
         if created and not request.user.is_superuser:
             obj.criado_por = request.user
-            obj.grupo_criador = request.user.groups.first()
         super().save_model(request, obj, form, change)
+        if created:
+            url = f'{os.getenv("HOST_ADDRESS")}{reverse("admin:bt_league_torneio_change", args=[obj.id])}'
+            send_email_html(
+                title='Torneio criado com sucesso',
+                msg_html=f'''
+                    <h2>O torneio <u>"{obj.nome}"</u> foi pelo usuário <u>{obj.criado_por}</u>!</h2>
+                    <br>
+                    <h3>Data de criação: {obj.criado_em.strftime('%H:%M - %d/%m/%Y')}</h3>
+                    <br>
+                    <h3>Acesse através <a href="{url}">desse link</a></h3>
+                    <br>
+                    <p>Att, Pódio Digital</p>
+                '''
+            )
 
 
 @admin.register(Ranking)
