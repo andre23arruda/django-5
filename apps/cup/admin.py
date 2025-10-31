@@ -1,7 +1,9 @@
 import os, re
 from django.contrib import admin, messages
 from django.shortcuts import redirect
+from django.urls import reverse
 from django.utils.html import format_html
+from utils.send_email import send_email_html
 from .models import Dupla, Jogador, Jogo, Ranking, Torneio
 
 
@@ -492,6 +494,22 @@ class TorneioAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         created = not change
-        if created:
+        if created and not request.user.is_superuser:
             obj.criado_por = request.user
         super().save_model(request, obj, form, change)
+        if created:
+            url = f'{os.getenv("HOST_ADDRESS")}{reverse("admin:cup_torneio_change", args=[obj.id])}'
+            send_email_html(
+                title='Torneio criado com sucesso',
+                msg_html=f'''
+                    <h2>Olá, {request.user.username}!</h2>
+                    <br>
+                    <p>O torneio <b>"{obj.nome}"</b> foi pelo usuário <u>{obj.criado_por}</u>!</p>
+                    <br>
+                    <p>Data de criação: {obj.criado_em.strftime('%H:%M - %d/%m/%Y')}</p>
+                    <br>
+                    <p>Acesse através <a href="{url}">desse link</a></p>
+                    <br>
+                    <p>Att, Pódio Digital</p>
+                '''
+            )

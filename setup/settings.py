@@ -104,5 +104,13 @@ LOCALE_PATHS = [ BASE_DIR / 'locale' ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = json.loads(os.getenv('CORS_ALLOWED_ORIGINS', '[]'))
 
+# EMAIL
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
 # Jazzmin
 from .theme import JAZZMIN_UI_TWEAKS, JAZZMIN_SETTINGS
