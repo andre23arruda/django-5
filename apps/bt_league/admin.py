@@ -233,13 +233,17 @@ class TorneioAdminForm(forms.ModelForm):
 @admin.register(Torneio)
 class TorneioAdmin(admin.ModelAdmin):
     class Media:
-        css = {'all': ['css/league/admin-torneio.css']}
+        css = {'all': [
+            'css/league/admin-torneio.css',
+            'css/save-game.css',
+        ]}
         js = [
             'js/create-games-modal.js',
             'js/finish-tournament-modal.js',
             'js/hide-phase.js',
             'js/games-counter.js',
             'js/players-inline-text.js',
+            'js/league/save-game.js',
         ]
 
     fieldsets = [

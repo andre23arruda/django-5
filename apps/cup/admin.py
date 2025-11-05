@@ -371,7 +371,8 @@ class TorneioAdmin(admin.ModelAdmin):
         css = {'all': [
             'css/cup/admin-torneio.css',
             'css/cup/hide-buttons.css',
-            'css/obs-modal.css',
+            'css/cup/obs-modal.css',
+            'css/save-game.css',
         ]}
         js = [
             'js/create-games-modal.js',
@@ -380,7 +381,8 @@ class TorneioAdmin(admin.ModelAdmin):
             'js/next-stage-modal.js',
             'js/games-counter.js',
             'js/teams-inline-text.js',
-            'js/obs-modal.js',
+            'js/cup/obs-modal.js',
+            'js/cup/save-game.js',
         ]
 
     change_form_template = 'admin/cup/cup_change_form.html'
