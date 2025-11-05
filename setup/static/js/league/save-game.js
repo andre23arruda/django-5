@@ -71,6 +71,7 @@
         indicator.className = 'auto-save-indicator saving';
         indicator.innerHTML = '⏳ Salvando...';
         indicator.style.position = 'absolute'
+        indicator.style.right = '10%'
         statusCell.appendChild(indicator);
     }
 
@@ -85,6 +86,7 @@
         indicator.className = 'auto-save-indicator success';
         indicator.innerHTML = '✓ Salvo';
         indicator.style.position = 'absolute'
+        indicator.style.right = '10%'
         statusCell.appendChild(indicator);
 
         // Remover após 3 segundos
@@ -105,6 +107,7 @@
         indicator.innerHTML = `✗ ${message}`;
         indicator.title = message;
         indicator.style.position = 'absolute'
+        indicator.style.right = '10%'
         statusCell.appendChild(indicator);
 
         // Remover após 5 segundos

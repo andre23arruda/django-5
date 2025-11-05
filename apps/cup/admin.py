@@ -252,7 +252,7 @@ class JogosInline(admin.TabularInline):
                     data-obs="{}"
                     title="{}"
                 >
-                    🖉
+                    💬
                 </button>''',
                 has_obs,
                 obj.pk,

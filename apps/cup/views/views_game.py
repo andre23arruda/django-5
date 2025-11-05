@@ -74,7 +74,7 @@ def save_game(request, jogo_id):
         pontos_dupla2 = data.get('pontos_dupla2')
 
         # Validar status
-        if status not in ['A', 'C']:
+        if status not in ['P', 'A', 'C']:
             return JsonResponse({
                 'success': False,
                 'error': 'Status inválido'
