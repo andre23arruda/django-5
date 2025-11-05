@@ -20,7 +20,7 @@
                             id="obs-textarea"
                             rows="5"
                             placeholder="Digite as observações do jogo (Tie break 7/1, WO, não ocorreu, etc.)"
-                        />
+                        ></textarea>
                     </div>
 
                     <div style="display: flex; justify-content: space-between; margin-top: 20px;">
