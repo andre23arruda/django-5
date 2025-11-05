@@ -10,3 +10,4 @@ from .views_ranking import (
     get_ranking_data,
     see_ranking
 )
+from .views_game import save_game

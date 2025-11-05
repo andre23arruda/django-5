@@ -9,6 +9,7 @@ from .views import (
     get_ranking_data,
     get_tournament_data,
     save_jogo_obs,
+    save_game
 )
 
 app_name = 'cup'
@@ -23,4 +24,5 @@ urlpatterns = [
     path('<str:torneio_id>/json', get_tournament_data, name='tournament_data'),
     path('ranking/<str:ranking_id>/json', get_ranking_data, name='ranking_data'),
     path('<str:jogo_id>/save-obs/', save_jogo_obs, name='save_jogo_obs'),
+    path('<str:jogo_id>/save-game/', save_game, name='save_game'),
 ]
