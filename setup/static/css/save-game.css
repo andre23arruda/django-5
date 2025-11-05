@@ -1,0 +1,49 @@
+/* static/css/cup/auto-save-jogo.css */
+
+.auto-save-indicator {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.auto-save-indicator.saving {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffc107;
+}
+
+.auto-save-indicator.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #28a745;
+}
+
+.auto-save-indicator.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #dc3545;
+    cursor: help;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estilo para inputs quando estão sendo salvos */
+.field-concluido:has(.auto-save-indicator.saving) select,
+.field-pontos_dupla1:has(.auto-save-indicator.saving) input,
+.field-pontos_dupla2:has(.auto-save-indicator.saving) input {
+    opacity: 0.7;
+    pointer-events: none;
+}

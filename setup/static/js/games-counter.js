@@ -27,9 +27,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const html = jogosInline.innerHTML
         jogosInline.innerHTML = `
             <div class="row mx-2">
-                <div class="col-4 text-center text-bold">Jogos: ${totalJogos}</div>
-                <div class="col-4 text-center text-bold">Concluídos: ${jogosConcluidos}</div>
-                <div class="col-4 text-center text-bold">Pendentes: ${jogosPendentes}</div>
+                <div class="col-4 text-center text-bold">
+                    Jogos: ${totalJogos}
+                </div>
+
+                <div class="col-4 text-center text-bold">
+                    Concluídos: <span id="text-concluidos">${jogosConcluidos}</span>
+                </div>
+
+                <div class="col-4 text-center text-bold">
+                    Pendentes: <span id="text-pendentes">${jogosPendentes}</span>
+                </div>
             </div>
         ` + html
     }
