@@ -2,7 +2,7 @@ import django, os, sys
 from datetime import date, timedelta
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, os.path.join(BASE_DIR))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'setup.settings')
 django.setup()
