@@ -1,7 +1,9 @@
-import django, os
+import django, os, sys
 from datetime import date, timedelta
-from django.conf import settings
+from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, os.path.join(BASE_DIR))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'setup.settings')
 django.setup()
 
