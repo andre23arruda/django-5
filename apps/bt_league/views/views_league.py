@@ -117,56 +117,60 @@ def export_csv(request, torneio_id: str):
     )
     center_alignment = Alignment(horizontal='center', vertical='center')
 
-    # LINHA 1: Nome do torneio
-    ws.merge_cells('A1:N1')
-    ws['A1'] = torneio.nome
-    ws['A1'].font = title_font
-    ws['A1'].fill = orange_fill
-    ws['A1'].alignment = center_alignment
-    ws['A1'].border = thin_border
-    ws['N1'].border = thin_border
-    rd = ws.row_dimensions[1]
+    # LINHA 2: Nome do torneio
+    ws.merge_cells('B2:O2')
+    ws['B2'] = torneio.nome
+    ws['B2'].font = title_font
+    ws['B2'].fill = header_fill
+    ws['B2'].alignment = center_alignment
+    ws['B2'].border = thin_border
+    ws['O2'].border = thin_border
+    rd = ws.row_dimensions[2]
     rd.height = 45
 
-    image_path = settings.BASE_DIR / 'setup/static/images/trophy.png'
+    image_path = settings.BASE_DIR / 'setup/static/images/podio.png'
     if os.path.exists(image_path):
         try:
             img = Image(image_path)
-            img.width = 60
-            img.height = 60
-            ws.add_image(img, 'A1')
+            img.width = 45*4
+            img.height = 45
+            ws.add_image(img, 'B2')
         except Exception as e:
             print(f"Erro ao carregar imagem: {e}")
 
-    # LINHA 2: Data do torneio
-    ws.merge_cells('A2:F2')
-    ws['A2'] = f"Data: {torneio.data.strftime('%d/%m/%Y')}"
-    ws['A2'].font = header_font
-    ws['A2'].fill = orange_fill
-    ws['A2'].alignment = center_alignment
-    ws['A2'].border = thin_border
-    ws['F2'].border = thin_border
+    # LINHA 3: Data do torneio
+    ws.merge_cells('B3:G3')
+    ws['B3'] = f"Data: {torneio.data.strftime('%d/%m/%Y')}"
+    ws['B3'].font = header_font
+    ws['B3'].fill = header_fill
+    ws['B3'].alignment = center_alignment
+    ws['B3'].border = thin_border
+    ws['G3'].border = thin_border
 
-    ws.merge_cells('G2:H2')
-    ws['G2'].fill = orange_fill
+    ws.merge_cells('H3:I3')
+    ws['H3'].fill = header_fill
+    ws['H3'].border = thin_border
 
-    ws.merge_cells('I2:N2')
-    ws['I2'] = f"Jogos: {torneio_jogos.count()}"
-    ws['I2'].font = header_font
-    ws['I2'].fill = orange_fill
-    ws['I2'].alignment = center_alignment
-    ws['I2'].border = thin_border
-    ws['N2'].border = thin_border
+    ws.merge_cells('J3:O3')
+    ws['J3'] = f"Jogos: {torneio_jogos.count()}"
+    ws['J3'].font = header_font
+    ws['J3'].fill = header_fill
+    ws['J3'].alignment = center_alignment
+    ws['J3'].border = thin_border
+    ws['O3'].border = thin_border
 
-    # LINHA 6: Headers da tabela
-    for col, header in enumerate(ranking_headers, 1):
-        cell = ws.cell(row=5, column=col, value=header)
+    rd = ws.row_dimensions[3]
+    rd.height = 20
+
+    # LINHA 6: Headers da tabela de Ranking
+    for col, header in enumerate(ranking_headers, 2):
+        cell = ws.cell(row=6, column=col, value=header)
         cell.font = header_font
         cell.alignment = center_alignment
         cell.fill = header_fill
         cell.border = thin_border
 
-    # Preparar dados do ranking
+    # Lógica de ranking
     ranking = []
     for jogador in torneio.jogadores.all():
         vitorias, pontos, saldo, jogos = jogador.player_points(torneio)
@@ -193,45 +197,44 @@ def export_csv(request, torneio_id: str):
         ranking_result.append(j_1)
 
     # LINHA 7+: Adicionar dados dos jogadores
-    for row_idx, jogador in enumerate(ranking_result, 6):
-        ws.cell(row=row_idx, column=1, value=jogador['posicao'])
-        ws.cell(row=row_idx, column=2, value=jogador['jogador'].nome)
-        ws.cell(row=row_idx, column=3, value=jogador['vitorias'])
-        ws.cell(row=row_idx, column=4, value=jogador['saldo'])
-        ws.cell(row=row_idx, column=5, value=jogador['pontos'])
-        ws.cell(row=row_idx, column=6, value=jogador['jogos'])
+    for row_idx, jogador in enumerate(ranking_result, 7):
+        ws.cell(row=row_idx, column=2, value=jogador['posicao'])
+        ws.cell(row=row_idx, column=3, value=jogador['jogador'].nome)
+        ws.cell(row=row_idx, column=4, value=jogador['vitorias'])
+        ws.cell(row=row_idx, column=5, value=jogador['saldo'])
+        ws.cell(row=row_idx, column=6, value=jogador['pontos'])
+        ws.cell(row=row_idx, column=7, value=jogador['jogos'])
 
-        for col in [1, 2, 3, 4, 5, 6]:
+        for col in [2, 3, 4, 5, 6, 7]:
             ws.cell(row=row_idx, column=col).alignment = center_alignment
             ws.cell(row=row_idx, column=col).border = thin_border
             ws.cell(row=row_idx, column=col).font = normal_font
 
-    for col, header in enumerate(game_headers, 9):
-        cell = ws.cell(row=5, column=col, value=header)
+    # Headers dos Jogos
+    for col, header in enumerate(game_headers, 10):
+        cell = ws.cell(row=6, column=col, value=header)
         cell.font = header_font
         cell.alignment = center_alignment
         cell.fill = header_fill
         cell.border = thin_border
 
-    rd = ws.row_dimensions[6]
-    rd.height = 30
-
     ws.merge_cells(
-        start_column=11,
-        start_row=5,
-        end_column=13,
-        end_row=5
+        start_column=12,
+        start_row=6,
+        end_column=14,
+        end_row=6
     )
 
-    for row_idx, jogo in enumerate(torneio_jogos, 6):
-        ws.cell(row=row_idx, column=9, value=jogo.get_concluido_display())
-        ws.cell(row=row_idx, column=10, value=jogo.render_dupla_1())
-        ws.cell(row=row_idx, column=11, value=jogo.placar_dupla1)
-        ws.cell(row=row_idx, column=12, value='x')
-        ws.cell(row=row_idx, column=13, value=jogo.placar_dupla2)
-        ws.cell(row=row_idx, column=14, value=jogo.render_dupla_2())
+    # Dados dos Jogos
+    for row_idx, jogo in enumerate(torneio_jogos, 7):
+        ws.cell(row=row_idx, column=10, value=jogo.get_concluido_display())
+        ws.cell(row=row_idx, column=11, value=jogo.render_dupla_1())
+        ws.cell(row=row_idx, column=12, value=jogo.placar_dupla1)
+        ws.cell(row=row_idx, column=13, value='x')
+        ws.cell(row=row_idx, column=14, value=jogo.placar_dupla2)
+        ws.cell(row=row_idx, column=15, value=jogo.render_dupla_2())
 
-        for col in [9, 10, 11, 12, 13, 14]:
+        for col in [10, 11, 12, 13, 14, 15]:
             ws.cell(row=row_idx, column=col).alignment = center_alignment
             ws.cell(row=row_idx, column=col).border = thin_border
             ws.cell(row=row_idx, column=col).font = normal_font
@@ -239,21 +242,23 @@ def export_csv(request, torneio_id: str):
         rd = ws.row_dimensions[row_idx]
         rd.height = 30
 
+    # Largura das colunas
     column_widths = {
-        'A': 3,
-        'B': 15,
-        'C': 8,
-        'D': 8,
-        'E': 8,
-        'F': 8,
-        'G': 5,
-        'H': 5,
-        'I': 5,
-        'J': 15,
-        'K': 3,
-        'L': 3,
-        'M': 3,
-        'N': 15
+        'A': 5,  #
+        'B': 3,  # Posição (#)
+        'C': 15, # Jogador
+        'D': 10, # Vitórias
+        'E': 8,  # Saldo
+        'F': 8,  # Pontos
+        'G': 8,  # Jogos
+        'H': 5,  # Espaço
+        'I': 5,  # Espaço
+        'J': 5,  # Status Jogo
+        'K': 15, # Dupla 1
+        'L': 3,  # Placar 1
+        'M': 3,  # x
+        'N': 3,  # Placar 2
+        'O': 15  # Dupla 2
     }
 
     for col, width in column_widths.items():
@@ -270,7 +275,6 @@ def export_csv(request, torneio_id: str):
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
     response['Content-Disposition'] = f'attachment; filename="{torneio.nome}.xlsx"'
-
     return response
 
 

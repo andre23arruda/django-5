@@ -272,67 +272,70 @@ def export_csv(request, torneio_id: str):
     center_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
     left_alignment = Alignment(horizontal='left', vertical='center')
 
-    # LINHA 1: Nome do torneio
-    ws.merge_cells('A1:N1')
-    ws['A1'] = torneio.nome
-    ws['A1'].font = title_font
-    ws['A1'].fill = orange_fill
-    ws['A1'].alignment = center_alignment
-    ws['A1'].border = thin_border
-    ws['N1'].border = thin_border
-    rd = ws.row_dimensions[1]
+    ws.merge_cells('B2:O2')
+    ws['B2'] = torneio.nome
+    ws['B2'].font = title_font
+    ws['B2'].fill = header_fill
+    ws['B2'].alignment = center_alignment
+    ws['B2'].border = thin_border
+    ws['O2'].border = thin_border
+    rd = ws.row_dimensions[2]
     rd.height = 45
 
-    image_path = settings.BASE_DIR / 'setup/static/images/trophy.png'
+    # Logo
+    image_path = settings.BASE_DIR / 'setup/static/images/podio.png'
     if os.path.exists(image_path):
         try:
             img = Image(image_path)
-            img.width = 60
-            img.height = 60
-            ws.add_image(img, 'A1')
+            img.width = 45*4
+            img.height = 45
+            ws.add_image(img, 'B2')
         except Exception as e:
             print(f"Erro ao carregar imagem: {e}")
 
-    # LINHA 2: Data do torneio
-    ws.merge_cells('A2:F2')
-    ws['A2'] = f"Data: {torneio.data.strftime('%d/%m/%Y')}"
-    ws['A2'].font = header_font
-    ws['A2'].fill = orange_fill
-    ws['A2'].alignment = center_alignment
-    ws['A2'].border = thin_border
-    ws['F2'].border = thin_border
+    # LINHA 3: Data do torneio
+    ws.merge_cells('B3:G3')
+    ws['B3'] = f"Data: {torneio.data.strftime('%d/%m/%Y')}"
+    ws['B3'].font = header_font
+    ws['B3'].fill = header_fill
+    ws['B3'].alignment = center_alignment
+    ws['B3'].border = thin_border
+    ws['G3'].border = thin_border
 
-    ws.merge_cells('G2:H2')
-    ws['G2'].fill = orange_fill
+    ws.merge_cells('H3:I3') # Espaço em branco
+    ws['H3'].fill = header_fill
+    ws['H3'].border = thin_border
 
-    ws.merge_cells('I2:N2')
-    ws['I2'] = f"Jogos: {jogos.count()}"
-    ws['I2'].font = header_font
-    ws['I2'].fill = orange_fill
-    ws['I2'].alignment = center_alignment
-    ws['I2'].border = thin_border
-    ws['N2'].border = thin_border
+    # Número de jogos
+    ws.merge_cells('J3:O3')
+    ws['J3'] = f"Jogos: {jogos.count()}"
+    ws['J3'].font = header_font
+    ws['J3'].fill = header_fill
+    ws['J3'].alignment = center_alignment
+    ws['J3'].border = thin_border
+    ws['O3'].border = thin_border
+
+    # Ajustar a linha inicial de conteúdo para a nova estrutura
+    current_row = 6
 
     # Processar grupos
-    current_row = 5
     for i in range(1, 5):
         grupo_jogos = jogos.filter(fase=f'GRUPO {i}')
         if grupo_jogos.exists():
-            # Header do grupo com merge (A:N)
-            ws.merge_cells(f'A{current_row}:N{current_row}')
-            ws.cell(row=current_row, column=1, value=f'GRUPO {i}')
-            ws.cell(row=current_row, column=1).font = group_font
-            ws.cell(row=current_row, column=1).fill = orange_fill
-            ws.cell(row=current_row, column=1).alignment = center_alignment
-            ws.cell(row=current_row, column=1).border = thin_border
-            ws.cell(row=current_row, column=14).border = thin_border
+            ws.merge_cells(f'B{current_row}:O{current_row}')
+            ws.cell(row=current_row, column=2, value=f'GRUPO {i}')
+            ws.cell(row=current_row, column=2).font = group_font
+            ws.cell(row=current_row, column=2).fill = orange_fill
+            ws.cell(row=current_row, column=2).alignment = center_alignment
+            ws.cell(row=current_row, column=2).border = thin_border
+            ws.cell(row=current_row, column=15).border = thin_border
             rd = ws.row_dimensions[current_row]
             rd.height = 30
             current_row += 1
 
             # Headers das colunas - Jogos e Ranking lado a lado
-            # Colunas A-F: Jogos | Colunas I-N: Ranking
-            for col, header in enumerate(game_headers, 1):  # A, B, C, D, E, F
+            # Colunas B-G: Jogos | Colunas J-O: Ranking
+            for col, header in enumerate(game_headers, 2):  # B, C, D, E, F, G
                 cell = ws.cell(row=current_row, column=col, value=header)
                 cell.font = header_font
                 cell.fill = header_fill
@@ -340,14 +343,14 @@ def export_csv(request, torneio_id: str):
                 cell.border = thin_border
 
             ws.merge_cells(
-                start_column=3,
+                start_column=4,
                 start_row=current_row,
-                end_column=5,
+                end_column=6,
                 end_row=current_row
             )
 
             # Headers do ranking
-            for col, header in enumerate(ranking_headers, 9):  # I, J, K, L, M, N
+            for col, header in enumerate(ranking_headers, 10):  # J, K, L, M, N, O
                 cell = ws.cell(row=current_row, column=col, value=header)
                 cell.font = header_font
                 cell.fill = header_fill
@@ -362,7 +365,7 @@ def export_csv(request, torneio_id: str):
             max_rows = max(len(games_list), len(ranking_list))
 
             for row in range(max_rows):
-                # Dados do jogo (colunas A-F)
+                # Dados do jogo (colunas B-G)
                 if row < len(games_list):
                     jogo = games_list[row]
                     game_data = [
@@ -374,7 +377,7 @@ def export_csv(request, torneio_id: str):
                         jogo.dupla2.render_special() if jogo.dupla2 else 'A definir',
                     ]
 
-                    for col, data in enumerate(game_data, 1):  # A, B, C, D, E, F
+                    for col, data in enumerate(game_data, 2):
                         cell = ws.cell(row=current_row, column=col, value=data)
                         cell.font = normal_font
                         cell.border = thin_border
@@ -383,7 +386,7 @@ def export_csv(request, torneio_id: str):
                     rd = ws.row_dimensions[current_row]
                     rd.height = 30
 
-                # Dados do ranking (colunas I-N)
+                # Dados do ranking (colunas J-O)
                 if row < len(ranking_list):
                     dupla = ranking_list[row]
                     ranking_data = [
@@ -395,7 +398,7 @@ def export_csv(request, torneio_id: str):
                         dupla['jogos']
                     ]
 
-                    for col, data in enumerate(ranking_data, 9):  # I, J, K, L, M, N
+                    for col, data in enumerate(ranking_data, 10):
                         cell = ws.cell(row=current_row, column=col, value=data)
                         cell.font = normal_font
                         cell.border = thin_border
@@ -410,21 +413,21 @@ def export_csv(request, torneio_id: str):
     for fase in ['OITAVAS', 'QUARTAS', 'SEMIFINAIS', 'TERCEIRO LUGAR', 'FINAL']:
         fase_jogos = jogos.filter(fase=fase)
         if fase_jogos.exists():
-            # Header da fase com merge (A:N)
-            ws.merge_cells(f'A{current_row}:N{current_row}')
-            ws.cell(row=current_row, column=1, value=fase)
-            ws.cell(row=current_row, column=1).font = group_font
-            ws.cell(row=current_row, column=1).fill = orange_fill
-            ws.cell(row=current_row, column=1).alignment = center_alignment
-            ws.cell(row=current_row, column=1).border = thin_border
-            ws.cell(row=current_row, column=14).border = thin_border
+            # Header da fase com merge (B:O)
+            ws.merge_cells(f'B{current_row}:O{current_row}')
+            ws.cell(row=current_row, column=2, value=fase)
+            ws.cell(row=current_row, column=2).font = group_font
+            ws.cell(row=current_row, column=2).fill = orange_fill
+            ws.cell(row=current_row, column=2).alignment = center_alignment
+            ws.cell(row=current_row, column=2).border = thin_border
+            ws.cell(row=current_row, column=15).border = thin_border
             rd = ws.row_dimensions[current_row]
             rd.height = 30
             current_row += 1
 
-            # Headers das colunas (apenas jogos, centralizados)
+            # Headers das colunas (apenas jogos)
             playoff_headers = ['', torneio.team_title(1), 'Placar', '', '', torneio.team_title(2)]
-            start_col = 1  # Centralizar as 4 colunas (D, E, F, G)
+            start_col = 2
             for col, header in enumerate(playoff_headers, start_col):
                 cell = ws.cell(row=current_row, column=col, value=header)
                 cell.font = header_font
@@ -433,9 +436,9 @@ def export_csv(request, torneio_id: str):
                 cell.border = thin_border
 
             ws.merge_cells(
-                start_column=3,
+                start_column=4,
                 start_row=current_row,
-                end_column=5,
+                end_column=6,
                 end_row=current_row
             )
             current_row += 1
@@ -466,20 +469,21 @@ def export_csv(request, torneio_id: str):
 
     # Ajustar largura das colunas
     column_widths = {
-        'A': 5,  # Status
-        'B': 15, # Dupla 1
-        'C': 3,  # Placar 1,
-        'D': 3,  # x
-        'E': 3,  # Placar 2
-        'F': 15, # Dupla 2
-        'G': 3,  #
+        'A': 5,  #
+        'B': 5,  # Status
+        'C': 15, # Dupla 1
+        'D': 3,  # Placar 1,
+        'E': 3,  # x
+        'F': 3,  # Placar 2
+        'G': 15, # Dupla 2
         'H': 3,  #
-        'I': 3,  # Posição ranking
-        'J': 15, # Dupla ranking
-        'K': 8,  # Vitórias
-        'L': 8,  # Pontos
-        'M': 8,  # Saldo
-        'N': 8,  # Jogos
+        'I': 3,  #
+        'J': 3,  # Posição ranking
+        'K': 15, # Dupla ranking
+        'L': 8,  # Vitórias
+        'M': 8,  # Pontos
+        'N': 8,  # Saldo
+        'O': 8,  # Jogos
     }
 
     for col, width in column_widths.items():
@@ -497,5 +501,4 @@ def export_csv(request, torneio_id: str):
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
-
     return response
