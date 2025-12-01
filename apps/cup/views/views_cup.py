@@ -372,7 +372,7 @@ def export_csv(request, torneio_id: str):
                         jogo.get_concluido_display(),
                         jogo.dupla1.render_special() if jogo.dupla1 else 'A definir',
                         f'{jogo.pontos_dupla1 or ""}',
-                        'x',
+                        '✕',
                         f'{jogo.pontos_dupla2 or ""}',
                         jogo.dupla2.render_special() if jogo.dupla2 else 'A definir',
                     ]
@@ -449,7 +449,7 @@ def export_csv(request, torneio_id: str):
                     jogo.get_concluido_display(),
                     jogo.dupla1.render_special() if jogo.dupla1 else 'A definir',
                     f'{jogo.pontos_dupla1 or ""}',
-                    'x',
+                    '✕',
                     f'{jogo.pontos_dupla2 or ""}',
                     jogo.dupla2.render_special() if jogo.dupla2 else 'A definir',
                 ]

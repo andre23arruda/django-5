@@ -230,7 +230,7 @@ def export_csv(request, torneio_id: str):
         ws.cell(row=row_idx, column=10, value=jogo.get_concluido_display())
         ws.cell(row=row_idx, column=11, value=jogo.render_dupla_1())
         ws.cell(row=row_idx, column=12, value=jogo.placar_dupla1)
-        ws.cell(row=row_idx, column=13, value='x')
+        ws.cell(row=row_idx, column=13, value='✕')
         ws.cell(row=row_idx, column=14, value=jogo.placar_dupla2)
         ws.cell(row=row_idx, column=15, value=jogo.render_dupla_2())
 
