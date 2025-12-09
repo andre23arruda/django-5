@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from openpyxl import Workbook
 from openpyxl.drawing.image import Image
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+from PIL import Image as PILImage
 
 from .models import Jogo, Torneio
 
@@ -145,12 +146,32 @@ def see_tournament(request, torneio_id: str):
 def qrcode_tournament(request, torneio_id: str):
     '''Cria QR Code do torneio'''
     torneio = get_object_or_404(Torneio, pk=torneio_id)
-    img = qrcode.make(f'{ os.getenv("APP_LINK") }/torneio/{ torneio.slug }')
+    link = f'{ os.getenv("APP_LINK") }/torneio/{ torneio.slug }'
+
+    logo_link = settings.BASE_DIR / 'setup/static/images/trophy-bg-black.png'
+    logo = PILImage.open(logo_link).convert('RGBA')
+    basewidth = 100
+    wpercent = (basewidth / float(logo.size[0]))
+    hsize = int((float(logo.size[1]) * float(wpercent)))
+    logo = logo.resize((basewidth, hsize), PILImage.LANCZOS)
+
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(link)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color='white', back_color='black').convert('RGB')
+    pos = ((img.size[0] - logo.size[0]) // 2, (img.size[1] - logo.size[1]) // 2)
+    img.paste(logo, pos, logo)
+
     buf = io.BytesIO()
     img.save(buf, 'PNG')
     buf.seek(0)
     string = base64.b64encode(buf.read())
-    uri =  urllib.parse.quote(string)
+    uri = urllib.parse.quote(string)
     context = {
         'img_b64': uri,
         'torneio': torneio,
