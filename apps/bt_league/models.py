@@ -36,6 +36,7 @@ class Ranking(models.Model):
 class Jogador(models.Model):
     id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     nome = models.CharField(max_length=100)
+    cpf = models.CharField(max_length=11, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     telefone = models.CharField(max_length=20, blank=True, null=True)
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
@@ -114,6 +115,11 @@ class Torneio(models.Model):
     quadras = models.IntegerField(default=1, help_text='Quantidade de quadras para jogos simultâneos')
     ranking = models.ForeignKey(Ranking, on_delete=models.SET_NULL, blank=True, null=True, help_text='Agrupar torneio em um ranking')
     slug = models.SlugField(null=False, unique=True)
+    inscricao_aberta = models.BooleanField(
+        default=False,
+        verbose_name='Inscrição aberta',
+        help_text='Criar um link para cadastrar jogadores no torneio'
+    )
 
     class Meta:
         verbose_name = 'Campeonato'

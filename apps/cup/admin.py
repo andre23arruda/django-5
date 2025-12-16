@@ -393,7 +393,8 @@ class TorneioAdmin(admin.ModelAdmin):
         ('Torneio', {'fields': [
             'nome', 'data', 'quantidade_grupos',
             'tipo', 'draw_pairs', 'playoffs',
-            'terceiro_lugar', 'ativo'
+            'terceiro_lugar', 'ativo',
+            'inscricao_aberta'
         ]}),
     ]
 
@@ -435,7 +436,8 @@ class TorneioAdmin(admin.ModelAdmin):
         base_fields = [
             'nome', 'data', 'quantidade_grupos',
             'tipo', 'draw_pairs', 'playoffs',
-            'terceiro_lugar', 'ativo'
+            'terceiro_lugar', 'ativo',
+            'inscricao_aberta'
         ]
         if has_ranking_view_perm and has_ranking_add_perm:
             base_fields.insert(2, 'ranking')

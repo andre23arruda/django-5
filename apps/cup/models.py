@@ -37,6 +37,7 @@ TORNEIO_TIPO_CHOICES = (
 class Jogador(models.Model):
     id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     nome = models.CharField(max_length=100)
+    cpf = models.CharField(max_length=11, blank=True, null=True)
     telefone = models.CharField(max_length=20, blank=True, null=True)
     jogos = models.IntegerField(default=0)
     vitorias = models.IntegerField(default=0, verbose_name='Vitórias')
@@ -229,6 +230,11 @@ class Torneio(models.Model):
         default=False,
         verbose_name='Sortear duplas',
         help_text='Ativar para sortear duplas com jogadores cadastrados'
+    )
+    inscricao_aberta = models.BooleanField(
+        default=False,
+        verbose_name='Inscrição aberta',
+        help_text='Criar um link para cadastrar jogadores no torneio'
     )
     criado_em = models.DateTimeField(auto_now_add=True)
 
@@ -447,6 +453,7 @@ class Torneio(models.Model):
         return True
 
     def has_games(self) -> bool:
+        print(self.jogo_set.exists())
         return self.jogo_set.exists()
 
     def get_groups_ranking(self) -> dict:
