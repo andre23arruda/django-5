@@ -358,3 +358,57 @@ def get_tournament_data(request, torneio_id: str):
     }
 
     return JsonResponse(data)
+
+
+@require_http_methods(['GET', 'POST'])
+def player_register(request, torneio_id: str):
+    '''Registra jogador no torneio'''
+    tournament = get_object_or_404(
+        Torneio,
+        slug=torneio_id,
+        inscricao_aberta=True,
+        ativo=True
+    )
+
+    if tournament.has_games():
+        return JsonResponse(
+            {'msg': 'Inscrição não permitida, o torneio já possui jogos'},
+            status=301
+        )
+
+    if request.method == 'GET':
+        return JsonResponse({
+            'nome': tournament.nome,
+            'data': tournament.data
+        })
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'msg': 'Dados inválidos'}, status=400)
+
+    # 1. Obter CPF e verificar obrigatoriedade
+    cpf_player = data.get('cpfPlayer')
+    if not cpf_player:
+        return JsonResponse({'msg': 'CPF do Jogador é obrigatório.'}, status=400)
+
+    # 2. Verificar se o jogador com esse CPF já está inscrito no torneio
+    existing_player = Jogador.objects.filter(cpf=cpf_player).first()
+    if existing_player:
+        if tournament.jogadores.filter(pk=existing_player.pk).exists():
+            return JsonResponse(
+                {'msg': f'Um jogador com CPF {cpf_player} já está cadastrado neste torneio'},
+                status=400
+            )
+        player = existing_player
+    else:
+        player = Jogador.objects.create(
+            nome=data['player'],
+            cpf=cpf_player,
+            telefone=data.get('phonePlayer'),
+            criado_por=tournament.criado_por
+        )
+
+    # 3. Adiciona o jogador (novo ou existente) ao torneio
+    tournament.jogadores.add(player)
+    return JsonResponse({'msg': 'Inscrição realizada com sucesso'})

@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from openpyxl import Workbook
@@ -11,6 +12,19 @@ from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from PIL import Image as PILImage
 
 from ..models import Jogador, Dupla, Jogo, Torneio
+
+
+def check_player_conflict(tournament,cpf: str):
+    if not cpf:
+        return None
+    existing_player = Jogador.objects.filter(cpf=cpf).first()
+    if existing_player:
+        if Dupla.objects.filter(
+            Q(jogador1=existing_player) | Q(jogador2=existing_player),
+            torneio=tournament
+        ).exists():
+            return existing_player
+    return None
 
 
 def distribute_classifieds(classifieds):
@@ -524,3 +538,80 @@ def export_csv(request, torneio_id: str):
     )
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
+
+
+@require_http_methods(['GET', 'POST'])
+def player_register(request, torneio_id: str):
+    '''Registra jogador no torneio'''
+    tournament = get_object_or_404(
+        Torneio,
+        slug=torneio_id,
+        inscricao_aberta=True,
+        ativo=True
+    )
+
+    if tournament.has_games():
+        return JsonResponse(
+            {'msg': 'Inscrição não permitida, o torneio já possui jogos'},
+            status=301
+        )
+
+    if request.method == 'GET':
+        return JsonResponse({
+            'nome': tournament.nome,
+            'tipo': tournament.tipo,
+            'data': tournament.data
+        })
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'msg': 'Dados inválidos'}, status=400)
+
+    # validar jogadores registrados
+    cpf1 = data.get('cpfPlayer1')
+    cpf2 = data.get('cpfPlayer2') if tournament.tipo == 'D' else None
+    if not cpf1:
+        return JsonResponse({'msg': 'CPF do Jogador 1 é obrigatório.'}, status=400)
+
+    # Verifica o Jogador 1
+    conflicting_player = check_player_conflict(tournament, cpf1)
+    if conflicting_player:
+        return JsonResponse(
+            {'msg': f'Um jogador com CPF {conflicting_player.cpf} já está cadastrado neste torneio.'},
+            status=400
+        )
+
+    # Verifica o Jogador 2 (apenas se for torneio de Dupla)
+    if tournament.tipo == 'D':
+        conflicting_player = check_player_conflict(tournament, cpf2)
+        if conflicting_player:
+            return JsonResponse(
+                {'msg': f'Um jogador com CPF {conflicting_player.cpf} já está cadastrado neste torneio.'},
+                status=400
+            )
+
+    player1 = Jogador.objects.create(
+        nome=data['player1'],
+        cpf=cpf1,
+        telefone=data.get('phonePlayer1'),
+        criado_por=tournament.criado_por
+    )
+
+    player2 = None
+    if tournament.tipo == 'D':
+        player2 = Jogador.objects.create(
+            nome=data['player2'],
+            cpf=cpf2,
+            telefone=data.get('phonePlayer2'),
+            criado_por=tournament.criado_por
+        )
+
+    Dupla.objects.create(
+        jogador1=player1,
+        jogador2=player2,
+        torneio=tournament,
+        criado_por=tournament.criado_por
+    )
+
+    return JsonResponse({'msg': 'Inscrição realizada com sucesso'})

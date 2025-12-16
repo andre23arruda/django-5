@@ -8,7 +8,8 @@ from .views import (
     see_ranking,
     get_ranking_data,
     get_tournament_data,
-    save_game
+    save_game,
+    player_register
 )
 
 app_name = 'bt_league'
@@ -20,6 +21,7 @@ urlpatterns = [
     path('<str:torneio_id>/encerrar', finish_tournament, name='finish_tournament'),
     path('<str:torneio_id>/qr-code', qrcode_tournament, name='qrcode_tournament'),
     path('<str:torneio_id>/json', get_tournament_data, name='tournament_data'),
+    path('<str:torneio_id>/register', player_register, name='player_register'),
     path('ranking/<str:ranking_id>/', see_ranking, name='see_ranking'),
     path('ranking/<str:ranking_id>/json', get_ranking_data, name='ranking_data'),
     path('<str:jogo_id>/save-game/', save_game, name='save_game'),
