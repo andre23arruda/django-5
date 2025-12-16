@@ -107,11 +107,21 @@
 
             <a
                 class="btn btn-block btn-secondary btn-sm mt-2"
-                href="{{ APP_LINK }}/torneio-v2/{{original.slug}}"
+                href="{{ APP_LINK }}/torneio/{{original.slug}}"
                 target="_blank"
             >
                 Ver Torneio
             </a>
+        {% else %}
+            {% if original.ativo and original.inscricao_aberta %}
+                <a
+                    class="btn btn-block btn-secondary btn-sm mt-2"
+                    href="{{ APP_LINK }}/torneio/{{original.slug}}/inscricao"
+                    target="_blank"
+                >
+                    Inscrição
+                </a>
+            {% endif %}
         {% endif %}
 
         {% if not original.is_finished and original.has_games and original.ativo and original.playoffs and not original.open %}

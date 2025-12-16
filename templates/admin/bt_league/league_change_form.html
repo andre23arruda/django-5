@@ -111,6 +111,16 @@
             >
                 Ver Torneio
             </a>
+        {% else %}
+            {% if original.ativo and original.inscricao_aberta %}
+                <a
+                    class="btn btn-block btn-secondary btn-sm mt-2"
+                    href="{{ APP_LINK }}/rei-rainha/{{original.slug}}/inscricao"
+                    target="_blank"
+                >
+                    Inscrição
+                </a>
+            {% endif %}
         {% endif %}
     {% endif %}
 {% endblock %}
