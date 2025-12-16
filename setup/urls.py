@@ -1,12 +1,16 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from .views import index
+from .views import index, check_auth, get_csrf_token
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name='index'),
-    path('torneio/', include('bt_cup.urls')),
-    path('torneio-v2/', include('cup.urls')),
+    path('check-auth', check_auth, name='check_auth'),
+    path('csrf', get_csrf_token, name='get_csrf_token'),
+    path('torneio-v1/', include('bt_cup.urls')),
+    path('torneio/', include('cup.urls')),
     path('rei-rainha/', include('bt_league.urls')),
     path('quadras/', include('aluguel_quadra.urls')),
     path('escala-plantao/', include('escala_de_plantao.urls')),
