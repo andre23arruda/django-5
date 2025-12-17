@@ -37,7 +37,7 @@
         // Mostrar indicador de carregamento
         showSavingIndicator(rowElement);
 
-        fetch(`/torneio-v2/${jogoId}/save-game/`, {
+        fetch(`/torneio/${jogoId}/save-game/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

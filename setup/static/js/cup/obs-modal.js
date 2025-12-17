@@ -55,7 +55,7 @@
         const jogoId = textarea.dataset.jogoId;
         const obs = textarea.value.trim();
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        fetch(`/torneio-v2/${jogoId}/save-obs/`, {
+        fetch(`/torneio/${jogoId}/save-obs/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
