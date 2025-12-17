@@ -453,7 +453,6 @@ class Torneio(models.Model):
         return True
 
     def has_games(self) -> bool:
-        print(self.jogo_set.exists())
         return self.jogo_set.exists()
 
     def get_groups_ranking(self) -> dict:

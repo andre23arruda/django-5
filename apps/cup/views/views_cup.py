@@ -207,6 +207,8 @@ def get_tournament_data(request, torneio_id: str):
     if not torneio:
         return JsonResponse({'error': 'Torneio não encontrado'}, status=404)
     jogos = Jogo.objects.filter(torneio=torneio)
+    nao_iniciado = (jogos.count() == 0) or (jogos.filter(concluido='P').count() == jogos.count())
+
     classificacao = torneio.get_groups_ranking()
     playoff_card_style = ''
 
@@ -269,6 +271,7 @@ def get_tournament_data(request, torneio_id: str):
             'duplas': torneio.duplas.count(),
             'jogos': jogos.count(),
             'jogos_restantes': jogos.exclude(concluido='C').count(),
+            'nao_iniciado': nao_iniciado
         },
         'grupos': grupos,
         'fases_finais': fases_finais,
@@ -557,10 +560,12 @@ def player_register(request, torneio_id: str):
         )
 
     if request.method == 'GET':
+        duplas = [dupla.render() for dupla in tournament.duplas.all()]
         return JsonResponse({
             'nome': tournament.nome,
             'tipo': tournament.tipo,
-            'data': tournament.data
+            'data': tournament.data,
+            'duplas': duplas
         })
 
     try:
@@ -607,11 +612,14 @@ def player_register(request, torneio_id: str):
             criado_por=tournament.criado_por
         )
 
-    Dupla.objects.create(
+    dupla = Dupla.objects.create(
         jogador1=player1,
         jogador2=player2,
         torneio=tournament,
         criado_por=tournament.criado_por
     )
 
-    return JsonResponse({'msg': 'Inscrição realizada com sucesso'})
+    return JsonResponse({
+        'data': dupla.render(),
+        'msg': 'Inscrição realizada com sucesso'
+    })

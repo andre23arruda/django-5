@@ -306,6 +306,7 @@ def get_tournament_data(request, torneio_id: str):
     if not torneio:
         return JsonResponse({'error': 'Torneio não encontrado'}, status=404)
     jogos = torneio.jogo_set.all()
+    nao_iniciado = (jogos.count() == 0) or (jogos.filter(concluido='P').count() == jogos.count())
 
     # Calculate ranking
     ranking = []
@@ -337,6 +338,7 @@ def get_tournament_data(request, torneio_id: str):
             'nome': torneio.nome,
             'data': torneio.data,
             'ativo': torneio.ativo,
+            'nao_iniciado': nao_iniciado
         },
         'jogos': [
             {
@@ -377,9 +379,11 @@ def player_register(request, torneio_id: str):
         )
 
     if request.method == 'GET':
+        jogadores = [jogador.short_name() for jogador in tournament.jogadores.all()]
         return JsonResponse({
             'nome': tournament.nome,
-            'data': tournament.data
+            'data': tournament.data,
+            'jogadores': jogadores
         })
 
     try:
@@ -411,4 +415,7 @@ def player_register(request, torneio_id: str):
 
     # 3. Adiciona o jogador (novo ou existente) ao torneio
     tournament.jogadores.add(player)
-    return JsonResponse({'msg': 'Inscrição realizada com sucesso'})
+    return JsonResponse({
+        'data': player.short_name(),
+        'msg': 'Inscrição realizada com sucesso'
+    })
