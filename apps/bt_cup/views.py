@@ -146,7 +146,7 @@ def see_tournament(request, torneio_id: str):
 def qrcode_tournament(request, torneio_id: str):
     '''Cria QR Code do torneio'''
     torneio = get_object_or_404(Torneio, pk=torneio_id)
-    link = f'{ os.getenv("APP_LINK") }/torneio/{ torneio.slug }'
+    link = f'{ os.getenv("APP_LINK") }/torneio-v1/{ torneio.slug }'
 
     logo_link = settings.BASE_DIR / 'setup/static/images/trophy-bg-black.png'
     logo = PILImage.open(logo_link).convert('RGBA')
