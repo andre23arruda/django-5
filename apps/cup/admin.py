@@ -1,5 +1,6 @@
 import os, re
 from django.contrib import admin, messages
+from django.db.models import Q
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.html import format_html
@@ -309,6 +310,17 @@ class DuplasInline(admin.TabularInline):
     model = Dupla
     extra = 0
 
+    def grupo(self, obj):
+        if obj.pk:
+            jogo = Jogo.objects.filter(
+                torneio=obj.torneio,
+                fase__icontains='GRUPO'
+            ).filter(Q(dupla1=obj) | Q(dupla2=obj)).first()
+            if jogo:
+                return jogo.get_fase_display()
+        return '-'
+    grupo.short_description = 'Grupo'
+
     def jogadores(self, obj):
         return obj.__str__()
 
@@ -339,8 +351,9 @@ class DuplasInline(admin.TabularInline):
     def get_readonly_fields(self, request, obj=None):
         is_active = getattr(obj, 'ativo', False)
         if not is_active:
-            return ['jogadores']
-        return super().get_readonly_fields(request, obj)
+            return ['jogadores', 'grupo']
+        fields = super().get_readonly_fields(request, obj)
+        return list(fields) + ['grupo']
 
     def has_delete_permission(self, request, obj=None):
         return getattr(obj, 'ativo', False)
