@@ -109,6 +109,10 @@ tr.form-row.dynamic-duplas .related-widget-wrapper-link.view-related {
     height: 40px;
 }
 
+div#jogos-tab {
+    width: 100% !important;
+}
+
 @media (max-width: 500px) {
     td.field-pontos_dupla1 input.vIntegerField,
     td.field-pontos_dupla2 input.vIntegerField {

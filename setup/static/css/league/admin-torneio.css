@@ -111,6 +111,10 @@ tr.form-row.dynamic-Torneio_jogadores .related-widget-wrapper-link.view-related 
     height: 40px;
 }
 
+div#jogos-tab {
+    width: 100% !important;
+}
+
 @media (max-width: 500px) {
     td.field-placar_dupla1 input.vIntegerField,
     td.field-placar_dupla2 input.vIntegerField {
