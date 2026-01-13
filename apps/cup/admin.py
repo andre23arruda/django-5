@@ -354,9 +354,8 @@ class DuplasInline(admin.TabularInline):
     def get_readonly_fields(self, request, obj=None):
         is_active = getattr(obj, 'ativo', False)
         if not is_active:
-            fields = ('jogadores')
-        else:
-            fields = super().get_readonly_fields(request, obj)
+            return ['jogadores', 'grupo']
+        fields = super().get_readonly_fields(request, obj)
         return list(fields) + ['grupo']
 
     def has_delete_permission(self, request, obj=None):
