@@ -79,7 +79,7 @@ class DuplaAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         created = not change
-        if created:
+        if created and not request.user.is_superuser:
             obj.criado_por = request.user
         super().save_model(request, obj, form, change)
 
@@ -117,7 +117,7 @@ class JogadorAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         created = not change
-        if created:
+        if created and not request.user.is_superuser:
             obj.criado_por = request.user
         super().save_model(request, obj, form, change)
 
@@ -177,7 +177,7 @@ class RankingAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         created = not change
-        if created:
+        if created and not request.user.is_superuser:
             obj.criado_por = request.user
         super().save_model(request, obj, form, change)
 
