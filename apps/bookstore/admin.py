@@ -10,7 +10,7 @@ en.DATE_FORMAT = 'd/m/Y'
 en.DATETIME_FORMAT = 'H:i:s - d/m/Y'
 
 
-@admin.register(Book)
+# @admin.register(Book)
 class BookRegister(admin.ModelAdmin):
     list_display = ('id', 'title', 'created_at',)
     list_display_links = ('id', 'title')
@@ -18,7 +18,7 @@ class BookRegister(admin.ModelAdmin):
     autocomplete_fields = ['genre']
 
 
-@admin.register(Genre)
+# @admin.register(Genre)
 class GenreRegister(admin.ModelAdmin):
     list_display = ('id', 'name', 'created_at',)
     list_display_links = ('id', 'name')

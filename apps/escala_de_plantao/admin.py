@@ -17,7 +17,7 @@ english.DATE_FORMAT = 'd/m/Y'
 english.DATETIME_FORMAT = 'H:i d/m/Y'
 
 
-@admin.register(Plantao)
+# @admin.register(Plantao)
 class PlantaoAdmin(admin.ModelAdmin):
     list_display = ('plantonista', 'data', 'turno')
     list_filter = ('data', 'escala')
@@ -30,7 +30,7 @@ class PlantaoAdmin(admin.ModelAdmin):
         return super().get_queryset(request).filter(criado_por=request.user)
 
 
-@admin.register(FeriadoPontoFacultativo)
+# @admin.register(FeriadoPontoFacultativo)
 class FeriadoPontoFacultativoAdmin(admin.ModelAdmin):
     exclude = ('id',)
     list_display = ('nome', 'data')
@@ -41,7 +41,7 @@ class FeriadoPontoFacultativoAdmin(admin.ModelAdmin):
         return obj.data()
 
 
-@admin.register(Plantonista)
+# @admin.register(Plantonista)
 class PlantonistaAdmin(admin.ModelAdmin):
     list_display = ('nome', 'telefone','online')
     ordering = ('nome',)
@@ -90,7 +90,7 @@ class PlantaoInline(admin.TabularInline):
         return False
 
 
-@admin.register(Escala)
+# @admin.register(Escala)
 class EscalaAdmin(admin.ModelAdmin):
     class Media:
         css = {'all': ('css/escala-plantao.css',)}

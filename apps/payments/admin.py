@@ -29,7 +29,7 @@ def get_period(date_str: str) -> str:
     return 'Data'
 
 
-@admin.register(InputOutput)
+# @admin.register(InputOutput)
 class InputOutputRegister(admin.ModelAdmin):
     date_hierarchy = 'date'
     list_display = ('date', 'value', 'render_type', 'render_obs')
