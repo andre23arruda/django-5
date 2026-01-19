@@ -1,5 +1,7 @@
 import os, re
 from django.contrib import admin, messages
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
 from django.db.models import Prefetch, Q
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -534,3 +536,13 @@ class TorneioAdmin(admin.ModelAdmin):
             #     torneio=obj,
             #     link=url
             # )
+
+
+
+# User
+admin.site.unregister(User)
+
+@admin.register(User)
+class MyUserAdmin(UserAdmin):
+    list_display = ['username', 'email', 'is_active', 'is_staff', 'date_joined']
+    list_filter = ['is_active']
