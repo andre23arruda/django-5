@@ -1,6 +1,9 @@
+import json
+from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import render
+from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 
@@ -31,3 +34,34 @@ def get_csrf_token(request):
     return JsonResponse({
         'token': get_token(request)
     })
+
+
+@require_http_methods(['POST'])
+def staff_login(request):
+    '''Login para Staff'''
+    try:
+        data = json.loads(request.body)
+        username = data.get('username')
+        password = data.get('password')
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            if user.is_staff:
+                login(request, user)
+                return JsonResponse({
+                    'success': True,
+                    'redirect_url': reverse('admin:index')
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Acesso negado: Usuário não permitido.'
+                }, status=403)
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'Usuário ou senha inválidos.'
+            }, status=401)
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
