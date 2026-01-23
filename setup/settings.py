@@ -111,12 +111,20 @@ CORS_ALLOWED_ORIGINS = json.loads(os.getenv('CORS_ALLOWED_ORIGINS', '[]'))
 
 # CSRF
 CSRF_TRUSTED_ORIGINS = json.loads(os.getenv('CORS_ALLOWED_ORIGINS', '[]'))
-CSRF_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_NAME = 'podio-digital-csrftoken'
-SESSION_COOKIE_AGE = 86400 # 24h
-SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False   # Permitir que o React leia o token para o cabeçalho X-CSRFToken
+SESSION_COOKIE_HTTPONLY = True  # Impede acesso via JS ao ID da sessão (segurança)
+SESSION_COOKIE_AGE = 86400      # Duração de 24 horas
+if DEBUG:
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+else:
+    CSRF_COOKIE_SAMESITE = 'None'
+    SESSION_COOKIE_SAMESITE = 'None'
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
 
 # EMAIL
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
