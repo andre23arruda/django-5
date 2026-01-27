@@ -22,6 +22,15 @@ def send_email(title: str, msg: str):
 
 def send_email_html(title: str, msg_html: str, to=None):
     '''Envio de email com HTML de forma assíncrona'''
+    email = EmailMessage(
+        subject=title,
+        body=msg_html,
+        from_email=os.getenv('DEFAULT_FROM_EMAIL'),
+        to=[to or os.getenv('DEFAULT_FROM_EMAIL')],
+    )
+    email.content_subtype = 'html'
+    email.send(fail_silently=True)
+    return
     def send_async(title, msg_html):
         email = EmailMessage(
             subject=title,
