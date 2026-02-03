@@ -80,17 +80,36 @@ def staff_login(request):
         if user is not None and user.is_staff:
             otp = generate_otp()
             cache.set(f'otp_user_{user.id}', otp, timeout=300)
+            msg_html = f'''
+                <div style="border-style:solid; border-width:thin; border-color:#dadce0; border-radius:8px; padding:40px 20px; max-width: 550px; margin: 20px auto;" align="center">
+                    <img src="{ os.environ.get('APP_LINK') }/pd-email.png" width="160" style="margin-bottom:16px; display: block;" alt="Pódio Digital">
+
+                    <div style="font-family:'Google Sans',Roboto,RobotoDraft,Helvetica,Arial,sans-serif; border-bottom:thin solid #dadce0; color:rgba(0,0,0,0.87); line-height:32px; padding-bottom:24px; text-align:center; word-break:break-word">
+                        <div style="font-size:24px">Verifique seu acesso</div>
+                    </div>
+
+                    <div style="font-family:Roboto-Regular,Helvetica,Arial,sans-serif; font-size:14px; color:rgba(0,0,0,0.87); line-height:20px; padding-top:20px; text-align:left">
+                        Olá, <b>{user.username}</b>.
+                        <br><br>
+                        Recebemos uma solicitação de login para sua conta no painel do <b>Pódio Digital</b>.
+                        Use este código para concluir a autenticação:
+
+                        <div style="text-align:center; font-size:36px; margin:30px 0; line-height:44px; color:rgba(0,0,0,0.87); letter-spacing: 4px;">
+                            <strong>{otp}</strong>
+                        </div>
+
+                        Este código expirará em <b>5 minutos</b>.
+                        <br><br>
+                        Se você não reconhece esta atividade ou não tentou fazer login, você pode ignorar este e-mail com segurança. Nenhuma alteração foi feita na sua conta.
+                    </div>
+                </div>
+                <div style="text-align: center; font-family: Roboto,Arial,sans-serif; font-size: 11px; color: #70757a; margin-top: 15px;">
+                    Este é um e-mail automático. Por favor, não responda.
+                </div>
+            '''
             send_email_html(
                 title='Seu Código de Acesso - Pódio Digital',
-                msg_html=f'''
-                    Olá, <b>{user.username}</b>,
-                    <br/>
-                    Seu código de autenticação para acessar o painel do Pódio Digital:
-                    <div style="text-align: center; font-size: 2rem; margin: 1rem 0; padding: 1rem; background-color: lightgray;">
-                        <b>{otp}</b>
-                    </div>
-                    <i>Atenção: </i> Este código expira em 5 minutos.
-                ''',
+                msg_html=msg_html,
                 to=user.email or os.getenv('DEFAULT_FROM_EMAIL')
             )
             return JsonResponse({

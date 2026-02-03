@@ -31,6 +31,9 @@ def send_email_html(title: str, msg_html: str, to=None):
     email.content_subtype = 'html'
     email.send(fail_silently=True)
     return
+
+
+def send_email_async(title: str, msg_html: str, to=None):
     def send_async(title, msg_html):
         email = EmailMessage(
             subject=title,
