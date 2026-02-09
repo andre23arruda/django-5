@@ -241,7 +241,7 @@ class Torneio(models.Model):
     class Meta:
         verbose_name = 'Torneio'
         verbose_name_plural = 'Torneios'
-        ordering = ['-data']
+        ordering = ['-data', '-criado_em']
 
     def __str__(self):
         return self.nome
