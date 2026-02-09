@@ -276,7 +276,7 @@ class JogosInline(admin.TabularInline):
 class JogosOpenInline(admin.TabularInline):
     model = Jogo
     extra = 0
-    fields = ['dupla1', 'pontos_dupla1', 'x', 'pontos_dupla2', 'dupla2', 'obs', 'concluido']
+    fields = ['dupla1', 'pontos_dupla1', 'x', 'pontos_dupla2', 'dupla2', 'concluido', 'obs']
     readonly_fields = ['x']
     can_delete = True
 
@@ -431,6 +431,11 @@ class TorneioAdmin(admin.ModelAdmin):
     def change_view(self, request, object_id, form_url='', extra_context=None):
         extra_context = extra_context or {}
         extra_context['APP_LINK'] = os.getenv('APP_LINK')
+        extra_context['sheet_perm'] =  request.user.has_perm('features.view_podiodigitalfeatureplanilha')
+        # extra_context['sheet_perm'] = (
+        #     request.user.is_superuser or
+        #     request.user.groups.filter(name='pd-feature-sheet').exists()
+        # )
         return super().change_view(
             request, object_id, form_url, extra_context=extra_context,
         )
@@ -451,16 +456,25 @@ class TorneioAdmin(admin.ModelAdmin):
     def get_fieldsets(self, request, obj):
         has_ranking_view_perm = request.user.has_perm('cup.view_ranking')
         has_ranking_add_perm = request.user.has_perm('cup.add_ranking')
+        has_link_perm = request.user.has_perm('features.view_podiodigitalfeaturelink')
+        has_create_games_perm = request.user.has_perm('features.view_podiodigitalopengames')
+        # has_link_perm = (
+        #     request.user.is_superuser or
+        #     request.user.groups.filter(name='pd-feature-link').exists()
+        # )
         base_fields = [
             'nome', 'data', 'quantidade_grupos',
             'tipo', 'draw_pairs', 'playoffs',
             'terceiro_lugar', 'ativo',
-            'inscricao_aberta'
         ]
         if has_ranking_view_perm and has_ranking_add_perm:
             base_fields.insert(2, 'ranking')
+        if has_link_perm:
+            base_fields.insert(-1, 'inscricao_aberta')
+        if has_create_games_perm:
+            base_fields.insert(-1, 'open')
         if request.user.is_superuser:
-            base_fields.extend(['open', 'criado_por'])
+            base_fields.extend(['criado_por'])
         return [['Torneio', {'fields': base_fields}]]
 
     def get_inlines(self, request, obj):

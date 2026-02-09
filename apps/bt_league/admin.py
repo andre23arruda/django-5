@@ -104,11 +104,11 @@ class JogadorAdmin(admin.ModelAdmin):
 class JogoInline(admin.TabularInline):
     model = Jogo
     extra = 0
-    fields = ['quadra', 'dupla_1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla_2', 'concluido']
+    fields = ['dupla_1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla_2', 'concluido']
     can_delete = False
 
     def get_readonly_fields(self, request, obj=None):
-        fields = ['dupla_1', 'dupla_2', 'x', 'quadra']
+        fields = ['dupla_1', 'dupla_2', 'x']
         if not obj.ativo:
             fields += ['placar_dupla1', 'placar_dupla2', 'concluido']
         return fields
@@ -247,7 +247,7 @@ class TorneioAdmin(admin.ModelAdmin):
         ]
 
     fieldsets = [
-        ['Torneio', {'fields': ['nome', 'data', 'quadras', 'ativo', 'inscricao_aberta']}],
+        ['Torneio', {'fields': ['nome', 'data', 'ativo', 'inscricao_aberta']}],
     ]
     change_form_template = 'admin/bt_league/league_change_form.html'
     list_display = ['nome', 'data', 'total_jogadores', 'total_jogos', 'ativo']
@@ -259,6 +259,8 @@ class TorneioAdmin(admin.ModelAdmin):
     def change_view(self, request, object_id, form_url='', extra_context=None):
         extra_context = extra_context or {}
         extra_context['APP_LINK'] = os.getenv('APP_LINK')
+        extra_context['sheet_perm'] =  request.user.has_perm('features.view_podiodigitalfeatureplanilha')
+
         return super().change_view(
             request, object_id, form_url, extra_context=extra_context,
         )
@@ -324,9 +326,12 @@ class TorneioAdmin(admin.ModelAdmin):
     def get_fieldsets(self, request, obj):
         has_ranking_view_perm = request.user.has_perm('bt_league.view_ranking')
         has_ranking_add_perm = request.user.has_perm('bt_league.add_ranking')
-        base_fields = ['nome', 'data', 'quadras', 'ativo', 'inscricao_aberta']
+        has_link_perm = request.user.has_perm('features.view_podiodigitalfeaturelink')
+        base_fields = ['nome', 'data', 'ativo']
         if has_ranking_view_perm and has_ranking_add_perm:
             base_fields.insert(2, 'ranking')
+        if has_link_perm:
+            base_fields.insert(-1, 'inscricao_aberta')
         if request.user.is_superuser:
             base_fields.extend(['criado_por', 'grupo_criador'])
         return [['Torneio', {'fields': base_fields}]]
@@ -442,7 +447,6 @@ class JogoAdmin(admin.ModelAdmin):
 
     fields = [
         'torneio',
-        'quadra',
         'dupla1_jogador1',
         'dupla1_jogador2',
         'placar_dupla1',

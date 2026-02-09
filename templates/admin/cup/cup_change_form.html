@@ -86,13 +86,15 @@
                 </dialog>
             {% endif %}
         {% else %}
-            <a
-                class="btn btn-block btn-secondary btn-sm mt-2"
-                href="{% url 'cup:download' original.pk %}"
-                target="_blank"
-            >
-                Planilha
-            </a>
+            {% if sheet_perm %}
+                <a
+                    class="btn btn-block btn-secondary btn-sm mt-2"
+                    href="{% url 'cup:download' original.pk %}"
+                    target="_blank"
+                >
+                    Planilha
+                </a>
+            {% endif %}
         {% endif %}
 
         {% if original.has_games  %}

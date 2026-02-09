@@ -83,13 +83,15 @@
                 </a>
             {% endif %}
         {% else %}
-            <a
-                class="btn btn-block btn-secondary btn-sm mt-2"
-                href="{% url 'bt_league:download' original.pk %}"
-                target="_blank"
-            >
-                Planilha
-            </a>
+            {% if sheet_perm %}
+                <a
+                    class="btn btn-block btn-secondary btn-sm mt-2"
+                    href="{% url 'bt_league:download' original.pk %}"
+                    target="_blank"
+                >
+                    Planilha
+                </a>
+            {% endif %}
 
             <span id="hidePhaseColumn"/>
         {% endif %}
