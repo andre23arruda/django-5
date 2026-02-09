@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!jogoInlineGroup) return;
 
     // Coleta dados dos jogos
-    const jogosRows = jogoInlineGroup.querySelectorAll('.form-row:not(.add-row)');
+    const jogosRows = jogoInlineGroup.querySelectorAll('.form-row:not(.add-row, .empty-form)');
     const totalJogos = jogosRows.length;
     let jogosConcluidos = 0;
     let jogosPendentes = 0;
