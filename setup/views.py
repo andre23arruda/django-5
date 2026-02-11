@@ -82,7 +82,7 @@ def staff_login(request):
             cache.set(f'otp_user_{user.id}', otp, timeout=300)
             msg_html = f'''
                 <div style="border-style:solid; border-width:thin; border-color:#dadce0; border-radius:8px; padding:40px 20px; max-width: 550px; margin: 20px auto;" align="center">
-                    <img src="{ os.environ.get('APP_LINK') }/pd-email.png" width="160" style="margin-bottom:16px; display: block;" alt="Pódio Digital">
+                    <img src="{ os.environ.get('APP_LINK') }/logo-email.png" width="160" style="margin-bottom:16px; display: block;" alt="Pódio Digital">
 
                     <div style="font-family:'Google Sans',Roboto,RobotoDraft,Helvetica,Arial,sans-serif; border-bottom:thin solid #dadce0; color:rgba(0,0,0,0.87); line-height:32px; padding-bottom:24px; text-align:center; word-break:break-word">
                         <div style="font-size:24px">Verifique seu acesso</div>
