@@ -109,6 +109,7 @@ CORS_ALLOW_HEADERS = [
     'authorization',
 ]
 CORS_ALLOWED_ORIGINS = json.loads(os.getenv('CORS_ALLOWED_ORIGINS', '[]'))
+CORS_EXPOSE_HEADERS = ['x-csrftoken', 'X-CSRFToken-Status']
 
 # CSRF
 CSRF_TRUSTED_ORIGINS = json.loads(os.getenv('CORS_ALLOWED_ORIGINS', '[]'))
@@ -128,7 +129,7 @@ else:
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_DOMAIN = os.getenv('APP_DOMAIN')
     SESSION_COOKIE_PARTITIONED = True
-    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = 'None'
     SESSION_COOKIE_SECURE = True
 
 # EMAIL

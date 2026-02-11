@@ -1,5 +1,5 @@
 import json, os, random, string
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.http import JsonResponse
@@ -38,17 +38,20 @@ def check_auth(request):
 
 @require_http_methods(['POST'])
 def check_otp(request):
-    '''Valida o código recebido e inicia a sessão oficial'''
     data = json.loads(request.body)
     user_id = data.get('user_id')
     otp_received = data.get('otp_code')
     cached_otp = cache.get(f'otp_user_{user_id}')
 
-    if cached_otp and cached_otp == otp_received:
+    if cached_otp and str(cached_otp) == str(otp_received):
         try:
             user = User.objects.get(id=user_id)
+            if request.user.is_authenticated:
+                logout(request)
+
             login(request, user)
             cache.delete(f'otp_user_{user_id}')
+
             return JsonResponse({
                 'success': True,
                 'redirect_url': reverse('admin:index')
@@ -63,9 +66,15 @@ def check_otp(request):
 @require_http_methods(['GET'])
 def get_csrf_token(request):
     '''GET CSRF token'''
-    return JsonResponse({
-        'token': get_token(request)
+    token = get_token(request)
+    response = JsonResponse({
+        'token': token,
+        'message': 'Token gerado com sucesso'
     })
+    response['X-CSRFToken-Status'] = 'Ready'
+    response['Cache-Control'] = 'no-store, must-revalidate'
+    response['Access-Control-Expose-Headers'] = 'X-CSRFToken'
+    return response
 
 
 @require_http_methods(['POST'])
