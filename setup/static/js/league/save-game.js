@@ -37,7 +37,7 @@
         // Mostrar indicador de carregamento
         showSavingIndicator(rowElement);
 
-        fetch(`/rei-rainha/${jogoId}/save-game/`, {
+        fetch(`/api/rei-rainha/${jogoId}/save-game/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
