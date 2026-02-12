@@ -52,10 +52,11 @@ def check_otp(request):
             login(request, user)
             cache.delete(f'otp_user_{user_id}')
 
-            return JsonResponse({
+            response = JsonResponse({
                 'success': True,
                 'redirect_url': reverse('admin:index')
             })
+            return response
         except User.DoesNotExist:
             return JsonResponse({'message': 'Usuário inválido.'}, status=400)
 
@@ -71,7 +72,6 @@ def get_csrf_token(request):
         'token': token,
         'message': 'Token gerado com sucesso'
     })
-    response['X-CSRFToken-Status'] = 'Ready'
     response['Cache-Control'] = 'no-store, must-revalidate'
     response['Access-Control-Expose-Headers'] = 'X-CSRFToken'
     return response

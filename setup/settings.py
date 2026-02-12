@@ -91,9 +91,12 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 # Static files (CSS, JavaScript, Images)
 STATICFILES_DIRS = [ BASE_DIR / 'setup/static' ]
 STATIC_ROOT = BASE_DIR / 'static'
-STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+if DEBUG:
+    STATIC_URL = '/static/'
+else:
+    STATIC_URL = os.getenv('APP_LINK') + '/admin_assets/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
