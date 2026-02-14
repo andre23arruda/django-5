@@ -104,11 +104,11 @@ class JogadorAdmin(admin.ModelAdmin):
 class JogoInline(admin.TabularInline):
     model = Jogo
     extra = 0
-    fields = ['dupla_1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla_2', 'concluido']
+    fields = ['quadra', 'dupla_1', 'placar_dupla1', 'x', 'placar_dupla2', 'dupla_2', 'concluido']
     can_delete = False
 
     def get_readonly_fields(self, request, obj=None):
-        fields = ['dupla_1', 'dupla_2', 'x']
+        fields = ['quadra', 'dupla_1', 'dupla_2', 'x']
         if not obj.ativo:
             fields += ['placar_dupla1', 'placar_dupla2', 'concluido']
         return fields
