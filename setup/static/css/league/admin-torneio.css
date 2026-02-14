@@ -101,7 +101,7 @@ td.field-dupla_2 p {
 .field-ranking a.related-widget-wrapper-link.change-related,
 .field-ranking a.related-widget-wrapper-link.delete-related,
 /* .field-ranking a.related-widget-wrapper-link.view-related, */
-tr.form-row.dynamic-Torneio_jogadores.has_original .related-widget-wrapper-link.add-related,
+/* tr.form-row.dynamic-Torneio_jogadores.has_original .related-widget-wrapper-link.add-related, */
 tr.form-row.dynamic-Torneio_jogadores .related-widget-wrapper-link.view-related {
     display: none !important;
 }
