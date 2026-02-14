@@ -116,11 +116,18 @@ def staff_login(request):
                     Este é um e-mail automático. Por favor, não responda.
                 </div>
             '''
-            send_email_html(
+            enviado = send_email_html(
                 title='Seu Código de Acesso - Pódio Digital',
                 msg_html=msg_html,
                 to=user.email or os.getenv('DEFAULT_FROM_EMAIL')
             )
+
+            if not enviado:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Erro ao enviar código. Tente novamente!'
+                }, status=500)
+
             return JsonResponse({
                 'otp_required': True,
                 'user_id': user.id,

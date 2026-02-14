@@ -447,11 +447,9 @@ class JogoAdmin(admin.ModelAdmin):
 
     fields = [
         'torneio',
-        'dupla1_jogador1',
-        'dupla1_jogador2',
+        ('dupla1_jogador1', 'dupla1_jogador2'),
         'placar_dupla1',
-        'dupla2_jogador1',
-        'dupla2_jogador2',
+        ('dupla2_jogador1', 'dupla2_jogador2'),
         'placar_dupla2',
         'concluido',
     ]
