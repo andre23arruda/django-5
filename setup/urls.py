@@ -1,14 +1,18 @@
+import os
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic.base import RedirectView
 from .views import (
     index, check_auth, check_otp,
     get_csrf_token, staff_login,
 )
 
+
 urlpatterns = [
     path('', index, name='index'),
+    path(f'admin/login/', RedirectView.as_view(url=f'{ os.getenv("APP_LINK") }/login/', permanent=True)),
     path('admin/', admin.site.urls),
     # auth
     path('api/check-auth', check_auth, name='check_auth'),
