@@ -152,28 +152,39 @@ class Torneio(models.Model):
             self.jogo_set.all().delete()
 
         num_rodadas_total = n_jogadores - 1
-        jogos_gerados = []
+        rodadas, partidas, jogos_gerados = [], [], []
+        for rodada in range(num_rodadas_total):
+            matches = []
+            for i in range(n_jogadores // 2):
+                matches.append((jogadores[i], jogadores[n_jogadores - 1 - i]))
 
-        # Algoritmo de rotação (Circle Method) adaptado para duplas e confrontos
-        for r in range(num_rodadas_total):
-            # Rotaciona os jogadores mantendo o primeiro fixo
-            atual = [jogadores[0]] + jogadores[-r:] + jogadores[1:-r] if r > 0 else jogadores
+            # Rotacionar jogadores exceto o primeiro
+            jogadores = [jogadores[0]] + [jogadores[-1]] + jogadores[1:-1]
+            rodadas.append(matches)
 
-            # Divide os jogadores em duplas e depois em jogos (A&B vs C&D)
-            # Para cada jogo na rodada, criamos o objeto Jogo
-            # A 'quadra' será usada para armazenar o número da rodada
-            for i in range(0, n_jogadores, 4):
-                p1, p2, p3, p4 = atual[i], atual[i+1], atual[i+2], atual[i+3]
+        for rodada in rodadas:
+            for i in range(0, len(rodada), 2):
+                if i + 1 < len(rodada):
+                    partida = (rodada[i], rodada[i+1])
+                    partidas.append(partida)
 
-                jogo = Jogo(
-                    torneio=self,
-                    quadra=r + 1,
-                    dupla1_jogador1=p1,
-                    dupla1_jogador2=p2,
-                    dupla2_jogador1=p3,
-                    dupla2_jogador2=p4
-                )
-                jogos_gerados.append(jogo)
+        # Distribuir partidas nas quadras
+        partidas_por_rodada = self.quadras
+        num_rodadas_necessarias = math.ceil(len(partidas) / partidas_por_rodada)
+        for rodada in range(num_rodadas_necessarias):
+            for quadra in range(1, self.quadras + 1):
+                indice_partida = rodada * partidas_por_rodada + (quadra - 1)
+                if indice_partida < len(partidas):
+                    dupla1, dupla2 = partidas[indice_partida]
+                    jogo = Jogo(
+                        torneio=self,
+                        quadra=rodada + 1,
+                        dupla1_jogador1=dupla1[0],
+                        dupla1_jogador2=dupla1[1],
+                        dupla2_jogador1=dupla2[0],
+                        dupla2_jogador2=dupla2[1]
+                    )
+                    jogos_gerados.append(jogo)
 
         Jogo.objects.bulk_create(jogos_gerados)
         return jogos_gerados
