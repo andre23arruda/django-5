@@ -1,8 +1,9 @@
-import math, random
+import random
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 from shortuuid.django_fields import ShortUUIDField
+from .utils import GAME_TEMPLATES
 
 GAME_STATUS = (
     ('P', '🚫'),
@@ -140,7 +141,7 @@ class Torneio(models.Model):
         '''Gera jogos usando todas as duplas possíveis'''
         jogadores = self.shuffle_players()
         n_jogadores = len(jogadores)
-        excess_playes = n_jogadores % 4
+        excess_playes = n_jogadores not in [4, 5, 8, 12, 16]
         if excess_playes:
             return Exception(f'Não é possível gerar jogos com { n_jogadores } jogadores. Número de jogadores deve ser multiplo de 4.')
 
@@ -151,40 +152,32 @@ class Torneio(models.Model):
         if self.jogo_set.exists():
             self.jogo_set.all().delete()
 
-        num_rodadas_total = n_jogadores - 1
-        rodadas, partidas, jogos_gerados = [], [], []
-        for rodada in range(num_rodadas_total):
-            matches = []
-            for i in range(n_jogadores // 2):
-                matches.append((jogadores[i], jogadores[n_jogadores - 1 - i]))
+        if str(n_jogadores) not in [str(k) for k in GAME_TEMPLATES.keys()]:
+            return Exception(f'Não existe template de jogos para {n_jogadores} jogadores. Opções: {list(GAME_TEMPLATES.keys())}')
 
-            # Rotacionar jogadores exceto o primeiro
-            jogadores = [jogadores[0]] + [jogadores[-1]] + jogadores[1:-1]
-            rodadas.append(matches)
+        template = GAME_TEMPLATES[n_jogadores]
+        jogos_gerados = []
 
-        for rodada in rodadas:
-            for i in range(0, len(rodada), 2):
-                if i + 1 < len(rodada):
-                    partida = (rodada[i], rodada[i+1])
-                    partidas.append(partida)
+        for num_rodada, rodada in enumerate(template, 1):
+            for jogo in rodada:
+                dupla_a_idx = jogo[0] # ex: (1, 2)
+                dupla_b_idx = jogo[1] # ex: (3, 4)
 
-        # Distribuir partidas nas quadras
-        partidas_por_rodada = self.quadras
-        num_rodadas_necessarias = math.ceil(len(partidas) / partidas_por_rodada)
-        for rodada in range(num_rodadas_necessarias):
-            for quadra in range(1, self.quadras + 1):
-                indice_partida = rodada * partidas_por_rodada + (quadra - 1)
-                if indice_partida < len(partidas):
-                    dupla1, dupla2 = partidas[indice_partida]
-                    jogo = Jogo(
-                        torneio=self,
-                        quadra=rodada + 1,
-                        dupla1_jogador1=dupla1[0],
-                        dupla1_jogador2=dupla1[1],
-                        dupla2_jogador1=dupla2[0],
-                        dupla2_jogador2=dupla2[1]
-                    )
-                    jogos_gerados.append(jogo)
+                # Pega o objeto real na lista (subtraindo 1 do índice do template)
+                p1 = jogadores[dupla_a_idx[0] - 1]
+                p2 = jogadores[dupla_a_idx[1] - 1]
+                p3 = jogadores[dupla_b_idx[0] - 1]
+                p4 = jogadores[dupla_b_idx[1] - 1]
+
+                novo_jogo = Jogo(
+                    torneio=self,
+                    quadra=num_rodada,
+                    dupla1_jogador1=p1,
+                    dupla1_jogador2=p2,
+                    dupla2_jogador1=p3,
+                    dupla2_jogador2=p4
+                )
+                jogos_gerados.append(novo_jogo)
 
         Jogo.objects.bulk_create(jogos_gerados)
         return jogos_gerados
