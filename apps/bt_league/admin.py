@@ -387,7 +387,7 @@ class TorneioAdmin(admin.ModelAdmin):
             obj.criado_por = request.user
         super().save_model(request, obj, form, change)
         if created:
-            url = f'{os.getenv("HOST_ADDRESS")}{reverse("admin:bt_league_torneio_change", args=[obj.id])}'
+            url = f'{os.getenv("APP_LINK")}{reverse("admin:bt_league_torneio_change", args=[obj.id])}'
             send_telegram_msg(obj, url)
 
 
