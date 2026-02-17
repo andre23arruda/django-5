@@ -174,8 +174,14 @@ class RankingInline(admin.TabularInline):
 
 class JogadoresInline(admin.TabularInline):
     model = Torneio.jogadores.through
-    extra = 0
     verbose_name = 'Jogador'
+    can_delete = False
+    can_add = False
+
+    def get_extra(self, request, obj=None, **kwargs):
+        if obj:
+            return obj.n_jogadores - len(obj.jogadores.all())
+        return 0
 
     def jogador_nome(self, obj):
         return obj.jogador.nome
@@ -200,11 +206,11 @@ class JogadoresInline(admin.TabularInline):
                 kwargs['queryset'] = Jogador.objects.filter(criado_por=request.user).order_by('nome')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def has_add_permission(self, request, obj=None):
-        return obj.ativo
+    # def has_add_permission(self, request, obj=None):
+    #     return obj.ativo
 
-    def has_delete_permission(self, request, obj=None):
-        return obj.ativo
+    # def has_delete_permission(self, request, obj=None):
+    #     return obj.ativo
 
     @property
     def verbose_name_plural(self):
@@ -247,10 +253,10 @@ class TorneioAdmin(admin.ModelAdmin):
         ]
 
     fieldsets = [
-        ['Torneio', {'fields': ['nome', 'data', 'ativo', 'inscricao_aberta']}],
+        ['Torneio', {'fields': ['nome', 'data', 'n_jogadores', 'ativo', 'inscricao_aberta']}],
     ]
     change_form_template = 'admin/bt_league/league_change_form.html'
-    list_display = ['nome', 'data', 'total_jogadores', 'total_jogos', 'ativo']
+    list_display = ['nome', 'data', 'n_jogadores', 'total_jogos', 'ativo']
     # autocomplete_fields = ['jogadores']
     list_filter = ['ativo']
     search_fields = ['nome']
@@ -327,9 +333,9 @@ class TorneioAdmin(admin.ModelAdmin):
         has_ranking_view_perm = request.user.has_perm('bt_league.view_ranking')
         has_ranking_add_perm = request.user.has_perm('bt_league.add_ranking')
         has_link_perm = request.user.has_perm('features.view_podiodigitalfeaturelink')
-        base_fields = ['nome', 'data', 'ativo']
+        base_fields = ['nome', 'data', 'n_jogadores', 'ativo']
         if has_ranking_view_perm and has_ranking_add_perm:
-            base_fields.insert(2, 'ranking')
+            base_fields.insert(3, 'ranking')
         if has_link_perm:
             base_fields.insert(-1, 'inscricao_aberta')
         if request.user.is_superuser:
@@ -361,10 +367,6 @@ class TorneioAdmin(admin.ModelAdmin):
             return super().get_queryset(request).filter(Q(criado_por=request.user) | Q(grupo_criador=user_group))
         return super().get_queryset(request).filter(criado_por=request.user)
 
-    def total_jogadores(self, obj):
-        return obj.jogadores.count()
-    total_jogadores.short_description = 'Jogadores'
-
     def total_jogos(self, obj):
         return obj.jogo_set.count()
     total_jogos.short_description = 'Jogos'
@@ -389,6 +391,8 @@ class TorneioAdmin(admin.ModelAdmin):
         if created:
             url = f'{os.getenv("APP_LINK")}{reverse("admin:bt_league_torneio_change", args=[obj.id])}'
             send_telegram_msg(obj, url)
+        if len(obj.jogadores.all()) >= obj.n_jogadores:
+            obj.jogadores.set(list(obj.jogadores.all()[:obj.n_jogadores]))
 
 
 @admin.register(Ranking)
