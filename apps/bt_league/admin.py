@@ -88,9 +88,9 @@ class JogadorAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         if request.user.is_superuser:
             return super().get_queryset(request)
-        user_group = request.user.groups.first()
-        if user_group:
-            return super().get_queryset(request).filter(Q(criado_por=request.user) | Q(grupo_criador=user_group))
+        # user_group = request.user.groups.first()
+        # if user_group:
+        #     return super().get_queryset(request).filter(Q(criado_por=request.user) | Q(grupo_criador=user_group))
         return super().get_queryset(request).filter(Q(criado_por=request.user))
 
     def save_model(self, request, obj, form, change):
