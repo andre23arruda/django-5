@@ -15,7 +15,9 @@ JAZZMIN_SETTINGS = {
     'related_modal_active': True,
     # 'changeform_format': 'carousel',
     'topmenu_links': [
-        {'name': 'Home',  'url': 'admin:index', 'permissions': ['auth.view_user']},
+        {'name': 'Início',  'url': 'admin:index'},
+        {'name': 'Torneios',  'url': 'admin:cup_torneio_changelist', 'permissions': ['cup.view_torneio']},
+        {'name': 'Rei/Rainha',  'url': 'admin:bt_league_torneio_changelist', 'permissions': ['bt_league.view_torneio']},
     ],
     'icons': {
         'admin.LogEntry': 'fas fa-book',
