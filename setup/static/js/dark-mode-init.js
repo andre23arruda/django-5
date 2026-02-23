@@ -1,6 +1,7 @@
 const darkModeIcons = {
     true: '<i class="fa-solid fa-moon"></i>',
-    false: '<i class="fa-solid fa-sun"></i>'
+    false: '<i class="fa-solid fa-circle-half-stroke"></i>'
+
 }
 
 function getDarkMode() {

@@ -106,6 +106,12 @@ tr.form-row.dynamic-Torneio_jogadores .related-widget-wrapper-link.view-related 
     display: none !important;
 }
 
+div#Torneio_jogadores-group ul.errorlist.nonform,
+#Torneio_jogadores-group tr.add-row,
+td.field-jogador a.inline-deletelink {
+    display: none !important;
+}
+
 .field-obs textarea {
     width: 150px !important;
     height: 40px;
