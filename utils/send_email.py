@@ -22,14 +22,18 @@ def send_email(title: str, msg: str):
 
 def send_email_html(title: str, msg_html: str, to=None):
     '''Envio de email com HTML'''
-    email = EmailMessage(
-        subject=title,
-        body=msg_html,
-        from_email=os.getenv('DEFAULT_FROM_EMAIL'),
-        to=[to or os.getenv('DEFAULT_FROM_EMAIL')],
-    )
-    email.content_subtype = 'html'
-    return email.send(fail_silently=True)
+    try:
+        email = EmailMessage(
+            subject=title,
+            body=msg_html,
+            from_email=os.getenv('DEFAULT_FROM_EMAIL'),
+            to=[to or os.getenv('DEFAULT_FROM_EMAIL')],
+        )
+        email.content_subtype = 'html'
+        return email.send(fail_silently=False)
+    except Exception as e:
+        logger.error(f'Erro ao enviar email HTML: {e}')
+        return 0
 
 
 def send_email_async(title: str, msg_html: str, to=None):

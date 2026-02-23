@@ -1,5 +1,6 @@
 import os, re
 from django import forms
+from django.core.exceptions import NON_FIELD_ERRORS
 from django.conf.locale.pt_BR import formats as portuguese
 from django.conf.locale.en import formats as english
 from django.contrib import admin, messages
@@ -172,8 +173,20 @@ class RankingInline(admin.TabularInline):
     pontos.short_description = 'V / P / S'
 
 
+class JogadoresInlineForm(forms.ModelForm):
+    class Meta:
+        model = Torneio.jogadores.through
+        fields = '__all__'
+        error_messages = {
+            NON_FIELD_ERRORS: {
+                'unique_together': 'Esse jogador já foi adicionado no torneio',
+            }
+        }
+
+
 class JogadoresInline(admin.TabularInline):
     model = Torneio.jogadores.through
+    form = JogadoresInlineForm
     verbose_name = 'Jogador'
     can_delete = False
     can_add = False
@@ -323,7 +336,7 @@ class TorneioAdmin(admin.ModelAdmin):
 
     def get_inlines(self, request, obj):
         if obj:
-            if obj.jogadores.count() > 0:
+            if obj.jogadores.count() == obj.n_jogadores:
                 return [JogadoresInline, JogoInline]
             else:
                 return [JogadoresInline]
@@ -378,9 +391,15 @@ class TorneioAdmin(admin.ModelAdmin):
         return response
 
     def response_change(self, request, obj):
-        messages.add_message(request, messages.INFO, 'Informações salvas com sucesso.')
         response = redirect('admin:bt_league_torneio_change', obj.id)
-        response['location'] += '#jogos-tab'
+        n_jogadores = obj.jogadores.count()
+        if n_jogadores == obj.n_jogadores:
+            response['location'] += '#jogos-tab'
+            messages.add_message(request, messages.INFO, 'Informações salvas com sucesso.')
+            if obj.jogo_set.count() == 0:
+                messages.add_message(request, messages.INFO, 'Crie os jogos para este torneio.')
+        else:
+            response['location'] += f'#jogadores-{n_jogadores}-tab'
         return response
 
     def save_model(self, request, obj, form, change):
