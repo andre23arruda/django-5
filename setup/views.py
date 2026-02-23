@@ -71,7 +71,7 @@ def get_csrf_token(request):
     response = JsonResponse({
         'token': token,
         'message': 'Token gerado com sucesso',
-        'redirect_url': reverse('admin:index') if request.user.is_authenticated else None
+        'is_auth': request.user.is_authenticated
     })
     response['Cache-Control'] = 'no-store, must-revalidate'
     response['Access-Control-Expose-Headers'] = 'X-CSRFToken'
