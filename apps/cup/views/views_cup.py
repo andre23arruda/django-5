@@ -163,7 +163,7 @@ def qrcode_tournament(request, torneio_id: str):
     torneio = get_object_or_404(Torneio, pk=torneio_id)
     link = f'{ os.getenv("APP_LINK") }/torneio/{ torneio.slug }'
 
-    logo_link = settings.BASE_DIR / 'setup/static/images/trophy-bg-black.png'
+    logo_link = settings.BASE_DIR / 'setup/static/images/favicon-qr-code.png'
     logo = PILImage.open(logo_link).convert('RGBA')
     basewidth = 100
     wpercent = (basewidth / float(logo.size[0]))
