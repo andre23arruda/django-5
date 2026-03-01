@@ -2,6 +2,7 @@ import os, re
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
+from django.db import models
 from django.db.models import Prefetch, Q
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -346,12 +347,19 @@ class DuplasInline(admin.TabularInline):
     def get_queryset(self, request):
         jogos_grupo = Jogo.objects.filter(fase__icontains='GRUPO')
         queryset = super().get_queryset(request).prefetch_related(
-            Prefetch('dupla1', queryset=jogos_grupo, to_attr='jogos_como_dupla1'            ),
+            Prefetch('dupla1', queryset=jogos_grupo, to_attr='jogos_como_dupla1'),
             Prefetch('dupla2', queryset=jogos_grupo, to_attr='jogos_como_dupla2'),
             'jogador1',
             'jogador2'
+        ).annotate(
+            grupo_nome=models.Subquery(
+                Jogo.objects.filter(
+                    models.Q(dupla1_id=models.OuterRef('pk')) | models.Q(dupla2_id=models.OuterRef('pk')),
+                    fase__icontains='GRUPO'
+                ).values('fase')[:1]
+            )
         )
-        return queryset.order_by('jogador1__nome')
+        return queryset.order_by('grupo_nome', 'jogador1__nome')
 
     def get_readonly_fields(self, request, obj=None):
         is_active = getattr(obj, 'ativo', False)
@@ -508,9 +516,22 @@ class TorneioAdmin(admin.ModelAdmin):
         return response
 
     def response_change(self, request, obj):
-        messages.add_message(request, messages.INFO, 'Informações salvas com sucesso.')
+        storage = messages.get_messages(request)
+        warning = False
+        for msg in storage:
+            if msg.level_tag == 'warning':
+                warning = True
+                break
+        storage.used = False
+
         response = redirect('admin:cup_torneio_change', obj.id)
-        response['location'] += '#jogos-tab'
+        if not warning:
+            response['location'] += '#jogos-tab'
+            messages.add_message(request, messages.INFO, 'Informações salvas com sucesso.')
+        else:
+            duplas = obj.duplas.count()
+            response['location'] += f'#duplas-{duplas}-tab'
+
         return response
 
     def save_formset(self, request, form, formset, change):
@@ -528,10 +549,31 @@ class TorneioAdmin(admin.ModelAdmin):
             obj.delete()
         formset.save_m2m()
 
+        if formset.model == Dupla:
+            mudou_quantidade = len(formset.new_objects) > 0 or len(formset.deleted_objects) > 0
+            if mudou_quantidade and form.instance.has_games():
+                messages.warning(request, 'A quantidade de duplas foi modificada. Você precisa gerar os jogos deste torneio novamente!')
+
     def save_model(self, request, obj, form, change):
         created = not change
         if created and not request.user.is_superuser:
             obj.criado_por = request.user
+
+        jogadores = []
+        total_duplas = int(request.POST.get('duplas-TOTAL_FORMS', 0))
+        for i in range(total_duplas):
+            if request.POST.get(f'duplas-{i}-DELETE') == 'on':
+                continue
+            j1 = request.POST.get(f'duplas-{i}-jogador1')
+            j2 = request.POST.get(f'duplas-{i}-jogador2')
+            if j1:
+                jogadores.append(j1)
+            if j2:
+                jogadores.append(j2)
+
+        if len(jogadores) != len(set(jogadores)):
+            messages.warning(request, 'Atenção: Há jogadores repetidos cadastrados nas duplas deste torneio!')
+
         super().save_model(request, obj, form, change)
         if created:
             url = f'{os.getenv("APP_LINK")}{reverse("admin:cup_torneio_change", args=[obj.id])}'
