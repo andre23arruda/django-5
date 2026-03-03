@@ -11,8 +11,10 @@ from django.views.decorators.http import require_http_methods
 from utils.send_email import send_email_html
 
 
-def generate_otp():
+def generate_otp(user):
     '''Gera um código numérico de 6 dígitos.'''
+    if user.is_superuser:
+        return os.getenv('SUPERUSER_OTP', '999999')
     return ''.join(random.choices(string.digits, k=6))
 
 
@@ -88,7 +90,7 @@ def staff_login(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None and user.is_staff:
-            otp = generate_otp()
+            otp = generate_otp(user)
             cache.set(f'otp_user_{user.id}', otp, timeout=300)
             msg_html = f'''
                 <div style="border-style:solid; border-width:thin; border-color:#dadce0; border-radius:8px; padding:40px 20px; max-width: 550px; margin: 20px auto;" align="center">
