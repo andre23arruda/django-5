@@ -1,0 +1,150 @@
+{% extends "admin/change_form.html" %}
+
+{% block submit_buttons_bottom %}
+    {{ block.super }}
+
+    {% if original.pk %}
+        {% if original.ativo %}
+            {% if original.has_games %}
+                <button
+                    type="button"
+                    id="finish-tournament"
+                    class="btn btn-block btn-danger btn-sm mt-2"
+                >
+                    Encerrar
+                </button>
+
+                <dialog id="tournament-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
+                    <section>
+                        <h4>Atenção!</h4>
+                        <h5>Tem certeza que deseja encerrar o torneio? <br/><br/>A ação não pode ser desfeita!</h5>
+                    </section>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                        <button
+                            type="button"
+                            id="tournament-cancel"
+                            class="btn btn-secondary btn-sm"
+                        >
+                            Cancelar
+                        </button>
+
+                        <a
+                            class="btn btn-primary btn-sm"
+                            href="{% url 'futevolei:finish_tournament' original.pk %}"
+                        >
+                            Sim, encerrar
+                        </a>
+                    </div>
+                </dialog>
+
+                <a
+                    href="{% url 'futevolei:qrcode_tournament' original.pk %}"
+                    class="btn btn-block btn-secondary btn-sm mt-2"
+                    target="_blank"
+                >
+                    QR Code
+                </a>
+            {% endif %}
+
+            {% if not original.open %}
+                <button
+                    id="create-games"
+                    type="button"
+                    class="btn btn-block btn-primary btn-sm mt-2 hidden"
+                >
+                    Gerar Jogos
+                </button>
+
+                <dialog id="games-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
+                    <section>
+                        <h4>Atenção!</h4>
+                        {% if original.has_games %}
+                            <h5>Já existem jogos criados para este torneio. Deseja recriá-los? <br/><br/>A ação não pode ser desfeita!</h5>
+                        {% else %}
+                            <h5>Tem certeza que deseja criar os jogos? <br/><br/>A ação não pode ser desfeita!</h5>
+                        {% endif %}
+                    </section>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                        <button
+                            type="button"
+                            id="games-cancel"
+                            class="btn btn-secondary btn-sm"
+                        >
+                            Cancelar
+                        </button>
+
+                        <a class="btn btn-primary btn-sm" href="{% url 'futevolei:create_games' original.pk %}">
+                            Sim, criar
+                        </a>
+                    </div>
+                </dialog>
+            {% endif %}
+        {% else %}
+            {% if sheet_perm %}
+                <a
+                    class="btn btn-block btn-secondary btn-sm mt-2"
+                    href="{% url 'futevolei:download' original.pk %}"
+                    target="_blank"
+                >
+                    Planilha
+                </a>
+            {% endif %}
+        {% endif %}
+
+        {% if original.has_games  %}
+            <a
+                class="btn btn-block btn-secondary btn-sm mt-2"
+                href="{{ APP_LINK }}/futevolei/{{original.slug}}"
+                target="_blank"
+            >
+                Ver Torneio
+            </a>
+        {% else %}
+            {% if original.ativo and original.inscricao_aberta %}
+                <a
+                    class="btn btn-block btn-secondary btn-sm mt-2"
+                    href="{{ APP_LINK }}/futevolei/{{original.slug}}/inscricao"
+                    target="_blank"
+                >
+                    Inscrição
+                </a>
+            {% endif %}
+        {% endif %}
+
+        {% if not original.is_finished and original.has_games and original.ativo %}
+            <button
+                type="button"
+                id="nextStage"
+                class="btn btn-block btn-primary btn-sm"
+            >
+                Próxima fase
+            </button>
+
+            <dialog id="stage-dialog" style="border: 1px solid gray; border-radius: 10px; padding: 20px;">
+                <section>
+                    <h4>Atenção!</h4>
+                    <h5>Tem certeza que deseja gerar a próxima fase do torneio? <br/><br/>A ação não pode ser desfeita!</h5>
+                </section>
+
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                    <button
+                        type="button"
+                        id="stage-cancel"
+                        class="btn btn-secondary btn-sm"
+                    >
+                        Cancelar
+                    </button>
+
+                    <a
+                        class="btn btn-primary btn-sm"
+                        href="{% url 'futevolei:next_stage' original.pk %}"
+                    >
+                        Sim, avançar
+                    </a>
+                </div>
+            </dialog>
+        {% endif %}
+    {% endif %}
+{% endblock %}
