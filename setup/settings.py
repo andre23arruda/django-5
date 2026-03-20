@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'bt_league',
     'bt_cup',
     'cup',
+    'futevolei',
     'features',
     'escala_de_plantao',
     'payments',

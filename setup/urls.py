@@ -20,6 +20,7 @@ urlpatterns = [
     path('api/csrf', get_csrf_token, name='get_csrf_token'),
     path('api/staff-login', staff_login, name='staff_login'),
     # apps
+    path('api/futevolei/', include('futevolei.urls')),
     path('api/torneio-v1/', include('bt_cup.urls')),
     path('api/torneio/', include('cup.urls')),
     path('api/rei-rainha/', include('bt_league.urls')),

@@ -18,6 +18,7 @@ JAZZMIN_SETTINGS = {
         {'name': 'Início',  'url': 'admin:index'},
         {'name': 'Torneios',  'url': 'admin:cup_torneio_changelist', 'permissions': ['cup.view_torneio']},
         {'name': 'Rei/Rainha',  'url': 'admin:bt_league_torneio_changelist', 'permissions': ['bt_league.view_torneio']},
+        {'name': 'Ajuda', 'url': 'https://www.youtube.com/shorts/29bk25RGY6Y', 'new_window': True},
     ],
     'icons': {
         'admin.LogEntry': 'fas fa-book',
@@ -39,6 +40,10 @@ JAZZMIN_SETTINGS = {
         'cup.Jogador': 'fas fa-users',
         'cup.Jogo': 'fas fa-table-tennis-paddle-ball',
         'cup.Ranking': 'fas fa-ranking-star',
+        'futevolei.Dupla': 'fas fa-user-friends',
+        'futevolei.Torneio': 'fas fa-trophy',
+        'futevolei.Jogador': 'fas fa-users',
+        'futevolei.Jogo': 'fas fa-soccer-ball',
         'escala_de_plantao.Escala': 'fas fa-sitemap',
         'escala_de_plantao.Plantonista': 'fas fa-users',
         'escala_de_plantao.Plantao': 'fas fa-briefcase',
