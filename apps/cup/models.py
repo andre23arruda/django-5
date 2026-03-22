@@ -4,12 +4,17 @@ from django.template.defaultfilters import slugify
 from django.utils.html import format_html
 from itertools import zip_longest
 from shortuuid.django_fields import ShortUUIDField
+from .utils import GROUPS_TEMPLATES
 
 FASE_CHOICES = [
     ('GRUPO 1', 'G1'),
     ('GRUPO 2', 'G2'),
     ('GRUPO 3', 'G3'),
     ('GRUPO 4', 'G4'),
+    ('GRUPO 5', 'G5'),
+    ('GRUPO 6', 'G6'),
+    ('GRUPO 7', 'G7'),
+    ('GRUPO 8', 'G8'),
     ('OITAVAS', 'OF'),
     ('QUARTAS', 'QF'),
     ('SEMIFINAIS', 'SF'),
@@ -20,7 +25,11 @@ FASE_CHOICES = [
 QUANTIDADE_GRUPOS_CHOICES = [
     (1, '1'),
     (2, '2'),
+    (3, '3'),
     (4, '4'),
+    (5, '5'),
+    (6, '6'),
+    (7, '7'),
     (8, '8')
 ]
 GAME_STATUS = (
@@ -184,8 +193,8 @@ class Torneio(models.Model):
             <ul>
                 <li>1 grupo: Fase de grupo e FINAL</li>
                 <li>2 grupos: Fase de grupo, SEMIFINAIS e FINAL</li>
-                <li>4 grupos: Fase de grupo, QUARTAS, SEMIFINAIS e FINAL</li>
-                <li>8 grupos: Fase de grupo, OITAVAS, QUARTAS, SEMIFINAIS e FINAL</li>
+                <li>3 ou 4 grupos: Fase de grupo, QUARTAS, SEMIFINAIS e FINAL</li>
+                <li>5, 6, 7 ou 8 grupos: Fase de grupo, OITAVAS, QUARTAS, SEMIFINAIS e FINAL</li>
             </ul>
         ''')
     )
@@ -228,8 +237,8 @@ class Torneio(models.Model):
     )
     draw_pairs = models.BooleanField(
         default=False,
-        verbose_name='Sortear duplas',
-        help_text='Ativar para sortear duplas com jogadores cadastrados'
+        verbose_name='Duplas aleatórias',
+        help_text='Duplas montadas aleatoriamente ao criar os jogos'
     )
     inscricao_aberta = models.BooleanField(
         default=False,
@@ -291,7 +300,7 @@ class Torneio(models.Model):
         return grupos
 
     def create_games(self) -> list | Exception:
-        '''Cria jogos de um torneio automaticamente, com todos jogando contra todos no grupo'''
+        '''Cria jogos de um torneio automaticamente fase de grupos e playoffs'''
         duplas = self.shuffle_teams()
         grupos = self.create_groups(duplas)
         jogos_criados = []
@@ -318,53 +327,23 @@ class Torneio(models.Model):
         # Próximas fases
         if self.playoffs:
             n_grupos = self.quantidade_grupos
-            if n_grupos == 8:
-                for i in range(8): # Oitavas de final
-                    oitava = Jogo(
-                        torneio=self,
-                        dupla1=None,  # Será preenchido após grupos
-                        dupla2=None,  # Será preenchido após grupos
-                        fase='OITAVAS'
-                    )
-                    jogos_criados.append(oitava)
+            template = GROUPS_TEMPLATES.get(n_grupos)
 
-            if n_grupos >= 4:
-                for i in range(4): # Quartas de final
-                    quarta = Jogo(
-                        torneio=self,
-                        dupla1=None,  # Será preenchido após grupos ou oitavas
-                        dupla2=None,  # Será preenchido após grupos ou oitavas
-                        fase='QUARTAS'
-                    )
-                    jogos_criados.append(quarta)
+            if template:
+                for fase, jogos in template.items():
+                    if fase == 'TERCEIRO LUGAR' and not self.terceiro_lugar:
+                        continue
 
-            if n_grupos >= 2:
-                for i in range(2): # Semifinais
-                    semi = Jogo(
-                        torneio=self,
-                        dupla1=None,  # Será preenchido após grupos ou quartas
-                        dupla2=None,  # Será preenchido após grupos ou quartas
-                        fase='SEMIFINAIS'
-                    )
-                    jogos_criados.append(semi)
-
-                if self.terceiro_lugar :
-                    terceiro = Jogo(
-                        torneio=self,
-                        dupla1=None,  # Será preenchido após semi
-                        dupla2=None,  # Será preenchido após semi
-                        fase='TERCEIRO LUGAR'
-                    )
-                    jogos_criados.append(terceiro)
-
-            # Final sempre será criado
-            final = Jogo(
-                torneio=self,
-                dupla1=None, # Será preenchido após grupos ou semi
-                dupla2=None, # Será preenchido após grupos ou semi
-                fase='FINAL'
-            )
-            jogos_criados.append(final)
+                    for jogo_info in jogos:
+                        jogo = Jogo(
+                            torneio=self,
+                            dupla1=None,
+                            dupla2=None,
+                            fase=fase,
+                            playoff_number=jogo_info.get('jogo'),
+                            playoff_help_text=f'{jogo_info.get("dupla1") or "BYE"}x{jogo_info.get("dupla2") or "BYE"}'
+                        )
+                        jogos_criados.append(jogo)
 
         Jogo.objects.bulk_create(jogos_criados)
         return jogos_criados
@@ -377,68 +356,103 @@ class Torneio(models.Model):
             classificados += duplas[0:2]
         return classificados
 
+    def _resolve_team_code(self, code: str, ranking: dict) -> Dupla | None:
+        if not code:
+            return None
+        
+        # Formato '1 G1'
+        if 'º G' in code:
+            pos_str, grupo_num = code.split('º G')
+            try:
+                pos = int(pos_str)
+                grupo_nome = f'GRUPO {grupo_num}'
+                if grupo_nome in ranking:
+                    grupo_ranking = ranking[grupo_nome]
+                    jogos_grupo = self.jogo_set.filter(torneio=self, fase=grupo_nome)
+                    if jogos_grupo.exists() and jogos_grupo.filter(concluido='P').count() == 0:
+                        for team_stat in grupo_ranking:
+                            if team_stat['posicao'] == pos:
+                                return team_stat['dupla']
+            except (ValueError, IndexError):
+                pass
+        
+        # Formato 'W 1' ou 'L 2'
+        elif code.startswith('W ') or code.startswith('L '):
+            parts = code.split(' ')
+            if len(parts) == 2:
+                condition = parts[0]
+                try:
+                    num_jogo = int(parts[1])
+                    jogo = self.jogo_set.filter(torneio=self, playoff_number=num_jogo).first()
+                    if jogo and jogo.concluido == 'C':
+                        if condition == 'W':
+                            return jogo.vencedor
+                        elif condition == 'L':
+                            if jogo.vencedor == jogo.dupla1:
+                                return jogo.dupla2
+                            elif jogo.vencedor == jogo.dupla2:
+                                return jogo.dupla1
+                except ValueError:
+                    pass
+
+        return None
+
     def next_stage(self) -> bool | Exception:
-        '''Automatiza a passagem dos vencedores das fases (Oitavas -> Quartas -> Semifinais -> Final)'''
-        # Lista de fases e sua ordem
-        fases = ['OITAVAS', 'QUARTAS', 'SEMIFINAIS', 'FINAL']
+        '''Automatiza a classificação e preenchimento de todas as fases, do grupo para a final.'''
+        if not self.playoffs:
+            return Exception('Torneio não possui playoffs.')
+            
+        n_grupos = self.quantidade_grupos
+        template = GROUPS_TEMPLATES.get(n_grupos)
+        ranking = self.get_groups_ranking()
+        
+        if not template:
+            if n_grupos == 1:
+                # Caso de apenas 1 grupo (final direta)
+                grupo1_ranking = ranking.get('GRUPO 1', [])
+                jogos_grupo = self.jogo_set.filter(torneio=self, fase='GRUPO 1')
+                if jogos_grupo.exists() and jogos_grupo.filter(concluido='P').count() == 0:
+                    final = self.jogo_set.filter(torneio=self, fase='FINAL').first()
+                    if final and final.concluido == 'P':
+                        if final.dupla1 is None:
+                            final.dupla1 = grupo1_ranking[0]['dupla'] if len(grupo1_ranking) > 0 else None
+                        if final.dupla2 is None:
+                            final.dupla2 = grupo1_ranking[1]['dupla'] if len(grupo1_ranking) > 1 else None
+                        final.save()
+            return True
 
-        for i, fase in enumerate(fases):
-            # Buscar os jogos da fase atual
-            jogos_atuais = self.jogo_set.filter(torneio=self, fase=fase, concluido='C')
-
-            # Verificar se todos os jogos da fase atual foram concluídos
-            if len(jogos_atuais) == 0: # Nenhum jogo concluído, ignorar a fase
+        for fase, jogos in template.items():
+            if fase == 'TERCEIRO LUGAR' and not self.terceiro_lugar:
                 continue
-            elif jogos_atuais.count() != self.jogo_set.filter(torneio=self, fase=fase).count(): # jogos pendentes
-                return Exception(f'Aguardando conclusão de todos os jogos da fase {fase}.')
-
-            # Checar se existe uma próxima fase
-            if i + 1 >= len(fases):
-                # Não há próxima fase
-                continue
-
-            proxima_fase = fases[i + 1]
-
-            # Buscar os jogos da próxima fase
-            jogos_proxima_fase = self.jogo_set.filter(torneio=self, fase=proxima_fase)
-
-            # Garantir que os jogos da próxima fase foram criados, mas ainda não preenchidos
-            if not jogos_proxima_fase.exists():
-                return Exception(f'Jogos da próxima fase ({proxima_fase}) ainda não foram criados.')
-
-            jogos_proxima_fase = list(jogos_proxima_fase)
-
-            # Preencher os vencedores nos jogos da próxima fase
-            vencedores = []
-            terceiros = []
-            for jogo in jogos_atuais:
-                # Adiciona o vencedor do jogo (se os placares estão definidos)
-                if jogo.pontos_dupla1 > jogo.pontos_dupla2:
-                    vencedores.append(jogo.dupla1)
-                    if self.terceiro_lugar:
-                        terceiros.append(jogo.dupla2)
-                elif jogo.pontos_dupla2 > jogo.pontos_dupla1:
-                    vencedores.append(jogo.dupla2)
-                    if self.terceiro_lugar:
-                        terceiros.append(jogo.dupla1)
-
-            # Preencher os vencedores na próxima fase
-            if len(vencedores) != len(jogos_proxima_fase) * 2:
-                return Exception(f'Erro: O número de vencedores ({len(vencedores)}) não corresponde ao esperado para a fase {proxima_fase}.')
-
-            for jogo in jogos_proxima_fase:
-                if jogo.dupla1 is None:
-                    jogo.dupla1 = vencedores.pop(0)
-                if jogo.dupla2 is None:
-                    jogo.dupla2 = vencedores.pop(0)
-                jogo.save()
-
-            if fase == 'SEMIFINAIS' and self.terceiro_lugar and len(terceiros) == 2:
-                jogo = self.jogo_set.filter(torneio=self, fase='TERCEIRO LUGAR').first()
-                if jogo:
-                    jogo.dupla1 = terceiros.pop(0)
-                    jogo.dupla2 = terceiros.pop(0)
+                
+            jogos_template = jogos
+            
+            for jogo_info in jogos_template:
+                num_jogo = jogo_info.get('jogo')
+                code_dupla1 = jogo_info.get('dupla1')
+                code_dupla2 = jogo_info.get('dupla2')
+                
+                jogo = self.jogo_set.filter(torneio=self, fase=fase, playoff_number=num_jogo).first()
+                if jogo and jogo.concluido == 'P':
+                    # Resolve dupla 1
+                    if jogo.dupla1 is None and code_dupla1 is not None:
+                        jogo.dupla1 = self._resolve_team_code(code_dupla1, ranking)
+                    
+                    # Resolve dupla 2
+                    if jogo.dupla2 is None and code_dupla2 is not None:
+                        jogo.dupla2 = self._resolve_team_code(code_dupla2, ranking)
+                    
                     jogo.save()
+                    
+                    # Trata o BYE (quando no template a oposição é explicitamente None)
+                    if jogo.dupla1 is not None and code_dupla2 is None:
+                        jogo.pontos_dupla1 = 1
+                        jogo.pontos_dupla2 = 0
+                        jogo.save()
+                    elif jogo.dupla2 is not None and code_dupla1 is None:
+                        jogo.pontos_dupla1 = 0
+                        jogo.pontos_dupla2 = 1
+                        jogo.save()
 
         return True
 
@@ -611,7 +625,16 @@ class Torneio(models.Model):
         '''Organiza os jogos em ordem de grupos e fases'''
         if self.quantidade_grupos > 1:
             jogos_grupos = queryset.filter(fase__startswith='GRUPO').values_list('id', 'fase')
-            grupos = {'GRUPO 1': [], 'GRUPO 2': [], 'GRUPO 3': [], 'GRUPO 4': []}
+            grupos = {
+                'GRUPO 1': [], 
+                'GRUPO 2': [], 
+                'GRUPO 3': [], 
+                'GRUPO 4': [],
+                'GRUPO 5': [],
+                'GRUPO 6': [],
+                'GRUPO 7': [],
+                'GRUPO 8': [],
+            }
             for jogo_id, fase in jogos_grupos:
                 if fase in grupos:
                     grupos[fase].append(jogo_id)
@@ -622,12 +645,12 @@ class Torneio(models.Model):
 
             ids_playoff = list(queryset.exclude(fase__startswith='GRUPO').annotate(
                 fase_order=models.Case(
-                    models.When(fase='OITAVAS', then=1),
-                    models.When(fase='QUARTAS', then=2),
-                    models.When(fase='SEMIFINAIS', then=3),
-                    models.When(fase='TERCEIRO LUGAR', then=4),
-                    models.When(fase='FINAL', then=5),
-                    models.When(fase='CAMPEAO', then=6),
+                    models.When(fase='OITAVAS', then=0),
+                    models.When(fase='QUARTAS', then=1),
+                    models.When(fase='SEMIFINAIS', then=2),
+                    models.When(fase='TERCEIRO LUGAR', then=3),
+                    models.When(fase='FINAL', then=4),
+                    models.When(fase='CAMPEAO', then=5),
                     default=99,
                     output_field=models.IntegerField()
                 )
@@ -657,11 +680,29 @@ class Jogo(models.Model):
     fase = models.CharField(choices=FASE_CHOICES, default='GRUPO 1', max_length=100, null=True, blank=True, verbose_name='Fase')
     concluido = models.CharField(max_length=2, default='P', choices=GAME_STATUS, verbose_name='Status')
     obs = models.TextField(null=True, blank=True, help_text='Alguma observação sobre o jogo. Ex: "Dupla 1 WO"')
+    playoff_number = models.SmallIntegerField(null=True, blank=True, verbose_name='Playoff game number')
+    playoff_help_text = models.CharField(
+        max_length=100, 
+        default='', 
+        blank=True, 
+        verbose_name='Texto de ajuda para o playoff', 
+        help_text='Ex: 1º G1x2º G2, 1º G2xBYE' 
+    )
 
     def __str__(self):
         if self.dupla1 is None and self.dupla2 is None:
             return 'A definir'
         return f'{self.dupla1} X {self.dupla2}'
+
+    def help_text(self, index) -> str:
+        help_text = self.playoff_help_text or ''
+        if not 'G' in help_text:
+            return None
+
+        help_text = help_text.split('x')
+        if index == 0:
+            return help_text[0]
+        return help_text[1]
 
     def placar(self) -> str:
         if self.pontos_dupla1 is None and self.pontos_dupla2 is None:

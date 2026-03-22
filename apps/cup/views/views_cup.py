@@ -42,10 +42,13 @@ def create_games(request, torneio_id: str):
     result = torneio.create_games()
     if isinstance(result, Exception):
         messages.add_message(request, messages.ERROR, result)
+        n_duplas = Dupla.objects.filter(torneio=torneio).count()
+        location = f'#duplas-{n_duplas}-tab'
     else:
         messages.add_message(request, messages.INFO, 'Jogos gerados com sucesso!')
+        location = '#jogos-tab'
     response = redirect('admin:cup_torneio_change', torneio_id)
-    response['location'] += '#jogos-tab'
+    response['location'] += location
     return response
 
 
@@ -80,30 +83,7 @@ def next_stage(request, torneio_id: str):
         else:
             messages.add_message(request, messages.INFO, 'Confrontos gerados com sucesso!')
     else:
-        classificados = torneio.process_groups()
-        classificados = distribute_classifieds(classificados)
-        for i in range(0, len(classificados), 2):
-            dupla1, dupla2 = classificados[i:i+2]
-            if torneio.quantidade_grupos == 1:
-                final = jogos.get(fase='FINAL')
-                final.dupla1 = dupla1['dupla']
-                final.dupla2 = dupla2['dupla']
-                final.save()
-            elif torneio.quantidade_grupos == 2:
-                semifinal = jogos.filter(fase='SEMIFINAIS')[i//2]
-                semifinal.dupla1 = dupla1['dupla']
-                semifinal.dupla2 = dupla2['dupla']
-                semifinal.save()
-            elif torneio.quantidade_grupos == 4:
-                quartas = jogos.filter(fase='QUARTAS')[i//2]
-                quartas.dupla1 = dupla1['dupla']
-                quartas.dupla2 = dupla2['dupla']
-                quartas.save()
-            elif torneio.quantidade_grupos == 8:
-                oitavas = jogos.filter(fase='OITAVAS')[i//2]
-                oitavas.dupla1 = dupla1['dupla']
-                oitavas.dupla2 = dupla2['dupla']
-                oitavas.save()
+        result = torneio.next_stage()
         messages.add_message(request, messages.INFO, 'Confrontos gerados com sucesso!')
 
     response = redirect('admin:cup_torneio_change', torneio_id)
@@ -215,7 +195,7 @@ def get_tournament_data(request, torneio_id: str):
     # Process groups
     grupos = {}
     groups_finished = True
-    for i in range(1, 5):
+    for i in range(1, 8):
         grupo_jogos = jogos.filter(fase=f'GRUPO {i}')
         if grupo_jogos.exists():
             grupos[f'GRUPO {i}'] = {
@@ -256,7 +236,8 @@ def get_tournament_data(request, torneio_id: str):
                     'pontos_dupla1': jogo.pontos_dupla1,
                     'pontos_dupla2': jogo.pontos_dupla2,
                     'concluido': jogo.concluido,
-                    'obs': jogo.obs
+                    'obs': jogo.obs,
+                    'help_text': jogo.playoff_help_text or '',
                 } for jogo in fase_jogos
             ]
             playoff_card_style = CARD_STYLE_DICT[fase]

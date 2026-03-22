@@ -11,6 +11,16 @@ GAME_STATUS = (
     ('C', '✅'),
 )
 
+N_JOGADORES_CHOICES = [
+    (4, '4'),
+    (5, '5'),
+    (6, '6'),
+    (8, '8'),
+    (9, '9'),
+    (12, '12'),
+    (16, '16'),
+]
+
 class Ranking(models.Model):
     id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     nome = models.CharField(max_length=100)
@@ -108,13 +118,7 @@ class Torneio(models.Model):
     id = ShortUUIDField(length=8, max_length=40, primary_key=True)
     nome = models.CharField(max_length=100)
     data = models.DateField()
-    n_jogadores = models.IntegerField(default=8, choices=[
-        (4, '4'),
-        (5, '5'),
-        (8, '8'),
-        (12, '12'),
-        (16, '16'),
-    ], verbose_name='Nº jogadores')
+    n_jogadores = models.IntegerField(default=8, choices=N_JOGADORES_CHOICES, verbose_name='Nº jogadores')
     jogadores = models.ManyToManyField(Jogador, blank=True, help_text='O número de jogadores deve ser multiplo de 4.')
     criado_em = models.DateTimeField(auto_now_add=True)
     criado_por = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)

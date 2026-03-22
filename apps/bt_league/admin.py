@@ -1,5 +1,6 @@
 import os, re
 from django import forms
+from django.conf import settings
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.conf.locale.pt_BR import formats as portuguese
 from django.conf.locale.en import formats as english
@@ -409,7 +410,8 @@ class TorneioAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         if created:
             url = f'{os.getenv("APP_LINK")}{reverse("admin:bt_league_torneio_change", args=[obj.id])}'
-            send_telegram_msg(obj, url)
+            if not settings.DEBUG:
+                send_telegram_msg(obj, url)
         if len(obj.jogadores.all()) >= obj.n_jogadores:
             obj.jogadores.set(list(obj.jogadores.all()[:obj.n_jogadores]))
 

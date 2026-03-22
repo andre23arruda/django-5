@@ -1,4 +1,5 @@
 import os, re
+from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
@@ -223,6 +224,11 @@ class JogosInline(admin.TabularInline):
                 )
             else:
                 return obj.dupla1.render()
+
+        help_text = obj.help_text(0)
+        if help_text:
+            return format_html('<span class="text-muted">{}</span>', help_text)
+
         return format_html('<span class="text-muted">A definir</span>')
     dupla_1.short_description = 'Dupla 1'
 
@@ -240,6 +246,11 @@ class JogosInline(admin.TabularInline):
                 )
             else:
                 return obj.dupla2.render()
+
+        help_text = obj.help_text(1)
+        if help_text:
+            return format_html('<span class="text-muted">{}</span>', help_text)
+        
         return format_html('<span class="text-muted">A definir</span>')
     dupla_2.short_description = 'Dupla 2'
 
@@ -574,10 +585,14 @@ class TorneioAdmin(admin.ModelAdmin):
         if len(jogadores) != len(set(jogadores)):
             messages.warning(request, 'Atenção: Há jogadores repetidos cadastrados nas duplas deste torneio!')
 
+        if change and 'quantidade_grupos' in form.changed_data and obj.has_games():
+            messages.warning(request, 'A quantidade de grupos foi modificada. Você precisa gerar os jogos deste torneio novamente!')
+
         super().save_model(request, obj, form, change)
         if created:
             url = f'{os.getenv("APP_LINK")}{reverse("admin:cup_torneio_change", args=[obj.id])}'
-            send_telegram_msg(obj, url)
+            if not settings.DEBUG:
+                send_telegram_msg(obj, url)
 
 
 # User
