@@ -152,13 +152,9 @@ class Torneio(models.Model):
         '''Gera jogos usando todas as duplas possíveis'''
         jogadores = self.shuffle_players()
         n_jogadores = len(jogadores)
-        excess_playes = n_jogadores not in [4, 5, 8, 12, 16]
+        excess_playes = n_jogadores not in [4, 5, 6, 8, 9, 12, 16]
         if excess_playes:
-            return Exception(f'Não é possível gerar jogos com { n_jogadores } jogadores. Número de jogadores deve ser multiplo de 4.')
-
-        # quadras_jogadores = (n_jogadores / self.quadras) % 2
-        # if quadras_jogadores:
-        #     return Exception(f'Não é possível gerar jogos para { self.quadras } quadras com { n_jogadores } jogadores.')
+            return Exception(f'Não é possível gerar jogos com { n_jogadores } jogadores.')
 
         if self.jogo_set.exists():
             self.jogo_set.all().delete()
