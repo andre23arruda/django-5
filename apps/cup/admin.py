@@ -423,6 +423,7 @@ class TorneioAdmin(admin.ModelAdmin):
         ]
 
     change_form_template = 'admin/cup/cup_change_form.html'
+    date_hierarchy = 'data'
     list_display = ['nome', 'data', 'tipo', 'total_duplas', 'grupos', 'total_jogos', 'ativo']
     list_filter = ['ativo']
     search_fields = ['nome']

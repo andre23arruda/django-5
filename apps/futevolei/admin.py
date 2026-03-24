@@ -314,6 +314,7 @@ class TorneioAdmin(admin.ModelAdmin):
         ]
 
     change_form_template = 'admin/futevolei/futevolei_change_form.html'
+    date_hierarchy = 'data'
     list_display = ['nome', 'data', 'tipo', 'total_jogos', 'ativo']
     list_filter = ['ativo']
     search_fields = ['nome']
@@ -347,10 +348,15 @@ class TorneioAdmin(admin.ModelAdmin):
         return False
 
     def get_fieldsets(self, request, obj):
+        has_link_perm = request.user.has_perm('features.view_podiodigitalfeaturelink')
         base_fields = [
             'nome', 'data', 'quantidade_times',
             'tipo', 'draw_pairs', 'ativo',
         ]
+        if has_link_perm:
+            base_fields.insert(-1, 'inscricao_aberta')
+        if request.user.is_superuser:
+            base_fields.extend(['criado_por'])
         return [['Torneio', {'fields': base_fields}]]
 
     def get_inlines(self, request, obj):

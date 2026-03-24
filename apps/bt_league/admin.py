@@ -266,6 +266,7 @@ class TorneioAdmin(admin.ModelAdmin):
             'js/league/save-game.js',
         ]
 
+    date_hierarchy = 'data'
     fieldsets = [
         ['Torneio', {'fields': ['nome', 'data', 'n_jogadores', 'ativo', 'inscricao_aberta']}],
     ]
