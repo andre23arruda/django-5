@@ -223,11 +223,15 @@ class Jogo(models.Model):
     def __str__(self):
         return f'{self.dupla1_jogador1.short_name()}/{self.dupla1_jogador2.short_name()} X {self.dupla2_jogador1.short_name()}/{self.dupla2_jogador2.short_name()}'
 
-    def dupla_1(self):
-        return mark_safe(f'<span>{self.dupla1_jogador1.short_name()}<br/>{self.dupla1_jogador2.short_name()}</span>')
+    def dupla_1(self, short=False):
+        if short:
+            return mark_safe(f'<span>{self.dupla1_jogador1.short_name()}<br/>{self.dupla1_jogador2.short_name()}</span>')
+        return mark_safe(f'<span>{self.dupla1_jogador1}<br/>{self.dupla1_jogador2}</span>')
 
-    def dupla_2(self):
-        return mark_safe(f'<span>{self.dupla2_jogador1.short_name()}<br/>{self.dupla2_jogador2.short_name()}</span>')
+    def dupla_2(self, short=False):
+        if short:
+            return mark_safe(f'<span>{self.dupla2_jogador1.short_name()}<br/>{self.dupla2_jogador2.short_name()}</span>')
+        return mark_safe(f'<span>{self.dupla2_jogador1}<br/>{self.dupla2_jogador2}</span>')
 
     def render_dupla_1(self):
         return f'{self.dupla1_jogador1}\n{self.dupla1_jogador2}'

@@ -135,3 +135,52 @@ GROUPS_TEMPLATES = {
     'TERCEIRO LUGAR': [{ 'jogo': 16, 'dupla1': 'L 13', 'dupla2': 'L 14' }]
   }
 }
+
+GROUPS_TEMPLATES_RULES = {
+    1: [{'FINAL': '1º G1 x 2º G1'}],
+    2: [
+      {'SEMIFINAIS': '1º G1 x 2º G2, 2º G1 x 1º G2'},
+      {'TERCEIRO LUGAR': 'Perdedores da SEMIFINAL'},
+      {'FINAL': 'Vencedores da SEMIFINAL'},
+    ],
+    3: [
+      {'QUARTAS': '1º G1 e 1º G3 passam de BYE; 1º G2 x 2º G3, 2º G1 x 2º G2'},
+      {'SEMIFINAIS': 'Vencedores das QUARTAS'},
+      {'TERCEIRO LUGAR': 'Perdedores da SEMIFINAL'},
+      {'FINAL': 'Vencedores da SEMIFINAL'},
+    ],
+    4: [
+      {'QUARTAS': 'Cruzamento 1º x 2º (1º G1 x 2º G4, 1º G2 x 2º G3, etc)'},
+      {'SEMIFINAIS': 'Vencedores das QUARTAS'},
+      {'TERCEIRO LUGAR': 'Perdedores da SEMIFINAL'},
+      {'FINAL': 'Vencedores da SEMIFINAL'},
+    ],
+    5: [
+      {'OITAVAS': '6 duplas passam de BYE (1º G1, 1º G2, 1º G3, 1º G4, 1º G5 e 2º G1); 2 jogos (2º G4 x 2º G5, 2º G2 x 2º G3)'},
+      {'QUARTAS': 'Vencedores das OITAVAS e BYEs'},
+      {'SEMIFINAIS': 'Vencedores das QUARTAS'},
+      {'TERCEIRO LUGAR': 'Perdedores da SEMIFINAL'},
+      {'FINAL': 'Vencedores da SEMIFINAL'},
+    ],
+    6: [
+      {'OITAVAS': '4 duplas passam de BYE (1º G1, 1º G2, 1º G5, 1º G6); 4 jogos entre os demais'},
+      {'QUARTAS': 'Vencedores das OITAVAS e BYEs'},
+      {'SEMIFINAIS': 'Vencedores das QUARTAS'},
+      {'TERCEIRO LUGAR': 'Perdedores da SEMIFINAL'},
+      {'FINAL': 'Vencedores da SEMIFINAL'},
+    ],
+    7: [
+      {'OITAVAS': '2 duplas passam de BYE (1º G1 e 1º G7); 6 jogos entre os demais'},
+      {'QUARTAS': 'Vencedores das OITAVAS e BYEs'},
+      {'SEMIFINAIS': 'Vencedores das QUARTAS'},
+      {'TERCEIRO LUGAR': 'Perdedores da SEMIFINAL'},
+      {'FINAL': 'Vencedores da SEMIFINAL'},
+    ],
+    8: [
+      {'OITAVAS': '16 duplas jogam (1º e 2º dos 8 grupos cruzam: 1º G1 x 2º G8, etc)'},
+      {'QUARTAS': 'Vencedores das OITAVAS'},
+      {'SEMIFINAIS': 'Vencedores das QUARTAS'},
+      {'TERCEIRO LUGAR': 'Perdedores da SEMIFINAL'},
+      {'FINAL': 'Vencedores da SEMIFINAL'},
+    ],
+}

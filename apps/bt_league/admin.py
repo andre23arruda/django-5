@@ -121,15 +121,15 @@ class JogoInline(admin.TabularInline):
     def dupla_1(self, obj):
         if obj.placar_dupla1 is not None and obj.placar_dupla2 is not None:
             if obj.placar_dupla1 > obj.placar_dupla2:
-                return format_html('<u style="color: #00a50b"><strong>{}</strong></u>', obj.dupla_1())
-        return obj.dupla_1()
+                return format_html('<u style="color: #00a50b"><strong>{}</strong></u>', obj.dupla_1(short=True))
+        return obj.dupla_1(short=True)
     dupla_1.short_description = 'Dupla 1'
 
     def dupla_2(self, obj):
         if obj.placar_dupla1 is not None and obj.placar_dupla2 is not None:
             if obj.placar_dupla2 > obj.placar_dupla1:
-                return format_html('<u style="color: #00a50b"><strong>{}</strong></u>', obj.dupla_2())
-        return obj.dupla_2()
+                return format_html('<u style="color: #00a50b"><strong>{}</strong></u>', obj.dupla_2(short=True))
+        return obj.dupla_2(short=True)
     dupla_2.short_description = 'Dupla 2'
 
     def x(self, obj):

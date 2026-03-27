@@ -43,15 +43,15 @@ GAME_TEMPLATES = {
         [((4, 5), (3, 6)), ((1, 7), (8, 2))], # R7
     ],
     9: [
-        [((1, 2), (5, 8)), ((3, 7), (4, 6))], # R1
-        [((2, 3), (6, 9)), ((4, 8), (5, 7))], # R2
-        [((3, 4), (7, 1)), ((5, 9), (6, 8))], # R3
-        [((4, 5), (8, 2)), ((6, 1), (7, 9))], # R4
-        [((5, 6), (9, 3)), ((7, 2), (8, 1))], # R5
-        [((6, 7), (1, 4)), ((8, 3), (9, 2))], # R6
-        [((7, 8), (2, 5)), ((9, 4), (1, 3))], # R7
-        [((8, 9), (3, 6)), ((1, 5), (2, 4))], # R8
-        [((9, 1), (4, 7)), ((2, 6), (3, 5))], # R9
+        [((1, 2), (3, 6)), ((5, 7), (4, 8))], # R1
+        [((2, 3), (4, 7)), ((6, 8), (5, 9))], # R2
+        [((3, 4), (5, 8)), ((7, 9), (6, 1))], # R3
+        [((4, 5), (6, 9)), ((8, 1), (7, 2))], # R4
+        [((5, 6), (7, 1)), ((9, 2), (8, 3))], # R5
+        [((6, 7), (8, 2)), ((1, 3), (9, 4))], # R6
+        [((7, 8), (9, 3)), ((2, 4), (1, 5))], # R7
+        [((8, 9), (1, 4)), ((3, 5), (2, 6))], # R8
+        [((9, 1), (2, 5)), ((4, 6), (3, 7))], # R9
     ],
     12: [
         [((12, 1), (4, 9)), ((2, 11), (5, 8)), ((3, 10), (6, 7))], # R1
@@ -83,4 +83,52 @@ GAME_TEMPLATES = {
         [((16, 14), (4, 9)), ((15, 13), (5, 8)), ((1, 12), (6, 7)), ((2, 11), (3, 10))], #R14
         [((16, 15), (5, 10)), ((1, 14), (6, 9)), ((2, 13), (7, 8)), ((3, 12), (4, 11))], #R15
     ]
+}
+
+GAME_TEMPLATES_RULES = {
+    4: [
+        '3 jogos', 
+        '3 rodadas', 
+        'Todos jogam com todos, alternando as duplas',
+    ],
+    5: [
+        '5 jogos', 
+        '5 rodadas', 
+        'Todos jogam com todos, alternando as duplas',
+        'Cada jogador descansa em uma rodada',
+    ],
+    6: [
+        '15 jogos', 
+        '5 rodadas (3 jogos por rodada)', 
+        'Cada jogador joga duas partidas por rodada',
+        'Todos jogam com todos, alternando as duplas duas vezes',
+        'Cada participante joga quatro vezes contra todos os outros',
+    ],
+    8: [
+        '14 jogos', 
+        '7 rodadas (2 jogos por rodada)',
+        'Todos jogam com todos, alternando as duplas',
+        'Cada participante joga duas vezes contra todos os outros',
+        'Todos na quadra',
+    ],
+    9: [
+        '18 jogos', 
+        '9 rodadas (2 jogos por rodada)', 
+        'Todos jogam com todos, alternando as duplas',
+        'Cada jogador descansa em uma rodada',
+    ],
+    12: [
+        '33 jogos', 
+        '11 rodadas (3 jogos por rodada)', 
+        'Todos jogam com todos, alternando as duplas',
+        'Cada participante joga duas vezes contra todos os outros',
+        'Todos na quadra',
+    ],
+    16: [
+        '60 jogos', 
+        '15 rodadas (4 jogos por rodada)', 
+        'Todos jogam com todos, alternando as duplas',
+        'Cada participante joga duas vezes contra todos os outros',
+        'Todos na quadra',
+    ],
 }

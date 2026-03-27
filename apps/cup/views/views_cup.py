@@ -12,6 +12,7 @@ from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from PIL import Image as PILImage
 
 from ..models import Jogador, Dupla, Jogo, Torneio
+from ..utils import GROUPS_TEMPLATES_RULES
 
 
 def check_player_conflict(tournament,cpf: str):
@@ -242,6 +243,11 @@ def get_tournament_data(request, torneio_id: str):
             ]
             playoff_card_style = CARD_STYLE_DICT[fase]
 
+    jogos_validos = jogos.exclude(playoff_help_text__contains='BYE')
+    regras = GROUPS_TEMPLATES_RULES[torneio.quantidade_grupos]
+    if not (torneio.terceiro_lugar) and len(regras) > 2:
+        regras = regras[:-2] + regras[-1:]
+
     data = {
         'torneio': {
             'id': torneio.id,
@@ -250,9 +256,10 @@ def get_tournament_data(request, torneio_id: str):
             'tipo': torneio.tipo,
             'ativo': torneio.ativo,
             'duplas': torneio.duplas.count(),
-            'jogos': jogos.count(),
-            'jogos_restantes': jogos.exclude(concluido='C').count(),
-            'nao_iniciado': nao_iniciado
+            'jogos': jogos_validos.count(),
+            'jogos_restantes': jogos_validos.exclude(concluido='C').count(),
+            'nao_iniciado': nao_iniciado,
+            'regras': regras,
         },
         'grupos': grupos,
         'fases_finais': fases_finais,

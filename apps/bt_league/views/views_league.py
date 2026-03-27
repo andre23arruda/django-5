@@ -10,7 +10,8 @@ from openpyxl.drawing.image import Image
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from PIL import Image as PILImage
 
-from bt_league.models import Jogador, Torneio
+from ..models import Jogador, Torneio
+from ..utils import GAME_TEMPLATES_RULES
 
 
 @login_required(redirect_field_name='next', login_url='/admin/login/')
@@ -338,7 +339,8 @@ def get_tournament_data(request, torneio_id: str):
             'nome': torneio.nome,
             'data': torneio.data,
             'ativo': torneio.ativo,
-            'nao_iniciado': nao_iniciado
+            'nao_iniciado': nao_iniciado,
+            'regras': GAME_TEMPLATES_RULES[torneio.n_jogadores],
         },
         'jogos': [
             {
