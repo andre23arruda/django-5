@@ -8,7 +8,7 @@ from django.db.models import Prefetch, Q
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.html import format_html
-from utils.send_email import send_telegram_msg
+from utils.send_email import send_email_html, send_telegram_msg
 from .models import Dupla, Jogador, Jogo, Ranking, Torneio
 
 
@@ -601,5 +601,54 @@ admin.site.unregister(User)
 
 @admin.register(User)
 class MyUserAdmin(UserAdmin):
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'email', 'first_name', 'last_name', 'password1', 'password2'),
+        }),
+    )
     list_display = ['username', 'email', 'is_active', 'is_staff', 'date_joined']
     list_filter = ['is_active']
+
+    def save_model(self, request, obj, form, change):
+        created = obj.pk is None
+        password = None
+        
+        if created and 'password1' in form.cleaned_data:
+            password = form.cleaned_data['password1']
+            
+        super().save_model(request, obj, form, change)
+        
+        if created and password and obj.email:
+            msg_html = f'''
+                <div style="border-style:solid; border-width:thin; border-color:#dadce0; border-radius:8px; padding:40px 20px; max-width: 550px; margin: 20px auto;" align="center">
+                    <img src="{ os.environ.get('APP_LINK') }/logo-email.png" width="160" style="margin-bottom:16px; display: block;" alt="Pódio Digital">
+
+                    <div style="font-family:'Google Sans',Roboto,RobotoDraft,Helvetica,Arial,sans-serif; border-bottom:thin solid #dadce0; color:rgba(0,0,0,0.87); line-height:32px; padding-bottom:24px; text-align:center; word-break:break-word">
+                        <div style="font-size:24px">Conta Criada</div>
+                    </div>
+
+                    <div style="font-family:Roboto-Regular,Helvetica,Arial,sans-serif; font-size:14px; color:rgba(0,0,0,0.87); line-height:20px; padding-top:20px; text-align:left">
+                        Olá, <b>{obj.get_full_name()}</b>, sua conta foi criada com sucesso!
+                        <br><br>
+                        Seu usuário é: <strong>{obj.username}</strong>
+                        <br><br>
+                        Sua senha é: <strong>{password}</strong>
+                        <br><br>
+                        Você pode mudar sua senha depois de fazer o login.
+                        <br><br>
+                        Faça o login em: <a href="{ os.environ.get('APP_LINK') }/login">{ os.environ.get('APP_LINK') }/login</a>    
+                        <br><br>
+                    </div>
+                </div>
+
+                <div style="text-align: center; font-family: Roboto,Arial,sans-serif; font-size: 11px; color: #70757a; margin-top: 15px;">
+                    Este é um e-mail automático. Por favor, não responda.
+                </div>
+            '''
+
+            enviado = send_email_html(
+                title='Conta Criada - Pódio Digital',
+                msg_html=msg_html,
+                to=obj.email
+            )
